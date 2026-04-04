@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"math"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -12,9 +14,85 @@ import (
 )
 
 const (
-	vsmobile        = "web.vsmobile.jp"
-	mobile_rankpage = "https://web.vsmobile.jp/exvs2ib/results/classmatch/fight"
+	vsmobile            = "web.vsmobile.jp"
+	mobile_rankpage     = "https://web.vsmobile.jp/exvs2ib/results/classmatch/fight"
+	mobile_msusedrate   = "https://web.vsmobile.jp/exvs2ib/ranking/ms_used_rate"
 )
+
+// 機体情報（画像URL → 機体名のマッピング）
+type MSInfo struct {
+	Name     string
+	ImageURL string
+}
+
+// 機体使用率ランキングページから画像URLと機体名の一覧を取得する
+func ScrapeMSList(username, password string) []MSInfo {
+	var msList []MSInfo
+	seen := make(map[string]bool)
+
+	m := newClient(username, password)
+	m.login()
+
+	c := colly.NewCollector(
+		colly.AllowedDomains(vsmobile),
+	)
+	c.SetCookieJar(m.httpClient.Jar)
+
+	// 各機体のエントリからdata-original(画像URL)と機体名を取得
+	c.OnHTML("li.item div.ds-fx.fx-va-s.fx-hz-s", func(e *colly.HTMLElement) {
+		imageURL := e.ChildAttr("img.item-icon-img", "data-original")
+		name := strings.TrimSpace(e.ChildText("div.prompt-area > p.fz-s"))
+
+		if imageURL != "" && name != "" && !seen[imageURL] {
+			seen[imageURL] = true
+			msList = append(msList, MSInfo{
+				Name:     name,
+				ImageURL: imageURL,
+			})
+		}
+	})
+
+	// ページネーション: 次ページへのリンクをたどる
+	c.OnHTML("div.page-send ul.clearfix", func(e *colly.HTMLElement) {
+		nextLinks := e.ChildAttrs("li > a", "href")
+		for _, link := range nextLinks {
+			if link != "javascript:void(0);" {
+				c.Visit(e.Request.AbsoluteURL(link))
+			}
+		}
+	})
+
+	c.Visit(mobile_msusedrate)
+	return msList
+}
+
+// SaveMSList はMSInfoリストをJSONファイルに保存する
+func SaveMSList(msList []MSInfo, path string) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	enc := json.NewEncoder(f)
+	enc.SetIndent("", "  ")
+	return enc.Encode(msList)
+}
+
+// LoadMSList はJSONファイルからMSInfoリストを読み込む
+func LoadMSList(path string) ([]MSInfo, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var msList []MSInfo
+	if err := json.NewDecoder(f).Decode(&msList); err != nil {
+		return nil, err
+	}
+	return msList, nil
+}
 
 // スコア
 type PlayerScore struct {
@@ -22,12 +100,31 @@ type PlayerScore struct {
 	Name           string
 	Win            string
 	MsImage        string
+	MsName         string
 	Point          int
 	Kills          int
 	Deaths         int
 	Give_damage    int
 	Receive_damage int
 	Ex_damage      int
+}
+
+// MSInfoリストから画像URL→機体名のマップを生成する
+func BuildMSNameMap(msList []MSInfo) map[string]string {
+	m := make(map[string]string, len(msList))
+	for _, ms := range msList {
+		m[ms.ImageURL] = ms.Name
+	}
+	return m
+}
+
+// DatedScoresの各スコアにMsNameをセットする
+func (ds DatedScores) FillMsNames(msMap map[string]string) {
+	for i := range ds {
+		if name, ok := msMap[ds[i].PlayerScore.MsImage]; ok {
+			ds[i].PlayerScore.MsName = name
+		}
+	}
 }
 
 // 日付付きスコア
@@ -145,11 +242,11 @@ func Scraiping(username, password string) DatedScores {
 		selector_right_value := "div.w55 > dl > dd"
 		selector_city := "div.w80.ta-r > p.col-stand"
 		selector_name := "p.mb-ss.fz-m > span.name"
-		selector_ms_image := "img.item-icon-img"
+		selector_ms_image := "#panel3 img.item-icon-img"
 
 		cities := e.ChildTexts(selector_city)
 		names := e.ChildTexts(selector_name)
-		msImages := e.ChildAttrs(selector_ms_image, "src")
+		msImages := e.ChildAttrs(selector_ms_image, "data-original")
 		left_value := e.ChildTexts(selector_left_value)   //スコア・撃墜・被撃墜
 		right_value := e.ChildTexts(selector_right_value) //与ダメ・被ダメ・EXダメ
 
@@ -188,6 +285,7 @@ func Scraiping(username, password string) DatedScores {
 					name,
 					win,
 					msImage,
+					"", // MsName: FillMsNamesで後からセット
 					point,
 					kills,
 					deaths,
@@ -221,6 +319,7 @@ func (ds DatedScores) getscores(t time.Time, format func(time.Time) time.Time) P
 				v.PlayerScore.Name,
 				v.PlayerScore.Win,
 				v.PlayerScore.MsImage,
+				v.PlayerScore.MsName,
 				v.PlayerScore.Point,
 				v.PlayerScore.Kills,
 				v.PlayerScore.Deaths,
