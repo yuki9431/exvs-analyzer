@@ -21,6 +21,7 @@ type PlayerScore struct {
 	City           string
 	Name           string
 	Win            string
+	MsImage        string
 	Point          int
 	Kills          int
 	Deaths         int
@@ -144,9 +145,11 @@ func Scraiping(username, password string) DatedScores {
 		selector_right_value := "div.w55 > dl > dd"
 		selector_city := "div.w80.ta-r > p.col-stand"
 		selector_name := "p.mb-ss.fz-m > span.name"
+		selector_ms_image := "img.item-icon-img"
 
 		cities := e.ChildTexts(selector_city)
 		names := e.ChildTexts(selector_name)
+		msImages := e.ChildAttrs(selector_ms_image, "src")
 		left_value := e.ChildTexts(selector_left_value)   //スコア・撃墜・被撃墜
 		right_value := e.ChildTexts(selector_right_value) //与ダメ・被ダメ・EXダメ
 
@@ -166,6 +169,10 @@ func Scraiping(username, password string) DatedScores {
 			city := cities[i]                                  //地域
 			name := names[i]                                   //プレイヤー名
 			win := wins[i]                                     //勝ち負け
+			msImage := ""                                      //機体画像URL
+			if i < len(msImages) {
+				msImage = msImages[i]
+			}
 			point := parseNumber(left_value[0+offL])           // スコアポイント
 			kills := parseNumber(left_value[1+offL])              // 撃墜
 			deaths := parseNumber(left_value[2+offL])            // 被撃墜
@@ -180,6 +187,7 @@ func Scraiping(username, password string) DatedScores {
 					city,
 					name,
 					win,
+					msImage,
 					point,
 					kills,
 					deaths,
@@ -212,6 +220,7 @@ func (ds DatedScores) getscores(t time.Time, format func(time.Time) time.Time) P
 				v.PlayerScore.City,
 				v.PlayerScore.Name,
 				v.PlayerScore.Win,
+				v.PlayerScore.MsImage,
 				v.PlayerScore.Point,
 				v.PlayerScore.Kills,
 				v.PlayerScore.Deaths,
