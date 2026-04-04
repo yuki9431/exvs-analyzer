@@ -12,7 +12,7 @@ func exportAllScoresCSV(ds DatedScores, w io.Writer) error {
 	csvw := csv.NewWriter(w)
 	defer csvw.Flush()
 
-	header := []string{"試合日時", "プレイヤーNo.", "地域", "プレイヤー名", "勝利判定", "機体画像URL", "スコア", "撃墜数", "被撃墜数", "与ダメージ", "被ダメージ", "EXダメージ"}
+	header := []string{"試合日時", "プレイヤーNo.", "地域", "プレイヤー名", "勝利判定", "機体名", "機体画像URL", "スコア", "撃墜数", "被撃墜数", "与ダメージ", "被ダメージ", "EXダメージ"}
 	if err := csvw.Write(header); err != nil {
 		return err
 	}
@@ -24,6 +24,7 @@ func exportAllScoresCSV(ds DatedScores, w io.Writer) error {
 			d.PlayerScore.City,
 			d.PlayerScore.Name,
 			d.PlayerScore.Win,
+			d.PlayerScore.MsName,
 			d.PlayerScore.MsImage,
 			strconv.Itoa(d.PlayerScore.Point),
 			strconv.Itoa(d.PlayerScore.Kills),
