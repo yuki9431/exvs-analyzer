@@ -74,6 +74,7 @@ def get_player_ms(match):
 
 def get_my_data(match):
     p = match[0]
+    p2 = match[1]
     return {
         "win": p["勝利判定"] == "win",
         "ms": get_player_ms(match),
@@ -84,12 +85,44 @@ def get_my_data(match):
         "dmg_taken": int(p["被ダメージ"]),
         "ex_dmg": int(p["EXダメージ"]),
         "datetime": datetime.strptime(p["試合日時"], "%Y-%m-%d %H:%M"),
-        "partner_ms": match[1]["機体名"].strip() or "(不明)",
+        "partner_name": p2["プレイヤー名"].strip(),
+        "partner_ms": p2["機体名"].strip() or "(不明)",
+        "partner_score": int(p2["スコア"]),
+        "partner_kills": int(p2["撃墜数"]),
+        "partner_deaths": int(p2["被撃墜数"]),
+        "partner_dmg_given": int(p2["与ダメージ"]),
+        "partner_dmg_taken": int(p2["被ダメージ"]),
         "enemy_ms": [
             match[2]["機体名"].strip() or "(不明)",
             match[3]["機体名"].strip() or "(不明)",
         ],
     }
+
+
+def detect_fixed_partners(all_data, min_streak=3):
+    """連続で同じ相方と組んでいる区間を検出し、固定相方の試合を返す。
+    時系列順で連続3戦以上同じ相方名ならその区間を固定とみなす。
+    """
+    sorted_data = sorted(all_data, key=lambda d: d["datetime"])
+
+    fixed_matches = defaultdict(list)
+    streak = [sorted_data[0]]
+
+    for i in range(1, len(sorted_data)):
+        if sorted_data[i]["partner_name"] == streak[-1]["partner_name"]:
+            streak.append(sorted_data[i])
+        else:
+            if len(streak) >= min_streak:
+                name = streak[0]["partner_name"]
+                fixed_matches[name].extend(streak)
+            streak = [sorted_data[i]]
+
+    # 最後のストリーク
+    if len(streak) >= min_streak:
+        name = streak[0]["partner_name"]
+        fixed_matches[name].extend(streak)
+
+    return fixed_matches
 
 
 def avg(values):
@@ -123,6 +156,7 @@ def md_basic_stats(data_list):
     total_kills = sum(d["kills"] for d in data_list)
     total_deaths = sum(d["deaths"] for d in data_list)
     kd = total_kills / total_deaths if total_deaths > 0 else 0
+    eff = dmg_efficiency(data_list)
 
     lines = [
         "| 項目 | 値 |",
@@ -131,12 +165,25 @@ def md_basic_stats(data_list):
         f"| **勝率** | **{wr:.1f}%** |",
         f"| 平均与ダメージ | {avg([d['dmg_given'] for d in data_list]):.0f} |",
         f"| 平均被ダメージ | {avg([d['dmg_taken'] for d in data_list]):.0f} |",
-        f"| **ダメージ効率** | **{dmg_efficiency(data_list):.3f}** |",
+        f"| **ダメージ効率** | **{eff:.3f}** |",
         f"| 平均撃墜 | {avg([d['kills'] for d in data_list]):.2f} |",
         f"| 平均被撃墜 | {avg([d['deaths'] for d in data_list]):.2f} |",
         f"| K/D比 | {kd:.2f} |",
         f"| 平均EXダメージ | {avg([d['ex_dmg'] for d in data_list]):.0f} |",
+        "",
     ]
+
+    # セクション別アドバイス
+    tips = []
+    if eff < 1.0:
+        tips.append(f"ダメージ効率が{eff:.3f}で1.0未満です。被ダメが与ダメを上回っており、被弾を減らす立ち回りが必要です。")
+    elif eff >= 1.2:
+        tips.append(f"ダメージ効率{eff:.3f}は優秀です。この調子を維持しましょう。")
+    if kd < 1.0:
+        tips.append(f"K/D比が{kd:.2f}で1.0未満です。撃墜数を増やすか、被撃墜を減らすことを意識しましょう。")
+    if tips:
+        lines.append("> **💡 アドバイス:** " + " / ".join(tips))
+
     return "\n".join(lines)
 
 
@@ -164,6 +211,20 @@ def md_win_loss_pattern(data_list):
     w_eff = dmg_efficiency(wins) if wins else 0
     l_eff = dmg_efficiency(losses) if losses else 0
     lines.append(f"| **ダメ効率** | **{w_eff:.3f}** | **{l_eff:.3f}** | {w_eff - l_eff:+.3f} |")
+    lines.append("")
+
+    # セクション別アドバイス
+    w_deaths = avg([d["deaths"] for d in wins]) if wins else 0
+    l_deaths = avg([d["deaths"] for d in losses]) if losses else 0
+    l_taken = avg([d["dmg_taken"] for d in losses]) if losses else 0
+    tips = []
+    if l_deaths >= 1.5:
+        tips.append(f"負け試合の平均被撃墜が{l_deaths:.1f}と高いです。耐久管理を意識しましょう。")
+    if l_taken >= 1100:
+        tips.append(f"負け試合の被ダメージが平均{l_taken:.0f}と高いです。無駄な被弾を減らすことが改善の鍵です。")
+    if tips:
+        lines.append("> **💡 アドバイス:** " + " / ".join(tips))
+
     return "\n".join(lines)
 
 
@@ -213,6 +274,21 @@ def md_enemy_matchup(data_list, min_matches=3):
         for ms, n, wr, eff, gv, tk in even:
             lines.append(f"| {ms} | {n} | {wr:.0f}% | {eff:.3f} | {gv:.0f} | {tk:.0f} |")
 
+    # セクション別アドバイス
+    tips = []
+    if weak:
+        high_dmg_taken = [r for r in weak if r[5] >= 1200]
+        if high_dmg_taken:
+            names = "、".join(r[0] for r in high_dmg_taken[:3])
+            tips.append(f"{names} 戦では被ダメが特に多いです。距離管理を見直しましょう。")
+        low_dmg_given = [r for r in weak if r[4] <= 900]
+        if low_dmg_given:
+            names = "、".join(r[0] for r in low_dmg_given[:3])
+            tips.append(f"{names} 戦では与ダメが低いです。攻撃の手数や当て方を工夫しましょう。")
+    if tips:
+        lines.append("")
+        lines.append("> **💡 アドバイス:** " + " / ".join(tips))
+
     return "\n".join(lines)
 
 
@@ -255,6 +331,12 @@ def md_deaths_impact(data_list):
             wr = win_rate(matches)
             eff = dmg_efficiency(matches)
             lines.append(f"| {key} | {len(matches)} | **{wr:.1f}%** | {eff:.3f} |")
+
+    d2 = len(by_deaths.get("2回", [])) + len(by_deaths.get("3回以上", []))
+    total = len(data_list)
+    lines.append("")
+    lines.append(f"> **💡 アドバイス:** 被撃墜2回以上の試合は{d2}/{total}戦({d2/total*100:.0f}%)。1落ち以内に抑えれば勝率80%超が見込めます。耐久管理が最重要課題です。")
+
     return "\n".join(lines)
 
 
@@ -273,6 +355,18 @@ def md_time_of_day(data_list):
         eff = dmg_efficiency(matches)
         mark = "★" if wr >= 70 else "▼" if wr <= 40 else ""
         lines.append(f"| {hour}時台 | {len(matches)} | {wr:.1f}% | {eff:.3f} | {mark} |")
+
+    good = [h for h, m in hourly.items() if len(m) >= 5 and win_rate(m) >= 70]
+    bad = [h for h, m in hourly.items() if len(m) >= 5 and win_rate(m) <= 40]
+    tips = []
+    if good:
+        tips.append(f"{'、'.join(f'{h}時台' for h in sorted(good))}が好調です。")
+    if bad:
+        tips.append(f"{'、'.join(f'{h}時台' for h in sorted(bad))}は不調です。強い相手が多い時間帯か、疲労の影響かもしれません。")
+    if tips:
+        lines.append("")
+        lines.append("> **💡 アドバイス:** " + " ".join(tips))
+
     return "\n".join(lines)
 
 
@@ -298,6 +392,15 @@ def md_day_of_week(data_list):
             wr = win_rate(matches)
             eff = dmg_efficiency(matches)
             lines.append(f"| {DOW_NAMES[dow]} | {len(matches)} | {wr:.1f}% | {eff:.3f} |")
+
+    wd_wr = win_rate(weekday_data) if weekday_data else 0
+    we_wr = win_rate(weekend_data) if weekend_data else 0
+    diff = abs(wd_wr - we_wr)
+    if diff >= 10:
+        better = "平日" if wd_wr > we_wr else "土日"
+        worse = "土日" if wd_wr > we_wr else "平日"
+        lines.append("")
+        lines.append(f"> **💡 アドバイス:** {better}の方が{worse}より勝率が{diff:.0f}ポイント高いです。{worse}は対戦相手の質が変わる可能性があります。")
     return "\n".join(lines)
 
 
@@ -319,6 +422,100 @@ def md_daily_trend(data_list):
         dow = matches[0]["datetime"].weekday()
         mark = "★" if wr >= 70 else "▼" if wr <= 45 else ""
         lines.append(f"| {date_str} | {DOW_NAMES[dow]} | {len(matches)} | {wr:.1f}% | {eff:.3f} | {mark} |")
+
+    # 連敗ストリーク検出
+    sorted_data = sorted(data_list, key=lambda d: d["datetime"])
+    max_lose_streak = 0
+    current_streak = 0
+    for d in sorted_data:
+        if not d["win"]:
+            current_streak += 1
+            max_lose_streak = max(max_lose_streak, current_streak)
+        else:
+            current_streak = 0
+
+    tips = []
+    bad_days = [ds for ds in sorted(daily.keys()) if win_rate(daily[ds]) <= 40 and len(daily[ds]) >= 5]
+    if bad_days:
+        tips.append(f"勝率40%以下の日: {', '.join(bad_days)}。不調時は早めに切り上げましょう。")
+    if max_lose_streak >= 4:
+        tips.append(f"最大{max_lose_streak}連敗の記録があります。3連敗したら休憩を挟むことを推奨します。")
+    if tips:
+        lines.append("")
+        lines.append("> **💡 アドバイス:** " + " / ".join(tips))
+
+    return "\n".join(lines)
+
+
+def md_fixed_partners(all_data):
+    """固定相方（連続3戦以上）の分析"""
+    fixed = detect_fixed_partners(all_data)
+
+    if not fixed:
+        return "固定相方（連続3戦以上）は検出されませんでした。"
+
+    lines = []
+    for partner_name in sorted(fixed.keys(), key=lambda x: -len(fixed[x])):
+        data = fixed[partner_name]
+        n = len(data)
+        w, l = wins_losses(data)
+        wr = w / n * 100
+
+        # 自分のスタッツ
+        my_eff = dmg_efficiency(data)
+        my_avg_given = avg([d["dmg_given"] for d in data])
+        my_avg_taken = avg([d["dmg_taken"] for d in data])
+
+        # 相方のスタッツ
+        p_avg_given = avg([d["partner_dmg_given"] for d in data])
+        p_avg_taken = avg([d["partner_dmg_taken"] for d in data])
+        p_total_given = sum(d["partner_dmg_given"] for d in data)
+        p_total_taken = sum(d["partner_dmg_taken"] for d in data)
+        p_eff = p_total_given / p_total_taken if p_total_taken > 0 else 0
+        p_avg_kills = avg([d["partner_kills"] for d in data])
+        p_avg_deaths = avg([d["partner_deaths"] for d in data])
+
+        lines.append(f"### {partner_name} ({n}戦)\n")
+        lines.append(f"**チーム成績: {w}勝{l}敗 (勝率{wr:.1f}%)**\n")
+
+        lines.append("| 項目 | 自分 | 相方 |")
+        lines.append("|------|------|------|")
+        lines.append(f"| 平均与ダメージ | {my_avg_given:.0f} | {p_avg_given:.0f} |")
+        lines.append(f"| 平均被ダメージ | {my_avg_taken:.0f} | {p_avg_taken:.0f} |")
+        lines.append(f"| ダメージ効率 | {my_eff:.3f} | {p_eff:.3f} |")
+        lines.append(f"| 平均撃墜 | {avg([d['kills'] for d in data]):.2f} | {p_avg_kills:.2f} |")
+        lines.append(f"| 平均被撃墜 | {avg([d['deaths'] for d in data]):.2f} | {p_avg_deaths:.2f} |")
+
+        # 相方の使用機体別勝率
+        partner_ms_stats = defaultdict(list)
+        for d in data:
+            partner_ms_stats[d["partner_ms"]].append(d)
+
+        if len(partner_ms_stats) > 1 or any(len(v) >= 2 for v in partner_ms_stats.values()):
+            lines.append("\n**相方の使用機体別:**\n")
+            lines.append("| 機体 | 試合 | 勝率 | 相方ダメ効率 |")
+            lines.append("|------|------|------|-------------|")
+            for ms in sorted(partner_ms_stats.keys(), key=lambda x: -len(partner_ms_stats[x])):
+                ms_data = partner_ms_stats[ms]
+                ms_wr = win_rate(ms_data)
+                ms_p_given = sum(d["partner_dmg_given"] for d in ms_data)
+                ms_p_taken = sum(d["partner_dmg_taken"] for d in ms_data)
+                ms_p_eff = ms_p_given / ms_p_taken if ms_p_taken > 0 else 0
+                lines.append(f"| {ms} | {len(ms_data)} | {ms_wr:.0f}% | {ms_p_eff:.3f} |")
+
+        # 相方ごとのアドバイス
+        tips = []
+        if p_eff < 0.8:
+            tips.append(f"相方のダメ効率が{p_eff:.3f}と低めです。相方が狙われやすい展開になっている可能性があります。カットやラインを意識しましょう。")
+        if wr < 45 and n >= 5:
+            tips.append(f"勝率が{wr:.0f}%と低調です。連携や機体の組み合わせを見直してみましょう。")
+        if wr >= 70 and n >= 5:
+            tips.append(f"勝率{wr:.0f}%と好相性です。この相方との連携を継続しましょう。")
+        if tips:
+            lines.append(f"> **💡 アドバイス:** " + " / ".join(tips))
+
+        lines.append("")
+
     return "\n".join(lines)
 
 
@@ -337,10 +534,23 @@ def md_season(data_list):
         data = season_data[season_name]
         lines.append(f"**{season_name}**\n")
         lines.append(f"- 全体: {len(data)}戦 勝率{win_rate(data):.1f}% ダメ効率{dmg_efficiency(data):.3f}")
-        for half_name in ["前半", "後半"]:
-            hdata = season_half[season_name][half_name]
-            if hdata:
-                lines.append(f"- {half_name}: {len(hdata)}戦 勝率{win_rate(hdata):.1f}% ダメ効率{dmg_efficiency(hdata):.3f}")
+
+        first_half = season_half[season_name].get("前半", [])
+        second_half = season_half[season_name].get("後半", [])
+        if first_half:
+            lines.append(f"- 前半: {len(first_half)}戦 勝率{win_rate(first_half):.1f}% ダメ効率{dmg_efficiency(first_half):.3f}")
+        if second_half:
+            lines.append(f"- 後半: {len(second_half)}戦 勝率{win_rate(second_half):.1f}% ダメ効率{dmg_efficiency(second_half):.3f}")
+
+        if first_half and second_half:
+            f_wr = win_rate(first_half)
+            s_wr = win_rate(second_half)
+            diff = s_wr - f_wr
+            if abs(diff) >= 5:
+                if diff > 0:
+                    lines.append(f"\n> **💡 アドバイス:** 後半の方が勝率が{diff:.0f}ポイント高く、シーズンが進むにつれて安定しています。")
+                else:
+                    lines.append(f"\n> **💡 アドバイス:** 前半の方が勝率が{-diff:.0f}ポイント高いです。後半は対戦相手のレベルが上がっている可能性があります。")
         lines.append("")
     return "\n".join(lines)
 
@@ -421,6 +631,57 @@ def md_advice(all_data, ms_data):
                 f"{better}の勝率({max(wd_wr, we_wr):.0f}%)が{worse}({min(wd_wr, we_wr):.0f}%)より{diff:.0f}ポイント高いです。"
             )
 
+    # 固定相方ごとの勝率差
+    fixed = detect_fixed_partners(all_data)
+    if len(fixed) >= 2:
+        partner_wrs = [(name, win_rate(data), len(data)) for name, data in fixed.items() if len(data) >= 5]
+        if len(partner_wrs) >= 2:
+            partner_wrs.sort(key=lambda x: -x[1])
+            best = partner_wrs[0]
+            worst = partner_wrs[-1]
+            if best[1] - worst[1] >= 15:
+                advices.append(
+                    f"固定相方の勝率差が大きいです。{best[0]}({best[1]:.0f}%)と{worst[0]}({worst[1]:.0f}%)で{best[1]-worst[1]:.0f}ポイント差。"
+                    f"相方ごとに戦い方を変えるか、相性の良い相方との試合を増やしましょう。"
+                )
+
+    # 連敗ストリーク
+    sorted_data = sorted(all_data, key=lambda d: d["datetime"])
+    max_lose_streak = 0
+    current_streak = 0
+    for d in sorted_data:
+        if not d["win"]:
+            current_streak += 1
+            max_lose_streak = max(max_lose_streak, current_streak)
+        else:
+            current_streak = 0
+    if max_lose_streak >= 4:
+        advices.append(
+            f"最大{max_lose_streak}連敗の記録があります。3連敗したら休憩を挟みましょう。メンタル管理も勝率に直結します。"
+        )
+
+    # シーズン前半/後半
+    season_data = defaultdict(list)
+    season_half = defaultdict(lambda: defaultdict(list))
+    for d in all_data:
+        s = get_season(d["datetime"])
+        h = get_season_half(d["datetime"])
+        season_data[s].append(d)
+        season_half[s][h].append(d)
+
+    for season_name in season_data:
+        first = season_half[season_name].get("前半", [])
+        second = season_half[season_name].get("後半", [])
+        if first and second:
+            f_wr = win_rate(first)
+            s_wr = win_rate(second)
+            diff = s_wr - f_wr
+            if abs(diff) >= 10:
+                if diff > 0:
+                    advices.append(f"{season_name}: 後半の勝率が前半より{diff:.0f}ポイント高く、シーズン後半に安定する傾向があります。")
+                else:
+                    advices.append(f"{season_name}: 前半の勝率が後半より{-diff:.0f}ポイント高いです。後半は対戦環境が厳しくなっている可能性があります。")
+
     lines = []
     for i, a in enumerate(advices, 1):
         lines.append(f"{i}. {a}")
@@ -472,6 +733,10 @@ def main():
         report.append(md_enemy_matchup(data))
         report.append("\n### 相方機体との相性\n")
         report.append(md_partner(data))
+
+    # 固定相方分析
+    report.append("\n---\n\n## 固定相方分析（連続3戦以上）\n")
+    report.append(md_fixed_partners(all_data))
 
     # 被撃墜数と勝率
     report.append("\n---\n\n## 被撃墜数と勝率の関係\n")
