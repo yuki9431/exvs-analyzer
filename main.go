@@ -19,7 +19,16 @@ func main() {
 	// ms_list.json をCSVと同じディレクトリに配置
 	msListPath := filepath.Join(filepath.Dir(csvPath), "ms_list.json")
 
-	datedScores := Scraiping(username, password)
+	// 既存CSVの最新日時を取得し、それ以降の戦歴のみスクレイピング
+	since, err := getLatestDatetime(csvPath)
+	if err != nil {
+		log.Printf("[WARN] Failed to read existing CSV: %v", err)
+	}
+	if !since.IsZero() {
+		log.Printf("[INFO] Fetching scores after %s", since.Format("2006-01-02 15:04"))
+	}
+
+	datedScores := Scraiping(username, password, since)
 
 	// 機体名マッピング: ファイルがあればそこから読む、なければスクレイピングして保存
 	msList, err := LoadMSList(msListPath)
