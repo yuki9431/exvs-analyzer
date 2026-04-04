@@ -174,7 +174,8 @@ func dateFormatMonthly(t time.Time) time.Time {
 }
 
 // スクレイピング処理を実行し、DatedScoresを返す
-func Scraiping(username, password string) DatedScores {
+// since より新しい戦歴のみ取得する。ゼロ値の場合は全件取得する。
+func Scraiping(username, password string, since time.Time) DatedScores {
 
 	var (
 		scores     DatedScores
@@ -201,6 +202,14 @@ func Scraiping(username, password string) DatedScores {
 		r := regexp.MustCompile(`\(.*`)
 		date = r.ReplaceAllString(e.ChildText("p.datetime.fz-ss"), "") // 2022/10/15(土) -> 2022/10/15
 
+		// since の日付より前の日はスキップ
+		if !since.IsZero() {
+			d, err := time.Parse("2006/01/02", date)
+			if err == nil && d.Before(since.Truncate(24*time.Hour)) {
+				return
+			}
+		}
+
 		link := e.ChildAttr("a", "href")
 
 		dailypage.Visit(link)
@@ -210,6 +219,14 @@ func Scraiping(username, password string) DatedScores {
 	dailypage.OnHTML("li.item", func(e *colly.HTMLElement) {
 
 		hour = e.ChildText("p.datetime.fz-ss")
+
+		// since 以前の試合はスキップ
+		if !since.IsZero() {
+			t, err := time.Parse("2006/01/02 15:04", date+" "+hour)
+			if err == nil && !t.After(since) {
+				return
+			}
+		}
 
 		// 判定: リンクの class に "win" が含まれるかで、1-2 人目が勝ち / 3-4 人目が負けとする
 		if e.ChildAttr("a", "class") == "right-arrow vs-detail win" {
