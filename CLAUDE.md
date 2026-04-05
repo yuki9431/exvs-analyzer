@@ -46,6 +46,7 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 ## コード構成
 
 - `cmd/server/main.go` — エントリポイント。`internal/server.StartServer()` に委譲
+- `cmd/update-mslist/main.go` — MSリストをスクレイピングして `data/ms_list.json` を更新するCLI
 - `internal/server/` — HTTPハンドラ、ジョブキュー、パイプライン制御
 - `internal/scraper/` — Collyベースのスクレイパー（`scraper.go`）+ バンダイナムコID OAuth認証（`login.go`）
 - `internal/model/` — データ型（`PlayerScore`, `DatedScore`, `MSInfo`）とMS名マッピング
@@ -56,8 +57,9 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 
 ## GitHub Actions
 
-- CI: `ci.yml`（Docker build, go vet, py_compile）
+- CI: `ci.yml`（PRのみ。Docker build, go vet, py_compile）
 - CD: `cd.yml`（mainマージ時にCloud Runへ自動デプロイ、Workload Identity Federation）
+- MSリスト更新: `update-mslist.yml`（毎日03:00-06:00 JST、ランダムスリープ。変更時にPR自動作成）
 - **サードパーティアクションを追加・変更する際は、GitHubリポジトリのリリースページで最新メジャーバージョンを確認すること。** 古いバージョンを指定するとNode.js非推奨警告やエラーが発生する（過去に複数回発生）。
 
 ## 主要な技術情報
