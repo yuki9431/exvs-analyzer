@@ -3,21 +3,67 @@ package main
 import (
 	"log"
 	"os"
-	"path/filepath"
 )
 
+const defaultMSListPath = "ms_list.json"
+
 func main() {
-	// 引数チェック: username, password, csvPath の3つが必要
+	// 引数なし or "serve" → HTTPサーバーモード
+	if len(os.Args) == 1 || (len(os.Args) >= 2 && os.Args[1] == "serve") {
+		startServer()
+		return
+	}
+
+	// "update-mslist" → ランキングページから新規機体のみ差分追加
+	if len(os.Args) >= 4 && os.Args[1] == "update-mslist" {
+		username := os.Args[2]
+		password := os.Args[3]
+		outputPath := defaultMSListPath
+		if len(os.Args) >= 5 {
+			outputPath = os.Args[4]
+		}
+
+		// 既存リストを読み込み
+		existing, err := LoadMSList(outputPath)
+		if err != nil {
+			existing = []MSInfo{}
+		}
+		existingURLs := make(map[string]bool, len(existing))
+		for _, ms := range existing {
+			existingURLs[ms.ImageURL] = true
+		}
+
+		// スクレイピングで取得
+		log.Println("[INFO] Fetching MS list from ranking page...")
+		scraped := ScrapeMSList(username, password)
+
+		// 新規分だけ追加
+		added := 0
+		for _, ms := range scraped {
+			if !existingURLs[ms.ImageURL] {
+				existing = append(existing, ms)
+				existingURLs[ms.ImageURL] = true
+				added++
+				log.Printf("[INFO] New MS added: %s", ms.Name)
+			}
+		}
+
+		if err := SaveMSList(existing, outputPath); err != nil {
+			log.Fatalf("[ERROR] Failed to save MS list: %v", err)
+		}
+		log.Printf("[INFO] MS list updated: %d new, %d total", added, len(existing))
+		return
+	}
+
+	// CLIモード: username, password, csvPath の3つが必要
 	if len(os.Args) < 4 {
-		log.Fatalf("Usage: %s <username> <password> <csv_path>", os.Args[0])
+		log.Fatalf("Usage:\n  %s <username> <password> <csv_path>\n  %s serve\n  %s update-mslist <username> <password> [output_path]",
+			os.Args[0], os.Args[0], os.Args[0])
 	}
 
 	username := os.Args[1]
 	password := os.Args[2]
 	csvPath := os.Args[3]
-
-	// ms_list.json をCSVと同じディレクトリに配置
-	msListPath := filepath.Join(filepath.Dir(csvPath), "ms_list.json")
 
 	// 既存CSVの最新日時を取得し、それ以降の戦歴のみスクレイピング
 	since, err := getLatestDatetime(csvPath)
@@ -30,22 +76,17 @@ func main() {
 
 	datedScores := Scraiping(username, password, since)
 
-	// 機体名マッピング: ファイルがあればそこから読む、なければスクレイピングして保存
-	msList, err := LoadMSList(msListPath)
+	// 同梱のMSリストから機体名マッピングを読み込み
+	msList, err := LoadMSList(defaultMSListPath)
 	if err != nil {
-		log.Println("[INFO] MS list file not found, fetching from ranking page...")
-		msList = ScrapeMSList(username, password)
-		if err := SaveMSList(msList, msListPath); err != nil {
-			log.Printf("[WARN] Failed to save MS list: %v", err)
-		} else {
-			log.Printf("[INFO] MS list saved to %s (%d entries)", msListPath, len(msList))
-		}
+		log.Printf("[WARN] MS list not found, MS names will be empty")
 	} else {
-		log.Printf("[INFO] Loaded MS list from %s (%d entries)", msListPath, len(msList))
+		log.Printf("[INFO] Loaded MS list (%d entries)", len(msList))
 	}
 
 	msMap := BuildMSNameMap(msList)
 	datedScores.FillMsNames(msMap)
+	datedScores.CheckUnknownMS()
 
 	if err := SaveAllScoresCSV(datedScores, csvPath); err != nil {
 		log.Fatalf("[ERROR] Failed to save CSV: %v", err)
