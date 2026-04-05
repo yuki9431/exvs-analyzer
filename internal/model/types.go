@@ -31,7 +31,7 @@ type PlayerScore struct {
 // DatedScore は日付付きスコア
 type DatedScore struct {
 	PlayerNo    int
-	Datatime    time.Time
+	Datetime    time.Time
 	PlayerScore PlayerScore
 }
 
