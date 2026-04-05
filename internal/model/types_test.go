@@ -1,3 +1,16 @@
+// types_test.go — internal/model パッケージのユニットテスト
+//
+// テスト対象と観点:
+//   - BuildMSNameMap: MSリスト→マップ変換。空リスト・存在しないキーも確認
+//   - FillMsNames: マップを使ったMS名補完。マッチしないURLは空のまま残るか
+//   - SaveMSList/LoadMSList: JSON保存→読み込みの往復。名前順ソートの確認
+//   - CheckUnknownMS: 不明MSがあってもパニックしないか（ログ出力のみ）
+//
+// テストデータはすべて架空の値。実際のms_list.jsonとは無関係。
+// ファイル系テストは t.TempDir() で一時フォルダを使い、実データに影響しない。
+//
+// 実行方法:
+//   make test
 package model
 
 import (

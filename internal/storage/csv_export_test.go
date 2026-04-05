@@ -1,3 +1,16 @@
+// csv_export_test.go — internal/storage パッケージのユニットテスト
+//
+// テスト対象と観点:
+//   - scoreToRow: DatedScore→CSV行（13カラム）の変換が正しいか
+//   - exportAllScoresCSV: ヘッダー+データ行のCSV出力
+//   - GetLatestDatetime: CSV内の最新日時を取得。ファイル未存在時はゼロ値を返すか
+//   - SaveAllScoresCSV: 新規作成（ヘッダー付き）と既存ファイルへの追記。空データで変化しないか
+//
+// テストデータはすべて架空の値。
+// ファイル系テストは t.TempDir() で一時フォルダを使い、実データに影響しない。
+//
+// 実行方法:
+//   make test
 package storage
 
 import (
