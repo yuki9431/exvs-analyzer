@@ -54,6 +54,12 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 - `static/index.html` — SPA フロントエンド（素のJS、ダークテーマ、marked.jsでレンダリング）
 - `data/ms_list.json` — MS画像URL→名前のマッピング（261件）
 
+## GitHub Actions
+
+- CI: `ci.yml`（Docker build, go vet, py_compile）
+- CD: `cd.yml`（mainマージ時にCloud Runへ自動デプロイ、Workload Identity Federation）
+- **サードパーティアクションを追加・変更する際は、GitHubリポジトリのリリースページで最新メジャーバージョンを確認すること。** 古いバージョンを指定するとNode.js非推奨警告やエラーが発生する（過去に複数回発生）。
+
 ## 主要な技術情報
 
 - **Go 1.26**、Webフレームワーク不使用（標準 `net/http`）
