@@ -34,11 +34,26 @@ func runPipeline(username, password string) (string, error) {
 
 	csvPath := filepath.Join(tmpDir, "scores.csv")
 
-	// スクレイピング
-	log.Printf("[INFO] Scraping for user: %s", username)
+	// Cloud Storageから既存CSVをダウンロード
 	var since time.Time
+	exists, err := downloadCSV(username, csvPath)
+	if err != nil {
+		log.Printf("[WARN] Failed to download existing CSV: %v", err)
+	}
+	if exists {
+		since, err = getLatestDatetime(csvPath)
+		if err != nil {
+			log.Printf("[WARN] Failed to read latest datetime: %v", err)
+		}
+		if !since.IsZero() {
+			log.Printf("[INFO] Fetching scores after %s", since.Format("2006-01-02 15:04"))
+		}
+	}
+
+	// スクレイピング
+	log.Printf("[INFO] Scraping for user (hash: %s)", userKey(username))
 	datedScores := Scraiping(username, password, since)
-	if len(datedScores) == 0 {
+	if len(datedScores) == 0 && !exists {
 		return "", fmt.Errorf("no scores found")
 	}
 
@@ -52,9 +67,14 @@ func runPipeline(username, password string) (string, error) {
 	datedScores.FillMsNames(msMap)
 	datedScores.CheckUnknownMS()
 
-	// CSV保存
+	// CSV保存（既存データに追記）
 	if err := SaveAllScoresCSV(datedScores, csvPath); err != nil {
 		return "", fmt.Errorf("failed to save CSV: %w", err)
+	}
+
+	// Cloud Storageにアップロード
+	if err := uploadCSV(username, csvPath); err != nil {
+		log.Printf("[WARN] Failed to upload CSV to GCS: %v", err)
 	}
 
 	// Python分析実行
