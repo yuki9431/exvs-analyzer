@@ -23,12 +23,12 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v3
 
       - name: Build and push image
-        run: gcloud builds submit --tag ${{ vars.GCR_IMAGE }}
+        run: gcloud builds submit --tag ${{ secrets.GCR_IMAGE }}
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy exvs-analyzer \
-            --image ${{ vars.GCR_IMAGE }} \
+            --image ${{ secrets.GCR_IMAGE }} \
             --region asia-northeast1 \
-            --set-env-vars "GCS_BUCKET=${{ vars.GCS_BUCKET }}" \
+            --set-env-vars "GCS_BUCKET=${{ secrets.GCS_BUCKET }}" \
             --allow-unauthenticated
