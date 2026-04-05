@@ -1,4 +1,4 @@
-package main
+package storage
 
 import (
 	"context"
@@ -13,23 +13,24 @@ import (
 )
 
 const (
-	bucketName = "exvs2ib-analyzer-data"
+	// BucketName はCloud Storageのバケット名
+	BucketName = "exvs2ib-analyzer-data"
 )
 
-// userKey はメールアドレスからユーザー固有のキーを生成する
-func userKey(email string) string {
+// UserKey はメールアドレスからユーザー固有のキーを生成する
+func UserKey(email string) string {
 	hash := sha256.Sum256([]byte(email))
 	return fmt.Sprintf("%x", hash[:8])
 }
 
-// csvObjectPath はユーザーのCSVオブジェクトパスを返す
-func csvObjectPath(email string) string {
-	return fmt.Sprintf("users/%s/scores.csv", userKey(email))
+// CSVObjectPath はユーザーのCSVオブジェクトパスを返す
+func CSVObjectPath(email string) string {
+	return fmt.Sprintf("users/%s/scores.csv", UserKey(email))
 }
 
-// downloadCSV はCloud StorageからCSVをローカルファイルにダウンロードする
+// DownloadCSV はCloud StorageからCSVをローカルファイルにダウンロードする
 // ファイルが存在しない場合はfalseを返す
-func downloadCSV(email, localPath string) (bool, error) {
+func DownloadCSV(email, localPath string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -39,8 +40,8 @@ func downloadCSV(email, localPath string) (bool, error) {
 	}
 	defer client.Close()
 
-	objPath := csvObjectPath(email)
-	reader, err := client.Bucket(bucketName).Object(objPath).NewReader(ctx)
+	objPath := CSVObjectPath(email)
+	reader, err := client.Bucket(BucketName).Object(objPath).NewReader(ctx)
 	if err != nil {
 		if err == storage.ErrObjectNotExist {
 			log.Printf("[INFO] No existing CSV found for user")
@@ -64,8 +65,8 @@ func downloadCSV(email, localPath string) (bool, error) {
 	return true, nil
 }
 
-// uploadCSV はローカルのCSVファイルをCloud Storageにアップロードする
-func uploadCSV(email, localPath string) error {
+// UploadCSV はローカルのCSVファイルをCloud Storageにアップロードする
+func UploadCSV(email, localPath string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -81,8 +82,8 @@ func uploadCSV(email, localPath string) error {
 	}
 	defer f.Close()
 
-	objPath := csvObjectPath(email)
-	writer := client.Bucket(bucketName).Object(objPath).NewWriter(ctx)
+	objPath := CSVObjectPath(email)
+	writer := client.Bucket(BucketName).Object(objPath).NewWriter(ctx)
 	writer.ContentType = "text/csv"
 
 	if _, err := io.Copy(writer, f); err != nil {
