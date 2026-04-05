@@ -17,17 +17,18 @@ jobs:
       - id: auth
         uses: google-github-actions/auth@v3
         with:
-          workload_identity_provider: "projects/483014325656/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
-          service_account: "github-actions@exvs2ib-analyzer.iam.gserviceaccount.com"
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       - uses: google-github-actions/setup-gcloud@v3
 
       - name: Build and push image
-        run: gcloud builds submit --tag gcr.io/exvs2ib-analyzer/exvs-analyzer
+        run: gcloud builds submit --tag ${{ vars.GCR_IMAGE }}
 
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy exvs-analyzer \
-            --image gcr.io/exvs2ib-analyzer/exvs-analyzer \
+            --image ${{ vars.GCR_IMAGE }} \
             --region asia-northeast1 \
+            --set-env-vars "GCS_BUCKET=${{ vars.GCS_BUCKET }}" \
             --allow-unauthenticated
