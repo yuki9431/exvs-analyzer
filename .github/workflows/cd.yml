@@ -1,0 +1,33 @@
+name: CD
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: "projects/483014325656/locations/global/workloadIdentityPools/github-pool/providers/github-provider"
+          service_account: "github-actions@exvs2ib-analyzer.iam.gserviceaccount.com"
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build and push image
+        run: gcloud builds submit --tag gcr.io/exvs2ib-analyzer/exvs-analyzer
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy exvs-analyzer \
+            --image gcr.io/exvs2ib-analyzer/exvs-analyzer \
+            --region asia-northeast1 \
+            --allow-unauthenticated
