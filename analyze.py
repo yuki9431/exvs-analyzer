@@ -509,8 +509,15 @@ def md_fixed_partners(all_data):
             tips.append(f"相方のダメ効率が{p_eff:.3f}と低めです。相方が狙われやすい展開になっている可能性があります。カットやラインを意識しましょう。")
         if wr < 45 and n >= 5:
             tips.append(f"勝率が{wr:.0f}%と低調です。連携や機体の組み合わせを見直してみましょう。")
-        if wr >= 70 and n >= 5:
-            tips.append(f"勝率{wr:.0f}%と好相性です。この相方との連携を継続しましょう。")
+        if n >= 5:
+            if wr >= 90:
+                tips.append(f"勝率{wr:.0f}%は全国大会レベルです。最高の相方です。")
+            elif wr >= 80:
+                tips.append(f"勝率{wr:.0f}%は最上位レベルです。この相方との連携を大切にしましょう。")
+            elif wr >= 70:
+                tips.append(f"勝率{wr:.0f}%は上位レベルです。好相性の相方です。")
+            elif wr >= 60:
+                tips.append(f"勝率{wr:.0f}%と高めです。この調子を維持しましょう。")
         if tips:
             lines.append(f"> **💡 アドバイス:** " + "<br>".join(tips))
 
