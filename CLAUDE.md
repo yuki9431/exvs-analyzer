@@ -27,7 +27,7 @@ PORT=3000 make run
 
 http://localhost:8080 でアクセス可能。
 
-GoテストおよびMakefileは存在しない。CIでは `go vet`、`go build`、`py_compile` のみ実行。
+CIでは `go vet`、`go test`、`go build`、`py_compile` を実行。
 
 ## アーキテクチャ
 
@@ -69,6 +69,11 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 
 - **Go 1.26**、Webフレームワーク不使用（標準 `net/http`）
 - **Python 3.11** で分析（pip依存なし）
-- GCSバケット: `GCS_BUCKET`、ユーザーキーは SHA256(email)[:8] の16進数
+- GCSバケットは環境変数 `GCS_BUCKET` で指定、ユーザーキーは SHA256(email)[:8] の16進数
 - Cloud Runデプロイ、`PORT` 環境変数（デフォルト 8080）
+
+## セキュリティルール
+
+- **GCPプロジェクトID、バケット名、サービスアカウント等のインフラ識別子をコードやCLAUDE.mdにハードコードしない。** 環境変数またはGitHub Secrets/Variablesを使うこと。
+- 公開リポジトリのため、コミット履歴にも残ることを意識する。
 - マルチステージDockerfile: `golang:1.26-alpine` でビルド、`python:3.11-alpine` で実行
