@@ -22,7 +22,6 @@
 │       └── cloud_storage.go     # Cloud Storage連携
 ├── scripts/
 │   ├── analyze.py               # Python分析スクリプト
-│   ├── docker.sh                # Docker操作スクリプト
 │   └── entrypoint.sh            # Docker CLIモード用
 ├── static/
 │   └── index.html               # フロントエンド
@@ -31,6 +30,7 @@
 ├── .github/
 │   └── workflows/
 │       └── ci.yml               # CI（Docker build, Go vet, Python構文チェック）
+├── Makefile                     # ビルド・起動コマンド
 ├── Dockerfile                   # マルチステージビルド
 ├── go.mod
 ├── go.sum
@@ -56,18 +56,21 @@
 
 ```bash
 # ビルド＆起動（初回・コード変更時）
-./scripts/docker.sh restart
+make restart
 
 # ビルドのみ
-./scripts/docker.sh build
+make build
 
 # 起動のみ（ビルド済みの場合）
-./scripts/docker.sh run
+make run
+
+# コンテナ停止
+make stop
 ```
 
 http://localhost:8080 にアクセスしてバンナムIDでログインすると分析レポートが表示されます。
 
-ポートを変更したい場合は `PORT=3000 ./scripts/docker.sh run` のように指定できます。
+ポートを変更したい場合は `PORT=3000 make run` のように指定できます。
 
 ## 技術スタック
 
