@@ -1,6 +1,6 @@
 module example.com/m/v2
 
-go 1.19
+go 1.26
 
 require github.com/gocolly/colly/v2 v2.1.0
 
