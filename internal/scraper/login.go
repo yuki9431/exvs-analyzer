@@ -1,4 +1,4 @@
-package main
+package scraper
 
 import (
 	"encoding/json"
@@ -9,20 +9,19 @@ import (
 	"strings"
 )
 
-// Note:
-// redirect_uriはログインボタンを押下した際のPOSTの内容(Request Data)から確認できる
 const (
-	login_url    = "https://account-api.bandainamcoid.com/v3/login/idpw"
-	redirect_uri = "https://www.bandainamcoid.com/v2/oauth2/auth?back=v3&client_id=gundamexvs&scope=JpGroupAll&redirect_uri=https%3A%2F%2Fweb.vsmobile.jp%2Fexvs2ib%2Fregist&text="
+	loginURL    = "https://account-api.bandainamcoid.com/v3/login/idpw"
+	redirectURI = "https://www.bandainamcoid.com/v2/oauth2/auth?back=v3&client_id=gundamexvs&scope=JpGroupAll&redirect_uri=https%3A%2F%2Fweb.vsmobile.jp%2Fexvs2ib%2Fregist&text="
 )
 
-type client struct {
+// Client はHTTPクライアント
+type Client struct {
 	Username   string
 	Password   string
-	httpClient *http.Client
+	HTTPClient *http.Client
 }
 
-type loginResponce struct {
+type loginResponse struct {
 	Status string `json:"result"`
 	Cookie struct {
 		RetentionTmp struct {
@@ -91,18 +90,16 @@ type loginResponce struct {
 	RedirectUrl string `json:"redirect"`
 }
 
-func newClient(username, password string) *client {
-	// Allocate a new cookie jar to mimic the browser behavior:
+// NewClient は新しいクライアントを作成する
+func NewClient(username, password string) *Client {
 	cookieJar, _ := cookiejar.New(nil)
 
-	c := &client{
+	c := &Client{
 		Username: username,
 		Password: password,
 	}
 
-	// When initializing the http.Client, copy default values from http.DefaultClient
-	// Pass a pointer to the cookie jar that was created earlier:
-	c.httpClient = &http.Client{
+	c.HTTPClient = &http.Client{
 		Transport:     http.DefaultTransport,
 		CheckRedirect: http.DefaultClient.CheckRedirect,
 		Jar:           cookieJar,
@@ -112,12 +109,11 @@ func newClient(username, password string) *client {
 	return c
 }
 
-func (c *client) login() error {
-
-	// Set auth info
+// Login はバンダイナムコIDでログインする
+func (c *Client) Login() error {
 	v := url.Values{}
 	v.Set("client_id", "gundamexvs")
-	v.Set("redirect_uri", redirect_uri)
+	v.Set("redirect_uri", redirectURI)
 	v.Set("customize_id", "")
 	v.Set("login_id", c.Username)
 	v.Set("password", c.Password)
@@ -127,45 +123,38 @@ func (c *client) login() error {
 	v.Set("cookie", `{"language":"ja"}`)
 	v.Set("prompt", "")
 
-	// Post auth Info to login page
-	login_page, err := c.httpClient.PostForm(login_url, v)
+	loginPage, err := c.HTTPClient.PostForm(loginURL, v)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer login_page.Body.Close()
+	defer loginPage.Body.Close()
 
-	// Get URL for auth page
-	var l loginResponce
-	err = json.NewDecoder(login_page.Body).Decode(&l)
+	var l loginResponse
+	err = json.NewDecoder(loginPage.Body).Decode(&l)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// パスキーページへのリダイレクトの場合、passkey/info APIを呼んでスキップする
 	if strings.Contains(l.RedirectUrl, "passkey") {
 		err = c.skipPasskey(l)
 	} else {
-		// パスキーページでない場合は従来通り
-		auth_page, err := c.httpClient.Get(l.RedirectUrl)
+		authPage, err := c.HTTPClient.Get(l.RedirectUrl)
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer auth_page.Body.Close()
+		defer authPage.Body.Close()
 	}
 
 	return err
 }
 
-// Note: パスキー設定ページが表示された場合に「あとで」ボタン相当の処理を行い、OAuth認証を完了する
-// passkey/info APIにログインCookieをJSON形式で渡し、レスポンスのbtn-next URLにアクセスする
-func (c *client) skipPasskey(l loginResponce) error {
+func (c *Client) skipPasskey(l loginResponse) error {
 	parsedURL, err := url.Parse(l.RedirectUrl)
 	if err != nil {
 		return err
 	}
 	q := parsedURL.Query()
 
-	// ブラウザのJSと同様に、cookieクエリパラメータにログインCookieをJSON形式で渡す
 	cookieJSON := map[string]string{"language": "ja"}
 	if l.Cookie.Login.Name != "" {
 		cookieJSON[l.Cookie.Login.Name] = l.Cookie.Login.Value
@@ -187,7 +176,6 @@ func (c *client) skipPasskey(l loginResponce) error {
 	}
 	cookieBytes, _ := json.Marshal(cookieJSON)
 
-	// passkey/info APIを呼ぶ（「あとで」ボタンと同じリクエスト）
 	params := url.Values{}
 	params.Set("client_id", q.Get("client_id"))
 	params.Set("backto", q.Get("backto"))
@@ -198,7 +186,7 @@ func (c *client) skipPasskey(l loginResponce) error {
 	params.Set("cookie", string(cookieBytes))
 
 	passkeyInfoURL := "https://account-api.bandainamcoid.com/v3/passkey/info?" + params.Encode()
-	skipResp, err := c.httpClient.Get(passkeyInfoURL)
+	skipResp, err := c.HTTPClient.Get(passkeyInfoURL)
 	if err != nil {
 		return err
 	}
@@ -209,7 +197,6 @@ func (c *client) skipPasskey(l loginResponce) error {
 		return err
 	}
 
-	// data.btn.btn-next.urlから「あとで」ボタンのリダイレクト先を取得
 	redirectURL := ""
 	if data, ok := passkeyResp["data"].(map[string]interface{}); ok {
 		if btn, ok := data["btn"].(map[string]interface{}); ok {
@@ -225,27 +212,24 @@ func (c *client) skipPasskey(l loginResponce) error {
 		log.Fatal("passkey/info APIからリダイレクトURLを取得できませんでした")
 	}
 
-	// passkeyInfoProd Cookieをセット（ブラウザのcookie_processingと同等）
 	if cookie, ok := passkeyResp["cookie"].(map[string]interface{}); ok {
 		if pi, ok := cookie["passkey_info"].(map[string]interface{}); ok {
 			if name, ok := pi["name"].(string); ok {
 				if value, ok := pi["value"].(string); ok {
 					accountURL, _ := url.Parse("https://account.bandainamcoid.com/")
-					c.httpClient.Jar.SetCookies(accountURL, []*http.Cookie{{Name: name, Value: value}})
+					c.HTTPClient.Jar.SetCookies(accountURL, []*http.Cookie{{Name: name, Value: value}})
 				}
 			}
 		}
 	}
 
-	// ログインCookieを.bandainamcoid.comドメインにもセット（OAuth URLに送信されるように）
 	bnidURL, _ := url.Parse("https://www.bandainamcoid.com/")
-	c.httpClient.Jar.SetCookies(bnidURL, []*http.Cookie{
+	c.HTTPClient.Jar.SetCookies(bnidURL, []*http.Cookie{
 		{Name: l.Cookie.Common.Name, Value: l.Cookie.Common.Value, Domain: ".bandainamcoid.com", Path: "/"},
 		{Name: l.Cookie.Mnw.Name, Value: l.Cookie.Mnw.Value, Domain: ".bandainamcoid.com", Path: "/"},
 	})
 
-	// OAuth URLにアクセスしてvsmobileのセッションを確立
-	authPage, err := c.httpClient.Get(redirectURL)
+	authPage, err := c.HTTPClient.Get(redirectURL)
 	if err != nil {
 		return err
 	}
@@ -254,12 +238,12 @@ func (c *client) skipPasskey(l loginResponce) error {
 	return nil
 }
 
+// NewCookieJar はログイン済みのCookieJarを返す
 func NewCookieJar(username, password string) (http.CookieJar, error) {
-	c := newClient(username, password)
-	err := c.login()
+	c := NewClient(username, password)
+	err := c.Login()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return c.httpClient.Jar, err
+	return c.HTTPClient.Jar, err
 }

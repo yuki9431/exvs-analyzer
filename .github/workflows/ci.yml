@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Docker Build
-        run: docker build -t scraper-gundam .
+        run: docker build -t exvs-analyzer .
 
   lint-go:
     runs-on: ubuntu-latest
@@ -28,7 +28,7 @@ jobs:
         run: go vet ./...
 
       - name: Go build check
-        run: go build ./...
+        run: go build ./cmd/server
 
   lint-python:
     runs-on: ubuntu-latest
@@ -40,4 +40,4 @@ jobs:
           python-version: "3.11"
 
       - name: Python syntax check
-        run: python -m py_compile analyze.py
+        run: python -m py_compile scripts/analyze.py

@@ -5,30 +5,28 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-COPY *.go ./
-RUN go build -o scraper .
+COPY internal/ internal/
+COPY cmd/ cmd/
+RUN go build -o server ./cmd/server
 
 FROM python:3.11-alpine
 
 WORKDIR /app
 
 # Goバイナリをコピー
-COPY --from=builder /app/scraper .
+COPY --from=builder /app/server .
 
-# Python分析スクリプトとMSリストをコピー
-COPY analyze.py .
-COPY ms_list.json .
+# Python分析スクリプト
+COPY scripts/analyze.py scripts/
+
+# MSリスト
+COPY data/ms_list.json data/
 
 # フロントエンド
 COPY static/ static/
-
-# CLIモード用エントリポイント
-COPY entrypoint.sh .
-RUN chmod +x entrypoint.sh
 
 # Cloud Run はPORT環境変数を設定する
 ENV PORT=8080
 EXPOSE 8080
 
-# デフォルトはサーバーモード
-CMD ["./scraper", "serve"]
+CMD ["./server"]
