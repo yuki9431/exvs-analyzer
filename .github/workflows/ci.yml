@@ -25,6 +25,9 @@ jobs:
       - name: Go vet
         run: go vet ./...
 
+      - name: Go test
+        run: go test ./internal/...
+
       - name: Go build check
         run: go build ./cmd/server
 
