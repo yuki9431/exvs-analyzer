@@ -31,4 +31,6 @@ jobs:
             --image ${{ secrets.GCR_IMAGE }} \
             --region asia-northeast1 \
             --set-env-vars "GCS_BUCKET=${{ secrets.GCS_BUCKET }}" \
+            --max-instances 3 \
+            --concurrency 10 \
             --allow-unauthenticated
