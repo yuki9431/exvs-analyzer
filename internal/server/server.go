@@ -33,10 +33,11 @@ const (
 
 // job はバックグラウンドジョブの情報
 type job struct {
-	ID     string    `json:"id"`
-	Status jobStatus `json:"status"`
-	Report string    `json:"report,omitempty"`
-	Error  string    `json:"error,omitempty"`
+	ID      string    `json:"id"`
+	Status  jobStatus `json:"status"`
+	Message string    `json:"message,omitempty"`
+	Report  string    `json:"report,omitempty"`
+	Error   string    `json:"error,omitempty"`
 }
 
 // ジョブストア（インメモリ）
@@ -81,7 +82,12 @@ func runPipeline(j *job, username, password string) {
 
 	// スクレイピング
 	log.Printf("[INFO] Scraping for user (hash: %s)", storage.UserKey(username))
-	datedScores := scraper.Scraiping(username, password, since)
+	onProgress := func(msg string) {
+		jobsMu.Lock()
+		j.Message = msg
+		jobsMu.Unlock()
+	}
+	datedScores := scraper.Scraping(username, password, since, onProgress)
 	if len(datedScores) == 0 && !exists {
 		setError(j, "no scores found")
 		return
@@ -222,6 +228,9 @@ func StartServer() {
 		resp := map[string]string{
 			"id":     j.ID,
 			"status": string(j.Status),
+		}
+		if j.Message != "" {
+			resp["message"] = j.Message
 		}
 		if j.Error != "" {
 			resp["error"] = j.Error

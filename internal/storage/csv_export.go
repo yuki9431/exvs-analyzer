@@ -68,7 +68,7 @@ func exportAllScoresCSV(ds model.DatedScores, w io.Writer) error {
 
 func scoreToRow(d model.DatedScore) []string {
 	return []string{
-		d.Datatime.Format("2006-01-02 15:04"),
+		d.Datetime.Format("2006-01-02 15:04"),
 		strconv.Itoa(d.PlayerNo),
 		d.PlayerScore.City,
 		d.PlayerScore.Name,
