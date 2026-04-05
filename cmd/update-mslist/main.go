@@ -22,16 +22,39 @@ func main() {
 		outputPath = os.Args[1]
 	}
 
-	log.Println("Scraping MS list...")
-	msList := scraper.ScrapeMSList(username, password)
+	// 既存のMSリストを読み込み（手動追加分を保持するため）
+	existing, err := model.LoadMSList(outputPath)
+	if err != nil {
+		log.Printf("No existing MS list found, starting fresh: %v", err)
+	}
 
-	if len(msList) == 0 {
+	log.Println("Scraping MS list...")
+	scraped := scraper.ScrapeMSList(username, password)
+
+	if len(scraped) == 0 {
 		log.Fatal("No MS data found")
 	}
 
-	if err := model.SaveMSList(msList, outputPath); err != nil {
+	// スクレイピング結果と既存リストをマージ（ImageURLで重複排除）
+	seen := make(map[string]bool)
+	var merged []model.MSInfo
+	for _, ms := range scraped {
+		if !seen[ms.ImageURL] {
+			seen[ms.ImageURL] = true
+			merged = append(merged, ms)
+		}
+	}
+	for _, ms := range existing {
+		if !seen[ms.ImageURL] {
+			seen[ms.ImageURL] = true
+			merged = append(merged, ms)
+		}
+	}
+
+	if err := model.SaveMSList(merged, outputPath); err != nil {
 		log.Fatalf("Failed to save MS list: %v", err)
 	}
 
-	fmt.Printf("Saved %d MS entries to %s\n", len(msList), outputPath)
+	fmt.Printf("Saved %d MS entries (%d scraped + %d kept from existing) to %s\n",
+		len(merged), len(scraped), len(merged)-len(scraped), outputPath)
 }
