@@ -15,11 +15,20 @@ WORKDIR /app
 # Goバイナリをコピー
 COPY --from=builder /app/scraper .
 
-# Python分析スクリプトをコピー
+# Python分析スクリプトとMSリストをコピー
 COPY analyze.py .
+COPY ms_list.json .
 
-# エントリポイント
+# フロントエンド
+COPY static/ static/
+
+# CLIモード用エントリポイント
 COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
-ENTRYPOINT ["./entrypoint.sh"]
+# Cloud Run はPORT環境変数を設定する
+ENV PORT=8080
+EXPOSE 8080
+
+# デフォルトはサーバーモード
+CMD ["./scraper", "serve"]
