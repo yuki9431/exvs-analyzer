@@ -62,21 +62,29 @@
 
     <div class="status" id="status" style="display:none;">
       <span class="spinner"></span>
-      <span id="statusText">戦績を取得中です...（1〜2分かかります）</span>
+      <span id="statusText">準備中...</span>
     </div>
 
     <div class="error" id="error" style="display:none;"></div>
     <div class="report" id="report" style="display:none;"></div>
   </div>
 
-  <!-- マークダウンをHTMLに変換 -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
+    const STATUS_MESSAGES = {
+      pending: '準備中...',
+      scraping: '戦績を取得中...（1〜2分かかります）',
+      analyzing: '分析中...',
+      done: '完了',
+      error: 'エラーが発生しました',
+    };
+
     async function analyze() {
       const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       const btn = document.getElementById('analyzeBtn');
       const status = document.getElementById('status');
+      const statusText = document.getElementById('statusText');
       const error = document.getElementById('error');
       const report = document.getElementById('report');
 
@@ -86,13 +94,14 @@
         return;
       }
 
-      // UI更新
       btn.disabled = true;
       status.style.display = 'block';
+      statusText.textContent = STATUS_MESSAGES.pending;
       error.style.display = 'none';
       report.style.display = 'none';
 
       try {
+        // ジョブ作成
         const res = await fetch('/analyze', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -100,24 +109,52 @@
         });
 
         const data = await res.json();
-
         if (data.error) {
-          error.style.display = 'block';
-          error.textContent = data.error;
-        } else {
-          report.style.display = 'block';
-          report.innerHTML = marked.parse(data.report);
+          throw new Error(data.error);
+        }
+
+        const jobId = data.id;
+
+        // ポーリングで進捗確認
+        while (true) {
+          await new Promise(r => setTimeout(r, 3000));
+
+          const statusRes = await fetch(`/status/${jobId}`);
+          const statusData = await statusRes.json();
+
+          if (statusData.error && statusData.status !== 'error') {
+            throw new Error(statusData.error);
+          }
+
+          statusText.textContent = STATUS_MESSAGES[statusData.status] || statusData.status;
+
+          if (statusData.status === 'error') {
+            throw new Error(statusData.error || '分析に失敗しました');
+          }
+
+          if (statusData.status === 'done') {
+            // レポート取得
+            const resultRes = await fetch(`/result/${jobId}`);
+            const resultData = await resultRes.json();
+
+            if (resultData.error) {
+              throw new Error(resultData.error);
+            }
+
+            report.style.display = 'block';
+            report.innerHTML = marked.parse(resultData.report);
+            break;
+          }
         }
       } catch (e) {
         error.style.display = 'block';
-        error.textContent = 'サーバーとの通信に失敗しました: ' + e.message;
+        error.textContent = e.message;
       } finally {
         btn.disabled = false;
         status.style.display = 'none';
       }
     }
 
-    // Enterキーで送信
     document.getElementById('password').addEventListener('keypress', function(e) {
       if (e.key === 'Enter') analyze();
     });
