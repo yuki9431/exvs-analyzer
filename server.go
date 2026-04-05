@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sync"
 	"time"
 )
 
@@ -84,9 +83,6 @@ func startServer() {
 	if port == "" {
 		port = "8080"
 	}
-
-	var mu sync.Mutex
-	_ = mu
 
 	// ヘルスチェック
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
