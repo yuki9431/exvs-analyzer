@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"sort"
 	"time"
 )
 
@@ -82,8 +83,12 @@ func (ds DatedScores) CheckUnknownMS() {
 	}
 }
 
-// SaveMSList はMSInfoリストをJSONファイルに保存する
+// SaveMSList はMSInfoリストを名前順でソートしてJSONファイルに保存する
 func SaveMSList(msList []MSInfo, path string) error {
+	sort.Slice(msList, func(i, j int) bool {
+		return msList[i].Name < msList[j].Name
+	})
+
 	f, err := os.Create(path)
 	if err != nil {
 		return err
