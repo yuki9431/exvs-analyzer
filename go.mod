@@ -5,6 +5,7 @@ go 1.26
 require (
 	cloud.google.com/go/storage v1.56.0
 	github.com/gocolly/colly/v2 v2.1.0
+	github.com/google/uuid v1.6.0
 )
 
 require (
@@ -35,7 +36,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.14 // indirect
 	github.com/googleapis/gax-go/v2 v2.19.0 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect

@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"errors"
+	"fmt"
 	"math"
 	"regexp"
 	"strconv"
@@ -39,15 +40,25 @@ func dateFormatMonthly(t time.Time) time.Time {
 	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, jst)
 }
 
-// Scraiping はスクレイピング処理を実行し、DatedScoresを返す
-func Scraiping(username, password string, since time.Time) model.DatedScores {
+// ProgressFunc はスクレイピングの進捗を通知するコールバック型
+type ProgressFunc func(message string)
+
+// Scraping はスクレイピング処理を実行し、DatedScoresを返す
+func Scraping(username, password string, since time.Time, onProgress ...ProgressFunc) model.DatedScores {
 	var (
 		scores     model.DatedScores
 		date, hour string
 		wins       []string
 	)
 
+	notify := func(msg string) {
+		if len(onProgress) > 0 && onProgress[0] != nil {
+			onProgress[0](msg)
+		}
+	}
+
 	m := NewClient(username, password)
+	notify("ログイン中...")
 	m.Login()
 
 	rankpage := colly.NewCollector(
@@ -80,6 +91,10 @@ func Scraiping(username, password string, since time.Time) model.DatedScores {
 			if err == nil && !t.After(since) {
 				return
 			}
+		}
+
+		if d, err := time.Parse("2006/01/02 15:04", date+" "+hour); err == nil {
+			notify(fmt.Sprintf("%sの戦歴データを取得中...", d.Format("01/02 15:04")))
 		}
 
 		if e.ChildAttr("a", "class") == "right-arrow vs-detail win" {
@@ -137,7 +152,7 @@ func Scraiping(username, password string, since time.Time) model.DatedScores {
 
 			result := model.DatedScore{
 				PlayerNo: i + 1,
-				Datatime: datatime,
+				Datetime: datatime,
 				PlayerScore: model.PlayerScore{
 					City:           city,
 					Name:           name,
@@ -214,7 +229,7 @@ func getScores(ds model.DatedScores, t time.Time, format func(time.Time) time.Ti
 	var scores model.PlayerScores
 	date := format(t)
 	for _, v := range ds {
-		vd := format(v.Datatime)
+		vd := format(v.Datetime)
 		if vd.Equal(date) {
 			scores = append(scores, v.PlayerScore)
 		}
@@ -272,13 +287,13 @@ func GetDateList(ds model.DatedScores, frequency string) ([]time.Time, error) {
 		var day int
 		switch frequency {
 		case "daily":
-			day = v.Datatime.Day()
+			day = v.Datetime.Day()
 		case "monthly":
 			day = 1
 		default:
 			return nil, errors.New(`ERROR: "daily" or "monthly" is required for the argument`)
 		}
-		d := time.Date(v.Datatime.Year(), v.Datatime.Month(), day, 0, 0, 0, 0, jst)
+		d := time.Date(v.Datetime.Year(), v.Datetime.Month(), day, 0, 0, 0, 0, jst)
 		dates = append(dates, d)
 	}
 
