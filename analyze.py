@@ -182,7 +182,7 @@ def md_basic_stats(data_list):
     if kd < 1.0:
         tips.append(f"K/D比が{kd:.2f}で1.0未満です。撃墜数を増やすか、被撃墜を減らすことを意識しましょう。")
     if tips:
-        lines.append("> **💡 アドバイス:** " + " / ".join(tips))
+        lines.append("> **💡 アドバイス:** " + "<br>".join(tips))
 
     return "\n".join(lines)
 
@@ -223,7 +223,7 @@ def md_win_loss_pattern(data_list):
     if l_taken >= 1100:
         tips.append(f"負け試合の被ダメージが平均{l_taken:.0f}と高いです。無駄な被弾を減らすことが改善の鍵です。")
     if tips:
-        lines.append("> **💡 アドバイス:** " + " / ".join(tips))
+        lines.append("> **💡 アドバイス:** " + "<br>".join(tips))
 
     return "\n".join(lines)
 
@@ -287,7 +287,7 @@ def md_enemy_matchup(data_list, min_matches=3):
             tips.append(f"{names} 戦では与ダメが低いです。攻撃の手数や当て方を工夫しましょう。")
     if tips:
         lines.append("")
-        lines.append("> **💡 アドバイス:** " + " / ".join(tips))
+        lines.append("> **💡 アドバイス:** " + "<br>".join(tips))
 
     return "\n".join(lines)
 
@@ -442,7 +442,7 @@ def md_daily_trend(data_list):
         tips.append(f"最大{max_lose_streak}連敗の記録があります。3連敗したら休憩を挟むことを推奨します。")
     if tips:
         lines.append("")
-        lines.append("> **💡 アドバイス:** " + " / ".join(tips))
+        lines.append("> **💡 アドバイス:** " + "<br>".join(tips))
 
     return "\n".join(lines)
 
@@ -509,10 +509,17 @@ def md_fixed_partners(all_data):
             tips.append(f"相方のダメ効率が{p_eff:.3f}と低めです。相方が狙われやすい展開になっている可能性があります。カットやラインを意識しましょう。")
         if wr < 45 and n >= 5:
             tips.append(f"勝率が{wr:.0f}%と低調です。連携や機体の組み合わせを見直してみましょう。")
-        if wr >= 70 and n >= 5:
-            tips.append(f"勝率{wr:.0f}%と好相性です。この相方との連携を継続しましょう。")
+        if n >= 5:
+            if wr >= 90:
+                tips.append(f"勝率{wr:.0f}%は全国大会レベルです。最高の相方です。")
+            elif wr >= 80:
+                tips.append(f"勝率{wr:.0f}%は最上位レベルです。この相方との連携を大切にしましょう。")
+            elif wr >= 70:
+                tips.append(f"勝率{wr:.0f}%は上位レベルです。好相性の相方です。")
+            elif wr >= 60:
+                tips.append(f"勝率{wr:.0f}%と高めです。この調子を維持しましょう。")
         if tips:
-            lines.append(f"> **💡 アドバイス:** " + " / ".join(tips))
+            lines.append(f"> **💡 アドバイス:** " + "<br>".join(tips))
 
         lines.append("")
 
