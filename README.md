@@ -22,6 +22,7 @@
 │       └── cloud_storage.go     # Cloud Storage連携
 ├── scripts/
 │   ├── analyze.py               # Python分析スクリプト
+│   ├── docker.sh                # Docker操作スクリプト
 │   └── entrypoint.sh            # Docker CLIモード用
 ├── static/
 │   └── index.html               # フロントエンド
@@ -54,11 +55,19 @@
 ## 使い方
 
 ```bash
-docker build -t exvs-analyzer .
-docker run --rm -p 8080:8080 exvs-analyzer
+# ビルド＆起動（初回・コード変更時）
+./scripts/docker.sh restart
+
+# ビルドのみ
+./scripts/docker.sh build
+
+# 起動のみ（ビルド済みの場合）
+./scripts/docker.sh run
 ```
 
 http://localhost:8080 にアクセスしてバンナムIDでログインすると分析レポートが表示されます。
+
+ポートを変更したい場合は `PORT=3000 ./scripts/docker.sh run` のように指定できます。
 
 ## 技術スタック
 
