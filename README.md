@@ -21,8 +21,7 @@
 │       ├── csv_export.go        # CSV読み書き
 │       └── cloud_storage.go     # Cloud Storage連携
 ├── scripts/
-│   ├── analyze.py               # Python分析スクリプト
-│   └── entrypoint.sh            # Docker CLIモード用
+│   └── analyze.py               # Python分析スクリプト
 ├── static/
 │   └── index.html               # フロントエンド
 ├── data/
