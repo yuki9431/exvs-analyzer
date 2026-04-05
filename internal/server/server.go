@@ -8,8 +8,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/yuki9431/exvs-analyzer/internal/model"
 	"github.com/yuki9431/exvs-analyzer/internal/scraper"
 	"github.com/yuki9431/exvs-analyzer/internal/storage"
@@ -18,21 +20,44 @@ import (
 // DefaultMSListPath はデフォルトのMSリストパス
 const DefaultMSListPath = "data/ms_list.json"
 
+// ジョブの状態
+type jobStatus string
+
+const (
+	statusPending   jobStatus = "pending"
+	statusScraping  jobStatus = "scraping"
+	statusAnalyzing jobStatus = "analyzing"
+	statusDone      jobStatus = "done"
+	statusError     jobStatus = "error"
+)
+
+// job はバックグラウンドジョブの情報
+type job struct {
+	ID     string    `json:"id"`
+	Status jobStatus `json:"status"`
+	Report string    `json:"report,omitempty"`
+	Error  string    `json:"error,omitempty"`
+}
+
+// ジョブストア（インメモリ）
+var (
+	jobs   = make(map[string]*job)
+	jobsMu sync.RWMutex
+)
+
 type analyzeRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-type analyzeResponse struct {
-	Report string `json:"report"`
-	Error  string `json:"error,omitempty"`
-}
+// runPipeline はスクレイピング→分析を実行し、レポートを返す
+func runPipeline(j *job, username, password string) {
+	updateStatus(j, statusScraping)
 
-// RunPipeline はスクレイピング→分析を実行し、レポートを返す
-func RunPipeline(username, password string) (string, error) {
 	tmpDir, err := os.MkdirTemp("", "exvs-*")
 	if err != nil {
-		return "", fmt.Errorf("failed to create temp dir: %w", err)
+		setError(j, fmt.Sprintf("failed to create temp dir: %v", err))
+		return
 	}
 	defer os.RemoveAll(tmpDir)
 
@@ -58,7 +83,8 @@ func RunPipeline(username, password string) (string, error) {
 	log.Printf("[INFO] Scraping for user (hash: %s)", storage.UserKey(username))
 	datedScores := scraper.Scraiping(username, password, since)
 	if len(datedScores) == 0 && !exists {
-		return "", fmt.Errorf("no scores found")
+		setError(j, "no scores found")
+		return
 	}
 
 	// 同梱のMSリストから機体名マッピングを読み込み
@@ -73,7 +99,8 @@ func RunPipeline(username, password string) (string, error) {
 
 	// CSV保存（既存データに追記）
 	if err := storage.SaveAllScoresCSV(datedScores, csvPath); err != nil {
-		return "", fmt.Errorf("failed to save CSV: %w", err)
+		setError(j, fmt.Sprintf("failed to save CSV: %v", err))
+		return
 	}
 
 	// Cloud Storageにアップロード
@@ -82,21 +109,42 @@ func RunPipeline(username, password string) (string, error) {
 	}
 
 	// Python分析実行
+	updateStatus(j, statusAnalyzing)
 	cmd := exec.Command("python3", "scripts/analyze.py", csvPath)
 	cmd.Dir = "/app"
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("analysis failed: %w\n%s", err, string(output))
+		setError(j, fmt.Sprintf("analysis failed: %v\n%s", err, string(output)))
+		return
 	}
 
 	// レポート読み込み
 	reportPath := filepath.Join(tmpDir, "report.md")
 	report, err := os.ReadFile(reportPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to read report: %w", err)
+		setError(j, fmt.Sprintf("failed to read report: %v", err))
+		return
 	}
 
-	return string(report), nil
+	jobsMu.Lock()
+	j.Status = statusDone
+	j.Report = string(report)
+	jobsMu.Unlock()
+	log.Printf("[INFO] Job %s completed", j.ID)
+}
+
+func updateStatus(j *job, s jobStatus) {
+	jobsMu.Lock()
+	j.Status = s
+	jobsMu.Unlock()
+}
+
+func setError(j *job, msg string) {
+	jobsMu.Lock()
+	j.Status = statusError
+	j.Error = msg
+	jobsMu.Unlock()
+	log.Printf("[ERROR] Job %s failed: %s", j.ID, msg)
 }
 
 var requestLimiter = make(chan struct{}, 3)
@@ -113,6 +161,7 @@ func StartServer() {
 		fmt.Fprint(w, "ok")
 	})
 
+	// POST /analyze → ジョブ作成、IDを返す
 	http.HandleFunc("/analyze", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -121,34 +170,100 @@ func StartServer() {
 
 		var req analyzeRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			sendError(w, "Invalid request body", http.StatusBadRequest)
+			sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
 			return
 		}
 
 		if req.Username == "" || req.Password == "" {
-			sendError(w, "Username and password are required", http.StatusBadRequest)
+			sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Username and password are required"})
 			return
 		}
 
+		// 同時実行数制限
 		select {
 		case requestLimiter <- struct{}{}:
-			defer func() { <-requestLimiter }()
 		default:
-			sendError(w, "Server is busy, please try again later", http.StatusServiceUnavailable)
+			sendJSON(w, http.StatusServiceUnavailable, map[string]string{"error": "Server is busy, please try again later"})
 			return
 		}
 
-		report, err := RunPipeline(req.Username, req.Password)
-		if err != nil {
-			log.Printf("[ERROR] Pipeline failed: %v", err)
-			sendError(w, "Analysis failed: "+err.Error(), http.StatusInternalServerError)
-			return
+		// ジョブ作成
+		j := &job{
+			ID:     uuid.New().String(),
+			Status: statusPending,
 		}
+		jobsMu.Lock()
+		jobs[j.ID] = j
+		jobsMu.Unlock()
 
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(analyzeResponse{Report: report})
+		// バックグラウンドで実行
+		go func() {
+			defer func() { <-requestLimiter }()
+			runPipeline(j, req.Username, req.Password)
+		}()
+
+		sendJSON(w, http.StatusAccepted, map[string]string{"id": j.ID})
 	})
 
+	// GET /status/{id} → ジョブ状態を返す
+	http.HandleFunc("/status/", func(w http.ResponseWriter, r *http.Request) {
+		id := r.URL.Path[len("/status/"):]
+
+		jobsMu.RLock()
+		j, ok := jobs[id]
+		jobsMu.RUnlock()
+
+		if !ok {
+			sendJSON(w, http.StatusNotFound, map[string]string{"error": "Job not found"})
+			return
+		}
+
+		jobsMu.RLock()
+		resp := map[string]string{
+			"id":     j.ID,
+			"status": string(j.Status),
+		}
+		if j.Error != "" {
+			resp["error"] = j.Error
+		}
+		jobsMu.RUnlock()
+
+		sendJSON(w, http.StatusOK, resp)
+	})
+
+	// GET /result/{id} → レポートを返す
+	http.HandleFunc("/result/", func(w http.ResponseWriter, r *http.Request) {
+		id := r.URL.Path[len("/result/"):]
+
+		jobsMu.RLock()
+		j, ok := jobs[id]
+		jobsMu.RUnlock()
+
+		if !ok {
+			sendJSON(w, http.StatusNotFound, map[string]string{"error": "Job not found"})
+			return
+		}
+
+		jobsMu.RLock()
+		status := j.Status
+		report := j.Report
+		errMsg := j.Error
+		jobsMu.RUnlock()
+
+		if status != statusDone && status != statusError {
+			sendJSON(w, http.StatusAccepted, map[string]string{"status": string(status)})
+			return
+		}
+
+		if status == statusError {
+			sendJSON(w, http.StatusInternalServerError, map[string]string{"error": errMsg})
+			return
+		}
+
+		sendJSON(w, http.StatusOK, map[string]string{"report": report})
+	})
+
+	// 静的ファイル（フロントエンド）
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/", fs)
 
@@ -158,8 +273,8 @@ func StartServer() {
 	}
 }
 
-func sendError(w http.ResponseWriter, msg string, code int) {
+func sendJSON(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(analyzeResponse{Error: msg})
+	json.NewEncoder(w).Encode(data)
 }
