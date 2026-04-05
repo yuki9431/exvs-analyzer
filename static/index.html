@@ -126,7 +126,7 @@
             throw new Error(statusData.error);
           }
 
-          statusText.textContent = STATUS_MESSAGES[statusData.status] || statusData.status;
+          statusText.textContent = statusData.message || STATUS_MESSAGES[statusData.status] || statusData.status;
 
           if (statusData.status === 'error') {
             throw new Error(statusData.error || '分析に失敗しました');
