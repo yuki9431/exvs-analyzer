@@ -1,0 +1,54 @@
+name: Update MS List
+
+on:
+  schedule:
+    - cron: "0 18 * * *"  # 毎日 18:00 UTC（日本時間 03:00）
+  workflow_dispatch:  # 手動実行も可能
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Random delay (0-180 min)
+        run: sleep $((RANDOM % 10800))
+
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.26"
+
+      - name: Run update-mslist
+        env:
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+        run: go run ./cmd/update-mslist
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet data/ms_list.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="auto/update-mslist-$(date +%Y%m%d)"
+          git checkout -b "$BRANCH"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/ms_list.json
+          git commit -m "chore: MSリストを自動更新"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "chore: MSリストを自動更新" \
+            --body "GitHub Actionsによる自動更新です。新機体の追加や名前の変更があれば差分を確認してマージしてください。"
