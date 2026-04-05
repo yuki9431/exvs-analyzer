@@ -12,10 +12,8 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-const (
-	// BucketName はCloud Storageのバケット名
-	BucketName = "exvs2ib-analyzer-data"
-)
+// BucketName は環境変数 GCS_BUCKET から取得するCloud Storageのバケット名
+var BucketName = os.Getenv("GCS_BUCKET")
 
 // UserKey はメールアドレスからユーザー固有のキーを生成する
 func UserKey(email string) string {
