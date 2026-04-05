@@ -1,4 +1,4 @@
-module example.com/m/v2
+module github.com/yuki9431/exvs-analyzer
 
 go 1.26
 

@@ -1,4 +1,4 @@
-package main
+package storage
 
 import (
 	"encoding/csv"
@@ -6,11 +6,13 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/yuki9431/exvs-analyzer/internal/model"
 )
 
-// getLatestDatetime は既存CSVファイルから最新の試合日時を取得する。
+// GetLatestDatetime は既存CSVファイルから最新の試合日時を取得する。
 // ファイルが存在しない場合はゼロ値のtimeを返す。
-func getLatestDatetime(path string) (time.Time, error) {
+func GetLatestDatetime(path string) (time.Time, error) {
 	var latest time.Time
 	layout := "2006-01-02 15:04"
 
@@ -31,7 +33,7 @@ func getLatestDatetime(path string) (time.Time, error) {
 
 	for i, row := range records {
 		if i == 0 || len(row) == 0 {
-			continue // ヘッダースキップ
+			continue
 		}
 		t, err := time.Parse(layout, row[0])
 		if err != nil {
@@ -45,8 +47,7 @@ func getLatestDatetime(path string) (time.Time, error) {
 	return latest, nil
 }
 
-// exportAllScoresCSV writes all DatedScore entries to the provided writer as CSV.
-func exportAllScoresCSV(ds DatedScores, w io.Writer) error {
+func exportAllScoresCSV(ds model.DatedScores, w io.Writer) error {
 	csvw := csv.NewWriter(w)
 	defer csvw.Flush()
 
@@ -56,21 +57,7 @@ func exportAllScoresCSV(ds DatedScores, w io.Writer) error {
 	}
 
 	for _, d := range ds {
-		row := []string{
-			d.Datatime.Format("2006-01-02 15:04"),
-			strconv.Itoa(d.PlayerNo),
-			d.PlayerScore.City,
-			d.PlayerScore.Name,
-			d.PlayerScore.Win,
-			d.PlayerScore.MsName,
-			d.PlayerScore.MsImage,
-			strconv.Itoa(d.PlayerScore.Point),
-			strconv.Itoa(d.PlayerScore.Kills),
-			strconv.Itoa(d.PlayerScore.Deaths),
-			strconv.Itoa(d.PlayerScore.Give_damage),
-			strconv.Itoa(d.PlayerScore.Receive_damage),
-			strconv.Itoa(d.PlayerScore.Ex_damage),
-		}
+		row := scoreToRow(d)
 		if err := csvw.Write(row); err != nil {
 			return err
 		}
@@ -79,10 +66,27 @@ func exportAllScoresCSV(ds DatedScores, w io.Writer) error {
 	return nil
 }
 
+func scoreToRow(d model.DatedScore) []string {
+	return []string{
+		d.Datatime.Format("2006-01-02 15:04"),
+		strconv.Itoa(d.PlayerNo),
+		d.PlayerScore.City,
+		d.PlayerScore.Name,
+		d.PlayerScore.Win,
+		d.PlayerScore.MsName,
+		d.PlayerScore.MsImage,
+		strconv.Itoa(d.PlayerScore.Point),
+		strconv.Itoa(d.PlayerScore.Kills),
+		strconv.Itoa(d.PlayerScore.Deaths),
+		strconv.Itoa(d.PlayerScore.Give_damage),
+		strconv.Itoa(d.PlayerScore.Receive_damage),
+		strconv.Itoa(d.PlayerScore.Ex_damage),
+	}
+}
+
 // SaveAllScoresCSV は既存CSVに新しいレコードのみ追記する。
 // ファイルが存在しない場合は新規作成する。
-func SaveAllScoresCSV(ds DatedScores, path string) error {
-	// ファイルが存在しない場合は新規作成（ヘッダー付き）
+func SaveAllScoresCSV(ds model.DatedScores, path string) error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		f, err := os.Create(path)
 		if err != nil {
@@ -92,12 +96,10 @@ func SaveAllScoresCSV(ds DatedScores, path string) error {
 		return exportAllScoresCSV(ds, f)
 	}
 
-	// 新しいレコードがなければ何もしない
 	if len(ds) == 0 {
 		return nil
 	}
 
-	// 既存ファイルに追記（ヘッダーなし）
 	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
@@ -108,21 +110,7 @@ func SaveAllScoresCSV(ds DatedScores, path string) error {
 	defer csvw.Flush()
 
 	for _, d := range ds {
-		row := []string{
-			d.Datatime.Format("2006-01-02 15:04"),
-			strconv.Itoa(d.PlayerNo),
-			d.PlayerScore.City,
-			d.PlayerScore.Name,
-			d.PlayerScore.Win,
-			d.PlayerScore.MsName,
-			d.PlayerScore.MsImage,
-			strconv.Itoa(d.PlayerScore.Point),
-			strconv.Itoa(d.PlayerScore.Kills),
-			strconv.Itoa(d.PlayerScore.Deaths),
-			strconv.Itoa(d.PlayerScore.Give_damage),
-			strconv.Itoa(d.PlayerScore.Receive_damage),
-			strconv.Itoa(d.PlayerScore.Ex_damage),
-		}
+		row := scoreToRow(d)
 		if err := csvw.Write(row); err != nil {
 			return err
 		}

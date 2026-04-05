@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"encoding/json"
@@ -9,23 +9,27 @@ import (
 	"os/exec"
 	"path/filepath"
 	"time"
+
+	"github.com/yuki9431/exvs-analyzer/internal/model"
+	"github.com/yuki9431/exvs-analyzer/internal/scraper"
+	"github.com/yuki9431/exvs-analyzer/internal/storage"
 )
 
-// analyzeRequest はAPIリクエストのJSON構造
+// DefaultMSListPath はデフォルトのMSリストパス
+const DefaultMSListPath = "data/ms_list.json"
+
 type analyzeRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
-// analyzeResponse はAPIレスポンスのJSON構造
 type analyzeResponse struct {
 	Report string `json:"report"`
 	Error  string `json:"error,omitempty"`
 }
 
-// runPipeline はスクレイピング→分析を実行し、レポートを返す
-func runPipeline(username, password string) (string, error) {
-	// ユーザーごとの一時ディレクトリを作成
+// RunPipeline はスクレイピング→分析を実行し、レポートを返す
+func RunPipeline(username, password string) (string, error) {
 	tmpDir, err := os.MkdirTemp("", "exvs-*")
 	if err != nil {
 		return "", fmt.Errorf("failed to create temp dir: %w", err)
@@ -36,12 +40,12 @@ func runPipeline(username, password string) (string, error) {
 
 	// Cloud Storageから既存CSVをダウンロード
 	var since time.Time
-	exists, err := downloadCSV(username, csvPath)
+	exists, err := storage.DownloadCSV(username, csvPath)
 	if err != nil {
 		log.Printf("[WARN] Failed to download existing CSV: %v", err)
 	}
 	if exists {
-		since, err = getLatestDatetime(csvPath)
+		since, err = storage.GetLatestDatetime(csvPath)
 		if err != nil {
 			log.Printf("[WARN] Failed to read latest datetime: %v", err)
 		}
@@ -51,34 +55,34 @@ func runPipeline(username, password string) (string, error) {
 	}
 
 	// スクレイピング
-	log.Printf("[INFO] Scraping for user (hash: %s)", userKey(username))
-	datedScores := Scraiping(username, password, since)
+	log.Printf("[INFO] Scraping for user (hash: %s)", storage.UserKey(username))
+	datedScores := scraper.Scraiping(username, password, since)
 	if len(datedScores) == 0 && !exists {
 		return "", fmt.Errorf("no scores found")
 	}
 
 	// 同梱のMSリストから機体名マッピングを読み込み
-	msList, err := LoadMSList(defaultMSListPath)
+	msList, err := model.LoadMSList(DefaultMSListPath)
 	if err != nil {
 		log.Printf("[WARN] MS list not found, MS names will be empty")
 	}
 
-	msMap := BuildMSNameMap(msList)
+	msMap := model.BuildMSNameMap(msList)
 	datedScores.FillMsNames(msMap)
 	datedScores.CheckUnknownMS()
 
 	// CSV保存（既存データに追記）
-	if err := SaveAllScoresCSV(datedScores, csvPath); err != nil {
+	if err := storage.SaveAllScoresCSV(datedScores, csvPath); err != nil {
 		return "", fmt.Errorf("failed to save CSV: %w", err)
 	}
 
 	// Cloud Storageにアップロード
-	if err := uploadCSV(username, csvPath); err != nil {
-		log.Printf("[WARN] Failed to upload CSV to GCS: %v", err)
+	if err := storage.UploadCSV(username, csvPath); err != nil {
+		log.Printf("[WARN] Failed to upload CSV to Cloud Storage: %v", err)
 	}
 
 	// Python分析実行
-	cmd := exec.Command("python3", "analyze.py", csvPath)
+	cmd := exec.Command("python3", "scripts/analyze.py", csvPath)
 	cmd.Dir = "/app"
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -95,22 +99,20 @@ func runPipeline(username, password string) (string, error) {
 	return string(report), nil
 }
 
-// requestLimiter は同時リクエスト数を制限する
 var requestLimiter = make(chan struct{}, 3)
 
-func startServer() {
+// StartServer はHTTPサーバーを起動する
+func StartServer() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
-	// ヘルスチェック
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "ok")
 	})
 
-	// 分析API
 	http.HandleFunc("/analyze", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -128,7 +130,6 @@ func startServer() {
 			return
 		}
 
-		// 同時実行数制限
 		select {
 		case requestLimiter <- struct{}{}:
 			defer func() { <-requestLimiter }()
@@ -137,7 +138,7 @@ func startServer() {
 			return
 		}
 
-		report, err := runPipeline(req.Username, req.Password)
+		report, err := RunPipeline(req.Username, req.Password)
 		if err != nil {
 			log.Printf("[ERROR] Pipeline failed: %v", err)
 			sendError(w, "Analysis failed: "+err.Error(), http.StatusInternalServerError)
@@ -148,7 +149,6 @@ func startServer() {
 		json.NewEncoder(w).Encode(analyzeResponse{Report: report})
 	})
 
-	// 静的ファイル（フロントエンド）
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/", fs)
 
