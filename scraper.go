@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"log"
 	"math"
 	"os"
 	"regexp"
@@ -124,6 +125,22 @@ func (ds DatedScores) FillMsNames(msMap map[string]string) {
 		if name, ok := msMap[ds[i].PlayerScore.MsImage]; ok {
 			ds[i].PlayerScore.MsName = name
 		}
+	}
+}
+
+// CheckUnknownMS はMsNameが空のままの機体画像URLをログに出力する
+func (ds DatedScores) CheckUnknownMS() {
+	unknown := make(map[string]int)
+	for _, d := range ds {
+		if d.PlayerScore.MsImage != "" && d.PlayerScore.MsName == "" {
+			unknown[d.PlayerScore.MsImage]++
+		}
+	}
+	for url, count := range unknown {
+		log.Printf("[ALERT] Unknown MS (appeared %d times): %s", count, url)
+	}
+	if len(unknown) > 0 {
+		log.Printf("[ALERT] %d unknown MS found. Run 'update-mslist' or add them to ms_list.json manually.", len(unknown))
 	}
 }
 
