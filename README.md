@@ -1,40 +1,78 @@
-# scraping_gundam_mobile
+# EXVS2IB 戦績分析ツール (exvs-analyzer)
 
-[ガンダムモバイル](https://vsmobile.jp/)からスコアを取得 & 集計するツール
+機動戦士ガンダム EXTREME VS.2 INFINITE BOOST の戦績をスクレイピングし、分析レポートを生成するWebアプリケーション。
 
-## Requirement
-
-- Go 1.24.5 or later
-
-## How to Use
-
-1. Build "scraping_gundam_mobile"
-```
-git clone https://github.com/yuki9431/scraper_gundam_mobile.git
-
-cd scraper_gundam_mobile/
-
-go build -o main
-```
-
-2. Just run it
-
-```sh
-ID=YOUR_EMAIL; PASS=YOUR_PASSWORD
-
-./main $ID $PASS "./path.csv"
-```
-
-## Output sample
+## プロジェクト構成
 
 ```
-2025/11/04 10:58:52 [INFO] Scores successfully saved to ./path.csv
+.
+├── cmd/
+│   └── server/
+│       └── main.go              # エントリポイント（サーバー起動のみ）
+├── internal/
+│   ├── model/
+│   │   └── types.go             # 型定義（PlayerScore, MSInfo等）
+│   ├── scraper/
+│   │   ├── scraper.go           # スクレイピング処理
+│   │   └── login.go             # バンダイナムコIDログイン
+│   ├── server/
+│   │   └── server.go            # HTTPサーバー・API
+│   └── storage/
+│       ├── csv_export.go        # CSV読み書き
+│       └── cloud_storage.go     # Cloud Storage連携
+├── scripts/
+│   ├── analyze.py               # Python分析スクリプト
+│   └── entrypoint.sh            # Docker CLIモード用
+├── static/
+│   └── index.html               # フロントエンド
+├── data/
+│   └── ms_list.json             # 機体名マッピング（261件）
+├── .github/
+│   └── workflows/
+│       └── ci.yml               # CI（Docker build, Go vet, Python構文チェック）
+├── Dockerfile                   # マルチステージビルド
+├── go.mod
+├── go.sum
+├── LICENSE
+└── README.md
 ```
+
+### ディレクトリの役割
+
+| ディレクトリ | 説明 |
+|-------------|------|
+| `cmd/` | エントリポイント。main関数のみ |
+| `internal/` | プライベートパッケージ。外部から参照不可 |
+| `internal/model/` | データ型の定義 |
+| `internal/scraper/` | スクレイピング・ログイン処理 |
+| `internal/server/` | HTTPサーバー・APIエンドポイント |
+| `internal/storage/` | CSV・Cloud Storageの読み書き |
+| `scripts/` | Go以外のスクリプト（Python分析等） |
+| `static/` | フロントエンドHTML/JS |
+| `data/` | 静的データファイル |
+
+## 使い方
+
+```bash
+docker build -t exvs-analyzer .
+docker run --rm -p 8080:8080 exvs-analyzer
+```
+
+http://localhost:8080 にアクセスしてバンナムIDでログインすると分析レポートが表示されます。
+
+## 技術スタック
+
+- **バックエンド**: Go 1.26
+- **分析**: Python 3.11
+- **インフラ**: Cloud Run (GCP)
+- **ストレージ**: Cloud Storage (GCP)
+- **CI**: GitHub Actions
+- **コンテナ**: Docker（マルチステージビルド）
 
 ## Author
 
-[Dillen H. Tomida](https://twitter.com/cafe_yuki)
+Dillen Hiroyuki ([@yuki9431](https://github.com/yuki9431))
 
 ## License
 
-This software is licensed under the MIT license, see [LICENSE](./LICENSE) for more information.
+[Apache License 2.0](LICENSE)
