@@ -3,11 +3,22 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 
 	"github.com/yuki9431/exvs-analyzer/internal/model"
 	"github.com/yuki9431/exvs-analyzer/internal/scraper"
 )
+
+// imageKey はImageURLからクエリパラメータを除去してキーにする
+func imageKey(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	u.RawQuery = ""
+	return u.String()
+}
 
 func main() {
 	username := os.Getenv("USERNAME")
@@ -35,18 +46,20 @@ func main() {
 		log.Fatal("No MS data found")
 	}
 
-	// スクレイピング結果と既存リストをマージ（ImageURLで重複排除）
+	// スクレイピング結果と既存リストをマージ（ImageURLのパス部分で重複排除、クエリパラメータのタイムスタンプ差異を無視）
 	seen := make(map[string]bool)
 	var merged []model.MSInfo
 	for _, ms := range scraped {
-		if !seen[ms.ImageURL] {
-			seen[ms.ImageURL] = true
+		key := imageKey(ms.ImageURL)
+		if !seen[key] {
+			seen[key] = true
 			merged = append(merged, ms)
 		}
 	}
 	for _, ms := range existing {
-		if !seen[ms.ImageURL] {
-			seen[ms.ImageURL] = true
+		key := imageKey(ms.ImageURL)
+		if !seen[key] {
+			seen[key] = true
 			merged = append(merged, ms)
 		}
 	}
