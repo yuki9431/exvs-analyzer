@@ -7,6 +7,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"strings"
+	"time"
 )
 
 const (
@@ -103,7 +104,7 @@ func NewClient(username, password string) *Client {
 		Transport:     http.DefaultTransport,
 		CheckRedirect: http.DefaultClient.CheckRedirect,
 		Jar:           cookieJar,
-		Timeout:       http.DefaultClient.Timeout,
+		Timeout:       30 * time.Second,
 	}
 
 	return c
