@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/mail"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -206,6 +207,12 @@ func StartServer() {
 
 		if req.Username == "" || req.Password == "" {
 			sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Username and password are required"})
+			return
+		}
+
+		// メールアドレス形式チェック
+		if _, err := mail.ParseAddress(req.Username); err != nil {
+			sendJSON(w, http.StatusBadRequest, map[string]string{"error": "有効なメールアドレスを入力してください"})
 			return
 		}
 
