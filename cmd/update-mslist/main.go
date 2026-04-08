@@ -53,6 +53,7 @@ func main() {
 		key := imageKey(ms.ImageURL)
 		if !seen[key] {
 			seen[key] = true
+			ms.ImageURL = key // クエリパラメータ（タイムスタンプ）を除去して保存
 			merged = append(merged, ms)
 		}
 	}
@@ -60,6 +61,7 @@ func main() {
 		key := imageKey(ms.ImageURL)
 		if !seen[key] {
 			seen[key] = true
+			ms.ImageURL = key
 			merged = append(merged, ms)
 		}
 	}

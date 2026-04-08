@@ -3,10 +3,21 @@ package model
 import (
 	"encoding/json"
 	"log"
+	"net/url"
 	"os"
 	"sort"
 	"time"
 )
+
+// stripQuery はURLからクエリパラメータを除去する
+func stripQuery(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	u.RawQuery = ""
+	return u.String()
+}
 
 // MSInfo は機体情報（画像URL → 機体名のマッピング）
 type MSInfo struct {
@@ -49,19 +60,19 @@ type PlayerScores []PlayerScore
 // DatedScores は日付付きスコアのリスト
 type DatedScores []DatedScore
 
-// BuildMSNameMap はMSInfoリストから画像URL→機体名のマップを生成する
+// BuildMSNameMap はMSInfoリストから画像URL→機体名のマップを生成する（クエリパラメータを除去してマッチ）
 func BuildMSNameMap(msList []MSInfo) map[string]string {
 	m := make(map[string]string, len(msList))
 	for _, ms := range msList {
-		m[ms.ImageURL] = ms.Name
+		m[stripQuery(ms.ImageURL)] = ms.Name
 	}
 	return m
 }
 
-// FillMsNames はDatedScoresの各スコアにMsNameをセットする
+// FillMsNames はDatedScoresの各スコアにMsNameをセットする（クエリパラメータを除去してマッチ）
 func (ds DatedScores) FillMsNames(msMap map[string]string) {
 	for i := range ds {
-		if name, ok := msMap[ds[i].PlayerScore.MsImage]; ok {
+		if name, ok := msMap[stripQuery(ds[i].PlayerScore.MsImage)]; ok {
 			ds[i].PlayerScore.MsName = name
 		}
 	}
