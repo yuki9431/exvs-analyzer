@@ -174,6 +174,9 @@ func StartServer() {
 			return
 		}
 
+		// リクエストボディサイズを1KBに制限
+		r.Body = http.MaxBytesReader(w, r.Body, 1024)
+
 		var req analyzeRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
@@ -182,6 +185,12 @@ func StartServer() {
 
 		if req.Username == "" || req.Password == "" {
 			sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Username and password are required"})
+			return
+		}
+
+		// 入力長の制限（メールアドレス: RFC 5321準拠254文字、パスワード: 128文字）
+		if len(req.Username) > 254 || len(req.Password) > 128 {
+			sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Username or password is too long"})
 			return
 		}
 
