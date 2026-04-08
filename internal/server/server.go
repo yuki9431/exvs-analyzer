@@ -36,11 +36,12 @@ const (
 
 // job はバックグラウンドジョブの情報
 type job struct {
-	ID      string    `json:"id"`
-	Status  jobStatus `json:"status"`
-	Message string    `json:"message,omitempty"`
-	Report  string    `json:"report,omitempty"`
-	Error   string    `json:"error,omitempty"`
+	ID          string    `json:"id"`
+	Status      jobStatus `json:"status"`
+	Message     string    `json:"message,omitempty"`
+	Report      string    `json:"report,omitempty"`
+	Error       string    `json:"error,omitempty"`
+	completedAt time.Time
 }
 
 // ジョブストア（インメモリ）
@@ -138,6 +139,7 @@ func runPipeline(j *job, username, password string) {
 	jobsMu.Lock()
 	j.Status = statusDone
 	j.Report = string(report)
+	j.completedAt = time.Now()
 	jobsMu.Unlock()
 	log.Printf("[INFO] Job %s completed", j.ID)
 }
@@ -152,6 +154,7 @@ func setError(j *job, clientMsg, detail string) {
 	jobsMu.Lock()
 	j.Status = statusError
 	j.Error = clientMsg
+	j.completedAt = time.Now()
 	jobsMu.Unlock()
 	log.Printf("[ERROR] Job %s failed: %s", j.ID, detail)
 }
@@ -164,6 +167,9 @@ func StartServer() {
 	if port == "" {
 		port = "8080"
 	}
+
+	// 完了済みジョブの定期クリーンアップ（1時間経過したジョブを削除）
+	go cleanupJobs(1 * time.Hour)
 
 	// レート制限の設定（RATE_LIMIT環境変数: 1時間あたりの最大リクエスト数、0または未設定で無制限）
 	var rl *rateLimiter
@@ -329,6 +335,26 @@ func securityHeaders(next http.Handler) http.Handler {
 		w.Header().Set("Strict-Transport-Security", "max-age=31536000")
 		next.ServeHTTP(w, r)
 	})
+}
+
+// cleanupJobs は完了済みジョブを定期的に削除する
+func cleanupJobs(ttl time.Duration) {
+	ticker := time.NewTicker(ttl)
+	defer ticker.Stop()
+	for range ticker.C {
+		jobsMu.Lock()
+		before := len(jobs)
+		for id, j := range jobs {
+			if !j.completedAt.IsZero() && time.Since(j.completedAt) > ttl {
+				delete(jobs, id)
+			}
+		}
+		after := len(jobs)
+		jobsMu.Unlock()
+		if before != after {
+			log.Printf("[INFO] Job cleanup: %d -> %d jobs", before, after)
+		}
+	}
 }
 
 func sendJSON(w http.ResponseWriter, code int, data interface{}) {
