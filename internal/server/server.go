@@ -57,7 +57,7 @@ func runPipeline(j *job, username, password string) {
 
 	tmpDir, err := os.MkdirTemp("", "exvs-*")
 	if err != nil {
-		setError(j, fmt.Sprintf("failed to create temp dir: %v", err))
+		setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to create temp dir: %v", err))
 		return
 	}
 	defer os.RemoveAll(tmpDir)
@@ -89,7 +89,7 @@ func runPipeline(j *job, username, password string) {
 	}
 	datedScores := scraper.Scraping(username, password, since, onProgress)
 	if len(datedScores) == 0 && !exists {
-		setError(j, "no scores found")
+		setError(j, "戦績データが見つかりませんでした", "no scores found")
 		return
 	}
 
@@ -105,7 +105,7 @@ func runPipeline(j *job, username, password string) {
 
 	// CSV保存（既存データに追記）
 	if err := storage.SaveAllScoresCSV(datedScores, csvPath); err != nil {
-		setError(j, fmt.Sprintf("failed to save CSV: %v", err))
+		setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to save CSV: %v", err))
 		return
 	}
 
@@ -120,7 +120,7 @@ func runPipeline(j *job, username, password string) {
 	cmd.Dir = "/app"
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		setError(j, fmt.Sprintf("analysis failed: %v\n%s", err, string(output)))
+		setError(j, "分析処理に失敗しました", fmt.Sprintf("analysis failed: %v\n%s", err, string(output)))
 		return
 	}
 
@@ -128,7 +128,7 @@ func runPipeline(j *job, username, password string) {
 	reportPath := filepath.Join(tmpDir, "report.md")
 	report, err := os.ReadFile(reportPath)
 	if err != nil {
-		setError(j, fmt.Sprintf("failed to read report: %v", err))
+		setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to read report: %v", err))
 		return
 	}
 
@@ -145,12 +145,12 @@ func updateStatus(j *job, s jobStatus) {
 	jobsMu.Unlock()
 }
 
-func setError(j *job, msg string) {
+func setError(j *job, clientMsg, detail string) {
 	jobsMu.Lock()
 	j.Status = statusError
-	j.Error = msg
+	j.Error = clientMsg
 	jobsMu.Unlock()
-	log.Printf("[ERROR] Job %s failed: %s", j.ID, msg)
+	log.Printf("[ERROR] Job %s failed: %s", j.ID, detail)
 }
 
 var requestLimiter = make(chan struct{}, 3)
