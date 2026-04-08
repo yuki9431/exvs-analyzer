@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/yuki9431/exvs-analyzer/internal/model"
 	"github.com/yuki9431/exvs-analyzer/internal/scraper"
 	"github.com/yuki9431/exvs-analyzer/internal/storage"
+	"golang.org/x/time/rate"
 )
 
 // DefaultMSListPath はデフォルトのMSリストパス
@@ -162,6 +164,16 @@ func StartServer() {
 		port = "8080"
 	}
 
+	// レート制限の設定（RATE_LIMIT環境変数: 1時間あたりの最大リクエスト数、0または未設定で無制限）
+	var rl *rateLimiter
+	if v := os.Getenv("RATE_LIMIT"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			// n回/時間 = n/3600回/秒、バーストはnと同じ
+			rl = newRateLimiter(rate.Limit(float64(n)/3600), n)
+			log.Printf("[INFO] Rate limit enabled: %d requests/hour per IP", n)
+		}
+	}
+
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "ok")
@@ -172,6 +184,15 @@ func StartServer() {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
+		}
+
+		// レート制限チェック
+		if rl != nil {
+			ip := clientIP(r)
+			if !rl.getLimiter(ip).Allow() {
+				sendJSON(w, http.StatusTooManyRequests, map[string]string{"error": "リクエスト回数の上限に達しました。しばらく時間をおいてから再度お試しください"})
+				return
+			}
 		}
 
 		// リクエストボディサイズを1KBに制限
