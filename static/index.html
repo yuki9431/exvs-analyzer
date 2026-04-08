@@ -70,6 +70,7 @@
   </div>
 
   <script src="marked.min.js"></script>
+  <script src="purify.min.js"></script>
   <script>
     const STATUS_MESSAGES = {
       pending: '準備中...',
@@ -142,7 +143,7 @@
             }
 
             report.style.display = 'block';
-            report.innerHTML = marked.parse(resultData.report);
+            report.innerHTML = DOMPurify.sanitize(marked.parse(resultData.report));
             break;
           }
         }
