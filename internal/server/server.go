@@ -286,9 +286,20 @@ func StartServer() {
 	http.Handle("/", fs)
 
 	log.Printf("[INFO] Server starting on port %s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	handler := securityHeaders(http.DefaultServeMux)
+	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		log.Fatalf("[ERROR] Server failed: %v", err)
 	}
+}
+
+// securityHeaders は全レスポンスにセキュリティヘッダーを付与する
+func securityHeaders(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+		w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'")
+		next.ServeHTTP(w, r)
+	})
 }
 
 func sendJSON(w http.ResponseWriter, code int, data interface{}) {
