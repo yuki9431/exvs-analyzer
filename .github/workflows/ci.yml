@@ -42,3 +42,49 @@ jobs:
 
       - name: Python syntax check
         run: python -m py_compile scripts/analyze.py
+
+  validate-mslist:
+    runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.title, 'MSリスト')
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Validate ms_list.json
+        run: |
+          python3 -c "
+          import json, sys
+
+          with open('data/ms_list.json') as f:
+              data = json.load(f)
+
+          # 空でないこと
+          if len(data) == 0:
+              print('ERROR: ms_list.json is empty')
+              sys.exit(1)
+
+          # 必須フィールドチェック
+          for i, ms in enumerate(data):
+              if not ms.get('Name'):
+                  print(f'ERROR: entry {i} has empty Name')
+                  sys.exit(1)
+              if not ms.get('ImageURL'):
+                  print(f'ERROR: entry {i} has empty ImageURL')
+                  sys.exit(1)
+
+          # 機体数が減っていないこと（mainブランチと比較）
+          import subprocess
+          result = subprocess.run(
+              ['git', 'show', 'origin/main:data/ms_list.json'],
+              capture_output=True, text=True
+          )
+          if result.returncode == 0:
+              main_data = json.loads(result.stdout)
+              if len(data) < len(main_data):
+                  print(f'ERROR: MS count decreased ({len(main_data)} -> {len(data)})')
+                  sys.exit(1)
+              print(f'OK: {len(main_data)} -> {len(data)} entries')
+          else:
+              print(f'OK: {len(data)} entries (no main branch to compare)')
+          "
