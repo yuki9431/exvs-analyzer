@@ -25,6 +25,7 @@
     }
     button:hover { background: #81d4fa; }
     button:disabled { background: #333; color: #666; cursor: not-allowed; }
+    .note { margin-top: 16px; font-size: 0.8em; color: #777; line-height: 1.6; }
     .status { text-align: center; margin: 20px 0; color: #aaa; }
     .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #333; border-top: 3px solid #4fc3f7; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -58,6 +59,7 @@
         <input type="password" id="password" placeholder="パスワード">
       </div>
       <button id="analyzeBtn">分析開始</button>
+      <p class="note">公式サイトから直近30日分の戦績を取得して分析します。初回は全データを取得するため5〜10分ほどかかりますが、2回目以降は前回からの差分のみ取得するため短時間で完了します。</p>
     </div>
 
     <div class="status" id="status" style="display:none;">
