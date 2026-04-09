@@ -99,9 +99,9 @@ def get_my_data(match):
     }
 
 
-def detect_fixed_partners(all_data, min_streak=3):
+def detect_fixed_partners(all_data, min_streak=10):
     """連続で同じ相方と組んでいる区間を検出し、固定相方の試合を返す。
-    時系列順で連続3戦以上同じ相方名ならその区間を固定とみなす。
+    時系列順で連続10戦以上同じ相方名ならその区間を固定とみなす。
     """
     sorted_data = sorted(all_data, key=lambda d: d["datetime"])
 
@@ -448,11 +448,11 @@ def md_daily_trend(data_list):
 
 
 def md_fixed_partners(all_data):
-    """固定相方（連続3戦以上）の分析"""
+    """固定相方（連続10戦以上）の分析"""
     fixed = detect_fixed_partners(all_data)
 
     if not fixed:
-        return "固定相方（連続3戦以上）は検出されませんでした。"
+        return "固定相方（連続10戦以上）は検出されませんでした。"
 
     lines = []
     for partner_name in sorted(fixed.keys(), key=lambda x: -len(fixed[x])):
@@ -736,7 +736,7 @@ def main():
         toc.append(f"   - {toc_link('敵機体との相性', '敵機体との相性（' + ms_name + '）')}")
         toc.append(f"   - {toc_link('相方機体との相性', '相方機体との相性（' + ms_name + '）')}")
     n += len(ms_names_for_toc)
-    toc.append(f"{n}. {toc_link('固定相方分析', '固定相方分析（連続3戦以上）')}")
+    toc.append(f"{n}. {toc_link('固定相方分析', '固定相方分析（連続10戦以上）')}")
     toc.append(f"{n+1}. {toc_link('被撃墜数と勝率', '被撃墜数と勝率の関係')}")
     toc.append(f"{n+2}. {toc_link('時間帯別', '時間帯別の勝率')}")
     toc.append(f"{n+3}. {toc_link('曜日別', '曜日別の勝率（平日-vs-土日）')}")
@@ -767,7 +767,7 @@ def main():
         report.append(md_partner(data))
 
     # 固定相方分析
-    report.append("\n---\n\n## 固定相方分析（連続3戦以上）\n")
+    report.append("\n---\n\n## 固定相方分析（連続10戦以上）\n")
     report.append(md_fixed_partners(all_data))
 
     # 被撃墜数と勝率
