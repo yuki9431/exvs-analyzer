@@ -39,6 +39,7 @@ jobs:
           fi
 
       - name: Create PR
+        id: create-pr
         if: steps.diff.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,6 +51,13 @@ jobs:
           git add data/ms_list.json
           git commit -m "chore: MSリストを自動更新"
           git push origin "$BRANCH"
-          gh pr create \
+          PR_URL=$(gh pr create \
             --title "chore: MSリストを自動更新" \
-            --body "GitHub Actionsによる自動更新です。新機体の追加や名前の変更があれば差分を確認してマージしてください。"
+            --body "GitHub Actionsによる自動更新です。CIのバリデーション通過後に自動マージされます。")
+          echo "pr_url=$PR_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Enable auto-merge
+        if: steps.create-pr.outputs.pr_url
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge --auto --merge "${{ steps.create-pr.outputs.pr_url }}"
