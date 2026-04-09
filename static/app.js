@@ -69,7 +69,7 @@ async function analyze() {
         }
 
         report.style.display = 'block';
-        report.innerHTML = DOMPurify.sanitize(marked.parse(resultData.report));
+        report.innerHTML = DOMPurify.sanitize(marked.parse(resultData.report), {ADD_TAGS: ['details', 'summary']});
         report.querySelectorAll('h2, h3').forEach(function(h) {
           h.id = h.textContent.replace(/\s+/g, '-');
         });
