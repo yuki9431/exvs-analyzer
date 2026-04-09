@@ -719,26 +719,51 @@ def main():
     report = []
     report.append(f"# EXVS2IB 戦績分析レポート - 「{player_name}」\n")
 
-    # 全体スタッツ
-    report.append("## 全体スタッツ\n")
+    # 目次
+    def toc_link(label, heading):
+        anchor = heading.replace(" ", "-")
+        return f"[{label}](#{anchor})"
+
+    ms_names_for_toc = [ms for ms in sorted(ms_data.keys(), key=lambda x: -len(ms_data[x])) if len(ms_data[ms]) >= 3]
+    toc = ["<details open><summary><strong>目次</strong></summary>\n"]
+    toc.append(f"1. {toc_link('基本データ', '基本データ')}")
+    n = 2
+    for i, ms_name in enumerate(ms_names_for_toc):
+        ms_count = len(ms_data[ms_name])
+        heading = f"機体別分析:-{ms_name}-({ms_count}戦)"
+        toc.append(f"{n+i}. {toc_link(ms_name + ' (' + str(ms_count) + '戦)', heading)}")
+        toc.append(f"   - {toc_link('基本データ', '基本データ（' + ms_name + '）')}")
+        toc.append(f"   - {toc_link('敵機体との相性', '敵機体との相性（' + ms_name + '）')}")
+        toc.append(f"   - {toc_link('相方機体との相性', '相方機体との相性（' + ms_name + '）')}")
+    n += len(ms_names_for_toc)
+    toc.append(f"{n}. {toc_link('固定相方分析', '固定相方分析（連続3戦以上）')}")
+    toc.append(f"{n+1}. {toc_link('被撃墜数と勝率', '被撃墜数と勝率の関係')}")
+    toc.append(f"{n+2}. {toc_link('時間帯別', '時間帯別の勝率')}")
+    toc.append(f"{n+3}. {toc_link('曜日別', '曜日別の勝率（平日-vs-土日）')}")
+    toc.append(f"{n+4}. {toc_link('日別推移', '日別勝率推移')}")
+    toc.append(f"{n+5}. {toc_link('シーズン別', 'シーズン別分析')}")
+    toc.append(f"{n+6}. {toc_link('総合アドバイス', '総合アドバイス')}")
+    toc.append("\n</details>")
+    report.append("\n".join(toc))
+
+    # 基本データ
+    report.append("\n\n---\n\n## 基本データ\n")
     report.append(md_basic_stats(all_data))
     report.append("\n### 勝ち/負け時のダメージ傾向\n")
     report.append(md_win_loss_pattern(all_data))
 
     # 機体別分析
-    for ms_name in sorted(ms_data.keys(), key=lambda x: -len(ms_data[x])):
+    for ms_name in ms_names_for_toc:
         data = ms_data[ms_name]
-        if len(data) < 3:
-            continue
 
         report.append(f"\n---\n\n## 機体別分析: {ms_name} ({len(data)}戦)\n")
-        report.append("### 基本スタッツ\n")
+        report.append(f"### 基本データ（{ms_name}）\n")
         report.append(md_basic_stats(data))
-        report.append("\n### 勝ち/負け時のダメージ傾向\n")
+        report.append(f"\n### 勝ち/負け時のダメージ傾向（{ms_name}）\n")
         report.append(md_win_loss_pattern(data))
-        report.append("\n### 敵機体との相性\n")
+        report.append(f"\n### 敵機体との相性（{ms_name}）\n")
         report.append(md_enemy_matchup(data))
-        report.append("\n### 相方機体との相性\n")
+        report.append(f"\n### 相方機体との相性（{ms_name}）\n")
         report.append(md_partner(data))
 
     # 固定相方分析
