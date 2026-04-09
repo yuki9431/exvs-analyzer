@@ -108,9 +108,14 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 	})
 
 	dailypage.OnHTML("div.block.control", func(e *colly.HTMLElement) {
+		// 「>」(次へ)ボタンは末尾から2番目のリンク
 		links := e.ChildAttrs("ul.clearfix > li > a", "href")
-		link := links[len(links)-1]
-		dailypage.Visit(link)
+		if len(links) >= 2 {
+			nextLink := links[len(links)-2]
+			if nextLink != "javascript:void(0);" {
+				dailypage.Visit(nextLink)
+			}
+		}
 	})
 
 	detailpage.OnHTML("div.panel_area", func(e *colly.HTMLElement) {

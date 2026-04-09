@@ -243,8 +243,8 @@ def md_enemy_matchup(data_list, min_matches=3):
             avg_taken = avg([d["dmg_taken"] for d in matches])
             results.append((ms, len(matches), wr, eff, avg_given, avg_taken))
 
-    strong = sorted([r for r in results if r[2] >= 60], key=lambda x: -x[2])
-    weak = sorted([r for r in results if r[2] <= 40], key=lambda x: x[2])
+    strong = sorted([r for r in results if r[2] >= 60], key=lambda x: -x[1])
+    weak = sorted([r for r in results if r[2] <= 40], key=lambda x: -x[1])
     even = sorted([r for r in results if 40 < r[2] < 60], key=lambda x: -x[1])
 
     header_row = "| 機体名 | 試合 | 勝率 | ダメ効率 | 与ダメ | 被ダメ |"
@@ -304,7 +304,7 @@ def md_partner(data_list, min_matches=3):
             eff = dmg_efficiency(matches)
             results.append((ms, len(matches), wr, eff))
 
-    results.sort(key=lambda x: -x[2])
+    results.sort(key=lambda x: -x[1])
     lines = [
         "| 相方機体 | 試合 | 勝率 | ダメ効率 |",
         "|----------|------|------|----------|",
