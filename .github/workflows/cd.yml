@@ -65,7 +65,20 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v3
 
       - name: Build and push image
-        run: gcloud builds submit --tag ${{ secrets.GCR_IMAGE }}
+        run: |
+          IMAGE="${{ secrets.GCR_IMAGE }}:${{ github.sha }}"
+          gcloud builds submit --tag "$IMAGE"
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+      - name: Update Pulumi image config
+        working-directory: infra
+        run: |
+          npm install -g @pulumi/pulumi 2>/dev/null || true
+          pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
+          pulumi stack select dev
+          pulumi config set exvs-analyzer:image "$IMAGE" --secret
+        env:
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 
       - name: Deploy with Pulumi
         uses: pulumi/actions@v6
