@@ -713,14 +713,11 @@ def md_advice(all_data, ms_data):
         data = cost_groups[cost]
         fatal = COST_FATAL_DEATHS[cost]
         label = COST_LABEL[cost]
-        fatal_matches = [d for d in data if d["deaths"] >= fatal]
-        safe_matches = [d for d in data if d["deaths"] < fatal]
-        safe_wr = win_rate(safe_matches) if safe_matches else 0
-        if fatal_matches:
-            rate = len(fatal_matches) / len(data) * 100
+        fatal_losses = [d for d in data if d["deaths"] >= fatal and not d["win"]]
+        if fatal_losses:
+            rate = len(fatal_losses) / len(data) * 100
             advices.append(
-                f"**{label}**で負け確定({fatal}落ち)に達した試合が全体の{rate:.0f}%({len(fatal_matches)}/{len(data)}戦)。"
-                f"{fatal-1}落ち以内の勝率は**{safe_wr:.1f}%**です。"
+                f"使用機体が{label}の時に、{fatal}落ちで敗北した試合が全体の{rate:.0f}%({len(fatal_losses)}/{len(data)}戦)"
             )
 
     for ms_name, data in ms_data.items():
