@@ -15,23 +15,38 @@ jobs:
       pull-requests: write
 
     steps:
+      - name: Check required secrets
+        id: check-secrets
+        run: |
+          if [ -z "${{ secrets.PULUMI_STATE_BUCKET }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::PULUMI_STATE_BUCKET is not set. Skipping preview."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/checkout@v6
+        if: steps.check-secrets.outputs.skip != 'true'
 
       - uses: actions/setup-node@v4
+        if: steps.check-secrets.outputs.skip != 'true'
         with:
           node-version: "22"
 
       - name: Install dependencies
+        if: steps.check-secrets.outputs.skip != 'true'
         working-directory: infra
         run: npm ci
 
       - id: auth
+        if: steps.check-secrets.outputs.skip != 'true'
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       - uses: pulumi/actions@v6
+        if: steps.check-secrets.outputs.skip != 'true'
         with:
           command: preview
           work-dir: infra
