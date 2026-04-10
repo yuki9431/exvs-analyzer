@@ -79,6 +79,7 @@ async function analyze() {
           table.parentNode.insertBefore(wrap, table);
           wrap.appendChild(table);
         });
+        showShareButton(resultData.report);
         break;
       }
     }
@@ -89,6 +90,63 @@ async function analyze() {
     btn.disabled = false;
     status.style.display = 'none';
   }
+}
+
+function buildShareText(items) {
+  var lines = ['【EXVS2XB 戦績診断】'];
+  for (var i = 0; i < items.length; i++) {
+    var item = items[i];
+    if (item.type === 'top_ms') {
+      lines.push('🤖 最多使用: ' + item.ms + '（' + item.count + '戦）');
+    } else if (item.type === 'strong_enemy') {
+      lines.push('💪 ' + item.enemy + '相手に勝率' + item.wr + '%！');
+    } else if (item.type === 'weak_enemy') {
+      lines.push('😈 ' + item.enemy + 'に勝率' + item.wr + '%...天敵かも');
+    } else if (item.type === 'dmg_efficiency') {
+      var desc = item.value >= 1.0 ? '与ダメが上回ってます' : '被ダメが上回ってます';
+      lines.push('⚔ ' + item.ms + 'の与被ダメ比: ' + item.value + '（' + desc + '）');
+    }
+  }
+  lines.push('');
+  lines.push('▶ 自分も診断してみる');
+  lines.push(location.origin);
+  lines.push('#EXVS2XB');
+  return lines.join('\n');
+}
+
+function showShareButton(markdown) {
+  var existing = document.getElementById('shareArea');
+  if (existing) existing.remove();
+
+  var match = markdown.match(/<!-- SHARE_DATA:(.*?) -->/);
+  if (!match) return;
+
+  var items;
+  try { items = JSON.parse(match[1]); } catch (e) { return; }
+  if (!items.length) return;
+
+  var text = buildShareText(items);
+  var xUrl = 'https://x.com/intent/tweet?text=' + encodeURIComponent(text);
+
+  var area = document.createElement('div');
+  area.id = 'shareArea';
+  area.className = 'share-area';
+  area.innerHTML =
+    '<a href="' + xUrl + '" target="_blank" rel="noopener" class="share-btn share-x">Xで共有</a>' +
+    '<button class="share-btn share-copy" onclick="copyShareText()">テキストをコピー</button>';
+  area.dataset.shareText = text;
+
+  document.getElementById('report').before(area);
+}
+
+function copyShareText() {
+  var area = document.getElementById('shareArea');
+  if (!area) return;
+  navigator.clipboard.writeText(area.dataset.shareText).then(function() {
+    var btn = area.querySelector('.share-copy');
+    btn.textContent = 'コピーしました！';
+    setTimeout(function() { btn.textContent = 'テキストをコピー'; }, 2000);
+  });
 }
 
 document.getElementById('analyzeBtn').addEventListener('click', analyze);
