@@ -199,6 +199,98 @@ def wins_losses(data_list):
 # ========== マークダウン出力関数 ==========
 
 
+def md_cost_pair(data_list, min_matches=3):
+    """自機コスト+相方コストの組み合わせ別勝率"""
+    pairs = defaultdict(list)
+    for d in data_list:
+        my_cost = d.get("ms_cost", 0)
+        partner_cost = d.get("partner_cost", 0)
+        if my_cost and partner_cost:
+            key = f"{my_cost}+{partner_cost}"
+            pairs[key].append(d)
+
+    results = []
+    for pair, matches in pairs.items():
+        if len(matches) >= min_matches:
+            wr = win_rate(matches)
+            eff = dmg_efficiency(matches)
+            results.append((pair, len(matches), wr, eff))
+
+    results.sort(key=lambda x: -x[1])
+    lines = [
+        "| コスト編成 | 試合 | 勝率 | 与被ダメ比 |",
+        "|------------|------|------|----------|",
+    ]
+    for pair, n, wr, eff in results:
+        lines.append(f"| {pair} | {n} | {wr:.1f}% | {eff:.3f} |")
+    return "\n".join(lines)
+
+
+def md_dmg_contribution(data_list, min_matches=3):
+    """ダメージ貢献率（自分の与ダメ / チーム合計与ダメ）"""
+    # 全体の貢献率
+    contribs = []
+    for d in data_list:
+        team_total = d["dmg_given"] + d["partner_dmg_given"]
+        if team_total > 0:
+            contribs.append(d["dmg_given"] / team_total * 100)
+    avg_contrib = sum(contribs) / len(contribs) if contribs else 0
+
+    # 勝ち/負け別
+    win_contribs = []
+    lose_contribs = []
+    for d in data_list:
+        team_total = d["dmg_given"] + d["partner_dmg_given"]
+        if team_total > 0:
+            c = d["dmg_given"] / team_total * 100
+            if d["win"]:
+                win_contribs.append(c)
+            else:
+                lose_contribs.append(c)
+
+    avg_win = sum(win_contribs) / len(win_contribs) if win_contribs else 0
+    avg_lose = sum(lose_contribs) / len(lose_contribs) if lose_contribs else 0
+
+    lines = [
+        f"- 平均ダメージ貢献率: **{avg_contrib:.1f}%**（チーム与ダメに占める自分の割合）",
+        f"- 勝ち試合: {avg_win:.1f}% / 負け試合: {avg_lose:.1f}%",
+        "",
+    ]
+
+    # コスト帯別
+    cost_groups = defaultdict(list)
+    for d in data_list:
+        cost = d.get("ms_cost", 0)
+        if cost in COST_LABEL:
+            cost_groups[cost].append(d)
+
+    if len(cost_groups) > 1 or any(len(v) >= min_matches for v in cost_groups.values()):
+        lines.append("| コスト | 試合 | 貢献率 | 勝ち時 | 負け時 |")
+        lines.append("|--------|------|--------|--------|--------|")
+        for cost in sorted(cost_groups.keys(), reverse=True):
+            data = cost_groups[cost]
+            if len(data) < min_matches:
+                continue
+            c_all = []
+            c_win = []
+            c_lose = []
+            for d in data:
+                team_total = d["dmg_given"] + d["partner_dmg_given"]
+                if team_total > 0:
+                    c = d["dmg_given"] / team_total * 100
+                    c_all.append(c)
+                    if d["win"]:
+                        c_win.append(c)
+                    else:
+                        c_lose.append(c)
+            a = sum(c_all) / len(c_all) if c_all else 0
+            w = sum(c_win) / len(c_win) if c_win else 0
+            l = sum(c_lose) / len(c_lose) if c_lose else 0
+            lines.append(f"| {COST_LABEL[cost]} | {len(data)} | {a:.1f}% | {w:.1f}% | {l:.1f}% |")
+
+    return "\n".join(lines)
+
+
 def md_basic_stats(data_list):
     n = len(data_list)
     w, l = wins_losses(data_list)
@@ -713,13 +805,11 @@ def md_advice(all_data, ms_data):
         data = cost_groups[cost]
         fatal = COST_FATAL_DEATHS[cost]
         label = COST_LABEL[cost]
-        fatal_matches = [d for d in data if d["deaths"] >= fatal]
-        if fatal_matches:
-            rate = len(fatal_matches) / len(data) * 100
-            wr = win_rate(fatal_matches)
+        fatal_losses = [d for d in data if d["deaths"] >= fatal and not d["win"]]
+        if fatal_losses:
+            rate = len(fatal_losses) / len(data) * 100
             advices.append(
-                f"**{label}**で{fatal}落ち以上の試合が{rate:.0f}%あり、その勝率は{wr:.0f}%です。"
-                f"**{fatal-1}落ち以内に抑えることが勝率改善のポイント**です。"
+                f"使用機体が{label}の時に、{fatal}落ちで敗北した試合が全体の{rate:.0f}%({len(fatal_losses)}/{len(data)}戦)"
             )
 
     for ms_name, data in ms_data.items():
@@ -959,12 +1049,14 @@ def main():
         toc.append(f"   - {toc_link('敵機体との相性', '敵機体との相性（' + ms_name + '）')}")
         toc.append(f"   - {toc_link('相方機体との相性', '相方機体との相性（' + ms_name + '）')}")
     n += len(ms_names_for_toc)
-    toc.append(f"{n}. {toc_link('固定相方分析', '固定相方分析（連続10戦以上）')}")
-    toc.append(f"{n+1}. {toc_link('被撃墜数と勝率', '被撃墜数と勝率の関係')}")
-    toc.append(f"{n+2}. {toc_link('時間帯別', '時間帯別の勝率')}")
-    toc.append(f"{n+3}. {toc_link('曜日別', '曜日別の勝率（平日-vs-土日）')}")
-    toc.append(f"{n+4}. {toc_link('日別推移', '日別勝率推移')}")
-    toc.append(f"{n+5}. {toc_link('シーズン別', 'シーズン別分析')}")
+    toc.append(f"{n}. {toc_link('コスト編成別勝率', 'コスト編成別勝率')}")
+    toc.append(f"{n+1}. {toc_link('ダメージ貢献率', 'ダメージ貢献率')}")
+    toc.append(f"{n+2}. {toc_link('固定相方分析', '固定相方分析（連続10戦以上）')}")
+    toc.append(f"{n+3}. {toc_link('被撃墜数と勝率', '被撃墜数と勝率の関係')}")
+    toc.append(f"{n+4}. {toc_link('時間帯別', '時間帯別の勝率')}")
+    toc.append(f"{n+5}. {toc_link('曜日別', '曜日別の勝率（平日-vs-土日）')}")
+    toc.append(f"{n+6}. {toc_link('日別推移', '日別勝率推移')}")
+    toc.append(f"{n+7}. {toc_link('シーズン別', 'シーズン別分析')}")
     toc.append("\n</details>")
     report.append("\n".join(toc))
 
@@ -982,7 +1074,7 @@ def main():
     for ms_name in ms_names_for_toc:
         data = ms_data[ms_name]
 
-        report.append(f"\n---\n\n## 機体別分析: {ms_name} ({len(data)}戦)\n")
+        report.append(f"\n---\n\n<details><summary><strong>機体別分析: {ms_name} ({len(data)}戦)</strong></summary>\n")
         report.append(f"### 基本データ（{ms_name}）\n")
         report.append(md_basic_stats(data))
         report.append(f"\n### 勝ち/負け時のダメージ傾向（{ms_name}）\n")
@@ -991,6 +1083,15 @@ def main():
         report.append(md_enemy_matchup(data))
         report.append(f"\n### 相方機体との相性（{ms_name}）\n")
         report.append(md_partner(data))
+        report.append("\n</details>")
+
+    # コスト編成別勝率
+    report.append("\n---\n\n## コスト編成別勝率\n")
+    report.append(md_cost_pair(all_data))
+
+    # ダメージ貢献率
+    report.append("\n## ダメージ貢献率\n")
+    report.append(md_dmg_contribution(all_data))
 
     # 固定相方分析
     report.append("\n---\n\n## 固定相方分析（連続10戦以上）\n")
