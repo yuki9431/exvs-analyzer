@@ -8,5 +8,5 @@ export const repository = new gcp.artifactregistry.Repository(repoName, {
   repositoryId: repoName,
   location: gcp.config.region!,
   format: "DOCKER",
-  description: "EXVS Analyzer Docker images",
+  description: "Cloud Run Source Deployments",
 });
