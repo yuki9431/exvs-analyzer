@@ -3,6 +3,7 @@ name: CD
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   check-deploy-label:
@@ -38,7 +39,7 @@ jobs:
 
   deploy:
     needs: check-deploy-label
-    if: needs.check-deploy-label.outputs.no-deploy != 'true'
+    if: github.event_name == 'workflow_dispatch' || needs.check-deploy-label.outputs.no-deploy != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
