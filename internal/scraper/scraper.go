@@ -189,34 +189,55 @@ func ScrapeMSList(username, password string) []model.MSInfo {
 	m := NewClient(username, password)
 	m.Login()
 
-	c := colly.NewCollector(
-		colly.AllowedDomains(vsmobile),
-	)
-	c.SetCookieJar(m.HTTPClient.Jar)
-
-	c.OnHTML("li.item div.ds-fx.fx-va-s.fx-hz-s", func(e *colly.HTMLElement) {
-		imageURL := e.ChildAttr("img.item-icon-img", "data-original")
-		name := strings.TrimSpace(e.ChildText("div.prompt-area > p.fz-s"))
-
-		if imageURL != "" && name != "" && !seen[imageURL] {
-			seen[imageURL] = true
-			msList = append(msList, model.MSInfo{
-				Name:     name,
-				ImageURL: imageURL,
-			})
-		}
+	// まずCSRFトークンを取得
+	var csrfToken string
+	tokenCollector := colly.NewCollector(colly.AllowedDomains(vsmobile))
+	tokenCollector.SetCookieJar(m.HTTPClient.Jar)
+	tokenCollector.OnHTML("input[name=_token]", func(e *colly.HTMLElement) {
+		csrfToken = e.Attr("value")
 	})
+	tokenCollector.Visit(mobileMSUsedRate)
 
-	c.OnHTML("div.page-send ul.clearfix", func(e *colly.HTMLElement) {
-		nextLinks := e.ChildAttrs("li > a", "href")
-		for _, link := range nextLinks {
-			if link != "javascript:void(0);" {
-				c.Visit(e.Request.AbsoluteURL(link))
+	// 各コストでPOSTしてMS一覧を取得
+	costs := []int{3000, 2500, 2000, 1500}
+	for _, cost := range costs {
+		currentCost := cost
+
+		c := colly.NewCollector(
+			colly.AllowedDomains(vsmobile),
+		)
+		c.SetCookieJar(m.HTTPClient.Jar)
+
+		c.OnHTML("li.item div.ds-fx.fx-va-s.fx-hz-s", func(e *colly.HTMLElement) {
+			imageURL := e.ChildAttr("img.item-icon-img", "data-original")
+			name := strings.TrimSpace(e.ChildText("div.prompt-area > p.fz-s"))
+
+			if imageURL != "" && name != "" && !seen[imageURL] {
+				seen[imageURL] = true
+				msList = append(msList, model.MSInfo{
+					Name:     name,
+					ImageURL: imageURL,
+					Cost:     currentCost,
+				})
 			}
-		}
-	})
+		})
 
-	c.Visit(mobileMSUsedRate)
+		c.OnHTML("div.page-send ul.clearfix", func(e *colly.HTMLElement) {
+			nextLinks := e.ChildAttrs("li > a", "href")
+			for _, link := range nextLinks {
+				if link != "javascript:void(0);" {
+					c.Visit(e.Request.AbsoluteURL(link))
+				}
+			}
+		})
+
+		c.Post(mobileMSUsedRate, map[string]string{
+			"_token":   csrfToken,
+			"cost":     fmt.Sprintf("%d", currentCost),
+			"category": "1",
+		})
+	}
+
 	return msList
 }
 

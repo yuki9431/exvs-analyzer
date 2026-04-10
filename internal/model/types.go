@@ -23,6 +23,7 @@ func stripQuery(rawURL string) string {
 type MSInfo struct {
 	Name     string
 	ImageURL string
+	Cost     int `json:",omitempty"`
 }
 
 // PlayerScore はスコア
@@ -95,7 +96,16 @@ func (ds DatedScores) CheckUnknownMS() {
 }
 
 // MergeMSList はスクレイピング結果と既存リストをマージする（ImageURLのパス部分で重複排除、クエリパラメータを除去）
+// 既存データの色違い機体（同名・別URL）を保持し、コスト情報を名前ベースで補完する
 func MergeMSList(scraped, existing []MSInfo) []MSInfo {
+	// スクレイピング結果から名前→コストのマップを作成
+	costByName := make(map[string]int)
+	for _, ms := range scraped {
+		if ms.Cost > 0 {
+			costByName[ms.Name] = ms.Cost
+		}
+	}
+
 	seen := make(map[string]bool)
 	var merged []MSInfo
 	for _, ms := range scraped {
@@ -111,6 +121,12 @@ func MergeMSList(scraped, existing []MSInfo) []MSInfo {
 		if !seen[key] {
 			seen[key] = true
 			ms.ImageURL = key
+			// 既存データにコストがなければ名前ベースで補完
+			if ms.Cost == 0 {
+				if cost, ok := costByName[ms.Name]; ok {
+					ms.Cost = cost
+				}
+			}
 			merged = append(merged, ms)
 		}
 	}
