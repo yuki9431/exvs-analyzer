@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/url"
 	"os"
+	"sort"
 
 	"github.com/yuki9431/exvs-analyzer/internal/model"
 	"github.com/yuki9431/exvs-analyzer/internal/scraper"
@@ -65,6 +66,14 @@ func main() {
 			merged = append(merged, ms)
 		}
 	}
+
+	// 名前→ImageURLの順でソートし、毎回同じ順番で出力する
+	sort.Slice(merged, func(i, j int) bool {
+		if merged[i].Name != merged[j].Name {
+			return merged[i].Name < merged[j].Name
+		}
+		return merged[i].ImageURL < merged[j].ImageURL
+	})
 
 	if err := model.SaveMSList(merged, outputPath); err != nil {
 		log.Fatalf("Failed to save MS list: %v", err)
