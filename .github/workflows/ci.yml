@@ -5,7 +5,24 @@ on:
     branches: [main]
 
 jobs:
+  check-labels:
+    runs-on: ubuntu-latest
+    outputs:
+      skip-ci: ${{ steps.labels.outputs.skip-ci }}
+    steps:
+      - name: Check PR labels
+        id: labels
+        run: |
+          LABELS='${{ toJSON(github.event.pull_request.labels.*.name) }}'
+          if echo "$LABELS" | grep -q '"skip-ci"'; then
+            echo "skip-ci=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip-ci=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build:
+    needs: check-labels
+    if: needs.check-labels.outputs.skip-ci != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -14,6 +31,8 @@ jobs:
         run: docker build -t exvs-analyzer .
 
   lint-go:
+    needs: check-labels
+    if: needs.check-labels.outputs.skip-ci != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -32,6 +51,8 @@ jobs:
         run: go build ./cmd/server
 
   lint-python:
+    needs: check-labels
+    if: needs.check-labels.outputs.skip-ci != 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
