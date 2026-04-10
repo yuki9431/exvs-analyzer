@@ -714,12 +714,13 @@ def md_advice(all_data, ms_data):
         fatal = COST_FATAL_DEATHS[cost]
         label = COST_LABEL[cost]
         fatal_matches = [d for d in data if d["deaths"] >= fatal]
+        safe_matches = [d for d in data if d["deaths"] < fatal]
+        safe_wr = win_rate(safe_matches) if safe_matches else 0
         if fatal_matches:
             rate = len(fatal_matches) / len(data) * 100
-            wr = win_rate(fatal_matches)
             advices.append(
-                f"**{label}**で{fatal}落ち以上の試合が{rate:.0f}%あり、その勝率は{wr:.0f}%です。"
-                f"**{fatal-1}落ち以内に抑えることが勝率改善のポイント**です。"
+                f"**{label}**で負け確定({fatal}落ち)に達した試合が全体の{rate:.0f}%({len(fatal_matches)}/{len(data)}戦)。"
+                f"{fatal-1}落ち以内の勝率は**{safe_wr:.1f}%**です。"
             )
 
     for ms_name, data in ms_data.items():
