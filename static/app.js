@@ -164,7 +164,9 @@ function copyShareText() {
   });
 }
 
-document.getElementById('analyzeBtn').addEventListener('click', analyze);
-document.getElementById('password').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') analyze();
-});
+if (document.getElementById('analyzeBtn')) {
+  document.getElementById('analyzeBtn').addEventListener('click', analyze);
+  document.getElementById('password').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') analyze();
+  });
+}
