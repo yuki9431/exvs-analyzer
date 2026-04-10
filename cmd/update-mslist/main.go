@@ -3,23 +3,11 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/url"
 	"os"
-	"sort"
 
 	"github.com/yuki9431/exvs-analyzer/internal/model"
 	"github.com/yuki9431/exvs-analyzer/internal/scraper"
 )
-
-// imageKey はImageURLからクエリパラメータを除去してキーにする
-func imageKey(rawURL string) string {
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		return rawURL
-	}
-	u.RawQuery = ""
-	return u.String()
-}
 
 func main() {
 	username := os.Getenv("USERNAME")
@@ -34,7 +22,6 @@ func main() {
 		outputPath = os.Args[1]
 	}
 
-	// 既存のMSリストを読み込み（手動追加分を保持するため）
 	existing, err := model.LoadMSList(outputPath)
 	if err != nil {
 		log.Printf("No existing MS list found, starting fresh: %v", err)
@@ -47,33 +34,7 @@ func main() {
 		log.Fatal("No MS data found")
 	}
 
-	// スクレイピング結果と既存リストをマージ（ImageURLのパス部分で重複排除、クエリパラメータのタイムスタンプ差異を無視）
-	seen := make(map[string]bool)
-	var merged []model.MSInfo
-	for _, ms := range scraped {
-		key := imageKey(ms.ImageURL)
-		if !seen[key] {
-			seen[key] = true
-			ms.ImageURL = key // クエリパラメータ（タイムスタンプ）を除去して保存
-			merged = append(merged, ms)
-		}
-	}
-	for _, ms := range existing {
-		key := imageKey(ms.ImageURL)
-		if !seen[key] {
-			seen[key] = true
-			ms.ImageURL = key
-			merged = append(merged, ms)
-		}
-	}
-
-	// 名前→ImageURLの順でソートし、毎回同じ順番で出力する
-	sort.Slice(merged, func(i, j int) bool {
-		if merged[i].Name != merged[j].Name {
-			return merged[i].Name < merged[j].Name
-		}
-		return merged[i].ImageURL < merged[j].ImageURL
-	})
+	merged := model.MergeMSList(scraped, existing)
 
 	if err := model.SaveMSList(merged, outputPath); err != nil {
 		log.Fatalf("Failed to save MS list: %v", err)
