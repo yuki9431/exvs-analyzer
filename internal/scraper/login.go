@@ -2,7 +2,7 @@ package scraper
 
 import (
 	"encoding/json"
-	"log"
+	"fmt"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -126,27 +126,26 @@ func (c *Client) Login() error {
 
 	loginPage, err := c.HTTPClient.PostForm(loginURL, v)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("ログインリクエストに失敗: %w", err)
 	}
 	defer loginPage.Body.Close()
 
 	var l loginResponse
-	err = json.NewDecoder(loginPage.Body).Decode(&l)
-	if err != nil {
-		log.Fatal(err)
+	if err := json.NewDecoder(loginPage.Body).Decode(&l); err != nil {
+		return fmt.Errorf("ログインレスポンスの解析に失敗: %w", err)
 	}
 
 	if strings.Contains(l.RedirectUrl, "passkey") {
-		err = c.skipPasskey(l)
-	} else {
-		authPage, err := c.HTTPClient.Get(l.RedirectUrl)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer authPage.Body.Close()
+		return c.skipPasskey(l)
 	}
 
-	return err
+	authPage, err := c.HTTPClient.Get(l.RedirectUrl)
+	if err != nil {
+		return fmt.Errorf("認証リダイレクトに失敗: %w", err)
+	}
+	defer authPage.Body.Close()
+
+	return nil
 }
 
 func (c *Client) skipPasskey(l loginResponse) error {
@@ -210,7 +209,7 @@ func (c *Client) skipPasskey(l loginResponse) error {
 	}
 
 	if redirectURL == "" {
-		log.Fatal("passkey/info APIからリダイレクトURLを取得できませんでした")
+		return fmt.Errorf("passkey/info APIからリダイレクトURLを取得できませんでした")
 	}
 
 	if cookie, ok := passkeyResp["cookie"].(map[string]interface{}); ok {
@@ -242,9 +241,8 @@ func (c *Client) skipPasskey(l loginResponse) error {
 // NewCookieJar はログイン済みのCookieJarを返す
 func NewCookieJar(username, password string) (http.CookieJar, error) {
 	c := NewClient(username, password)
-	err := c.Login()
-	if err != nil {
-		log.Fatal(err)
+	if err := c.Login(); err != nil {
+		return nil, fmt.Errorf("ログインに失敗: %w", err)
 	}
-	return c.HTTPClient.Jar, err
+	return c.HTTPClient.Jar, nil
 }
