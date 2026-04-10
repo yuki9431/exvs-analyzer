@@ -1,6 +1,5 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
-import { service } from "./cloudrun";
 
 const config = new pulumi.Config();
 const domain = config.require("domain");
@@ -25,32 +24,9 @@ export const dnsZone = new gcp.dns.ManagedZone(
   { dependsOn: [dnsApi] }
 );
 
-// Cloud Runドメインマッピング（wwwサブドメイン）
-export const domainMapping = new gcp.cloudrun.DomainMapping(
-  "exvs-analyzer-domain",
-  {
-    location: gcp.config.region!,
-    name: domain,
-    metadata: {
-      namespace: gcp.config.project!,
-    },
-    spec: {
-      routeName: service.name,
-    },
-  }
-);
-
-// DomainMappingが返すDNSレコード
-export const dnsRecords = domainMapping.statuses.apply((statuses) => {
-  const records = (statuses || []).flatMap((s) =>
-    (s.resourceRecords || []).map((r) => ({
-      type: r.type,
-      name: r.name,
-      rrdata: r.rrdata,
-    }))
-  );
-  return records;
-});
-
 // ネームサーバー（お名前.comに設定する値）
 export const nameServers = dnsZone.nameServers;
+
+// TODO: Step 2 - お名前.comでNSレコード設定後にDomainMappingを有効化
+// import { service } from "./cloudrun";
+// export const domainMapping = new gcp.cloudrun.DomainMapping(...)
