@@ -13,3 +13,4 @@ config:
     secure: v1:t/btXxy5q94Z048L:UYbSe5mE/EkbOjVkfKLyvFGYbq0=
   exvs-analyzer:image:
     secure: v1:M0xwOizR13d1hFXd:NNKu4x2RQ5y20QPaE9b+/zhsh4MWfRFdWzTCQz6erSt0wboyLy8TT44PsFxNJM0q7vLeJ18=
+  exvs-analyzer:domain: www.exvs-analyzer.com
