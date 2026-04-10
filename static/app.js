@@ -126,14 +126,19 @@ function showShareButton(markdown) {
   if (!items.length) return;
 
   var text = buildShareText(items);
-  var xUrl = 'https://x.com/intent/tweet?text=' + encodeURIComponent(text);
+  var encoded = encodeURIComponent(text);
+  var xUrl = 'https://x.com/intent/tweet?text=' + encoded;
+  var bskyUrl = 'https://bsky.app/intent/compose?text=' + encoded;
+  var lineUrl = 'https://line.me/R/share?text=' + encoded;
 
   var area = document.createElement('div');
   area.id = 'shareArea';
   area.className = 'share-area';
   area.innerHTML =
-    '<a href="' + xUrl + '" target="_blank" rel="noopener" class="share-btn share-x">Xで共有</a>' +
-    '<button class="share-btn share-copy" onclick="copyShareText()">テキストをコピー</button>';
+    '<a href="' + xUrl + '" target="_blank" rel="noopener" class="share-btn share-x">X</a>' +
+    '<a href="' + bskyUrl + '" target="_blank" rel="noopener" class="share-btn share-bsky">Bluesky</a>' +
+    '<a href="' + lineUrl + '" target="_blank" rel="noopener" class="share-btn share-line">LINE</a>' +
+    '<button class="share-btn share-copy" onclick="copyShareText()">コピー</button>';
   area.dataset.shareText = text;
 
   document.getElementById('report').before(area);
