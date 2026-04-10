@@ -1,1046 +1,1307 @@
 [
   {
     "Name": "Ex-Sガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/39e3a220856be1fdfb5c032639f8aa9450ba5c68dab76c4796fd02d1cd9fafbb65e79dd17434ebb4481b28ded7b100dec5ef8d785b5158a4e53464c6a9fbe2c0.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/39e3a220856be1fdfb5c032639f8aa9450ba5c68dab76c4796fd02d1cd9fafbb65e79dd17434ebb4481b28ded7b100dec5ef8d785b5158a4e53464c6a9fbe2c0.jpg",
+    "Cost": 3000
   },
   {
     "Name": "G-アルケイン（フルドレス）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6c0d6a0fbc62ec1326346e9c7d34fc8ca184d1368a807cd410004199cd721b9e5f266b60fcdd18aae5885dbcab4acae310f4b65e376f29c532f3bc468b070b47.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6c0d6a0fbc62ec1326346e9c7d34fc8ca184d1368a807cd410004199cd721b9e5f266b60fcdd18aae5885dbcab4acae310f4b65e376f29c532f3bc468b070b47.jpg",
+    "Cost": 2000
   },
   {
     "Name": "G-セルフ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/78f17a55d3f6f980264121b48461a133b7553fd4b48e258b529e9f3ecb454c6ac511258687aa6836606ac254f9d91212a823851e0a7abb640b47c129ea01f24d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/78f17a55d3f6f980264121b48461a133b7553fd4b48e258b529e9f3ecb454c6ac511258687aa6836606ac254f9d91212a823851e0a7abb640b47c129ea01f24d.jpg",
+    "Cost": 2500
   },
   {
     "Name": "G-セルフ（パーフェクトパック）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2b74d89a19ee066c4545785d5bbf0a7bb16496430f446621ac25368c7b98c7cf13c955a9de90f7e36652261dc509e682bcb6030cf10328ee51ba4ef4627a43b3.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2b74d89a19ee066c4545785d5bbf0a7bb16496430f446621ac25368c7b98c7cf13c955a9de90f7e36652261dc509e682bcb6030cf10328ee51ba4ef4627a43b3.jpg",
+    "Cost": 3000
   },
   {
     "Name": "G-ルシファー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d7ea2db1864ebc601702af8ddb3e41aec80b2fd4bfa3ae93a494cfdc439341e8eafd28d66e1297bcbae04d3f6d2f4cbfa524b27a80a2336b531cb481984b5840.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d7ea2db1864ebc601702af8ddb3e41aec80b2fd4bfa3ae93a494cfdc439341e8eafd28d66e1297bcbae04d3f6d2f4cbfa524b27a80a2336b531cb481984b5840.jpg",
+    "Cost": 1500
   },
   {
     "Name": "GQuuuuuuX",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a4caf5eb7a3a340f4d140369e55fa316913a202bf6fe48140fe7e43f4a1f194d3cfa66e64ac782a40d192b9699c2029dc044077ce44947db88153d704906af18.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a4caf5eb7a3a340f4d140369e55fa316913a202bf6fe48140fe7e43f4a1f194d3cfa66e64ac782a40d192b9699c2029dc044077ce44947db88153d704906af18.jpg",
+    "Cost": 2500
   },
   {
     "Name": "Hi-νガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/62a75204f574b9db77911de03e58dd5d0364510a8d249d8aeba761ff8be6a9f72ed997d01bcab687fdb84fead77391e30559538a52672a3ec1da4fee3054ae0e.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/62a75204f574b9db77911de03e58dd5d0364510a8d249d8aeba761ff8be6a9f72ed997d01bcab687fdb84fead77391e30559538a52672a3ec1da4fee3054ae0e.jpg",
+    "Cost": 3000
   },
   {
     "Name": "N-EXTREMEガンダム エクスプロージョン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a65c5e74857124bdcf57f15435568b2baf028a7d3e0af92198089d8d436feec7bee7f9a10da43a570effaafb3d1aedefcb11bc106084c005d762bb17c82bb5c3.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a65c5e74857124bdcf57f15435568b2baf028a7d3e0af92198089d8d436feec7bee7f9a10da43a570effaafb3d1aedefcb11bc106084c005d762bb17c82bb5c3.jpg",
+    "Cost": 3000
   },
   {
     "Name": "N-EXTREMEガンダム エクスプロージョン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/eeba4d3aa00003500783850ca69a44d49c5432c982755f098c754715b7cee30c7f4f29bd8f0208ddfa89e3d6c374a6cf525c46c96aecc158033d7b7c00a2e3e3.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/eeba4d3aa00003500783850ca69a44d49c5432c982755f098c754715b7cee30c7f4f29bd8f0208ddfa89e3d6c374a6cf525c46c96aecc158033d7b7c00a2e3e3.jpg",
+    "Cost": 3000
   },
   {
     "Name": "N-EXTREMEガンダム ザナドゥ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/3a7b6bf890286e12ebced6342d372780013debc15fca07c7f8aeecbd36ae603a676f798f0cc9719df6f1486656493313afadcda1c3a252d1be4e93defeb776b6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/3a7b6bf890286e12ebced6342d372780013debc15fca07c7f8aeecbd36ae603a676f798f0cc9719df6f1486656493313afadcda1c3a252d1be4e93defeb776b6.jpg",
+    "Cost": 2000
   },
   {
     "Name": "N-EXTREMEガンダム ザナドゥ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/482bd88b762e39a9a91e4f856a143d322be20ba2cd872e1e50fea74c0c7c978c4d7b0a99d52ad8a273342fc7ffbc22dd6038e9bc6e442f2163fd429dbd2f480b.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/482bd88b762e39a9a91e4f856a143d322be20ba2cd872e1e50fea74c0c7c978c4d7b0a99d52ad8a273342fc7ffbc22dd6038e9bc6e442f2163fd429dbd2f480b.jpg",
+    "Cost": 2000
   },
   {
     "Name": "N-EXTREMEガンダム スプレマシー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/67d67aad452178bb348da31aaab787d246f5ea55e62a2947da707088d59fa8ee203a173c22d11a05f52c87898bcc450bac35f7c5fe166db41485767e489ab126.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/67d67aad452178bb348da31aaab787d246f5ea55e62a2947da707088d59fa8ee203a173c22d11a05f52c87898bcc450bac35f7c5fe166db41485767e489ab126.jpg",
+    "Cost": 1500
   },
   {
     "Name": "N-EXTREMEガンダム スプレマシー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/cef84bddb93ee5d13fbb9c899ca12c953ba4da2e954809a444a1bce603c257ed3023578034109ab9c2c8b5de5eeb2faeeac5abdd923abb01eb5881b890687fc2.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/cef84bddb93ee5d13fbb9c899ca12c953ba4da2e954809a444a1bce603c257ed3023578034109ab9c2c8b5de5eeb2faeeac5abdd923abb01eb5881b890687fc2.jpg",
+    "Cost": 1500
   },
   {
     "Name": "N-EXTREMEガンダム ヴィシャス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/553b157bbe6e3d00171d886bc1d72050f0bce00f546028967edb5ce9d8c72bdfc3f13b96479c7992e5e009e91e708c22dcc4f3790244cfd6aaca079a87e7cf7f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/553b157bbe6e3d00171d886bc1d72050f0bce00f546028967edb5ce9d8c72bdfc3f13b96479c7992e5e009e91e708c22dcc4f3790244cfd6aaca079a87e7cf7f.jpg",
+    "Cost": 2500
   },
   {
     "Name": "N-EXTREMEガンダム ヴィシャス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c29ffff216d4ef844e3e8da9cdc8d739a6ee1abda8cf7fbb7e6cd3b3204e1a5f8cc0fadb46d7b0c6038024e499b2ca91125a20d5bae10e37a8398325a9c8ed6b.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c29ffff216d4ef844e3e8da9cdc8d739a6ee1abda8cf7fbb7e6cd3b3204e1a5f8cc0fadb46d7b0c6038024e499b2ca91125a20d5bae10e37a8398325a9c8ed6b.jpg",
+    "Cost": 2500
   },
   {
     "Name": "RX-93ff νガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6423c3ac6bdf7c9cff7ea9f7ff4c2c04f49e6a3d09cd8a980caa71edc8feed77c767a3e5924170dbec47b423c3cd8d2afcb0b45ebc41f3d004b2b7acbdcb7832.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6423c3ac6bdf7c9cff7ea9f7ff4c2c04f49e6a3d09cd8a980caa71edc8feed77c767a3e5924170dbec47b423c3cd8d2afcb0b45ebc41f3d004b2b7acbdcb7832.jpg",
+    "Cost": 3000
   },
   {
     "Name": "RX-零丸",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/87cd891d158b8ec95934cbdf2790838c69c894a8743b30b7c0f7886c10492ed323153dd02306956269f3d3d1efba91e8839bb913ecf78e958815f07b8b67d6a0.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/87cd891d158b8ec95934cbdf2790838c69c894a8743b30b7c0f7886c10492ed323153dd02306956269f3d3d1efba91e8839bb913ecf78e958815f07b8b67d6a0.jpg",
+    "Cost": 2500
   },
   {
     "Name": "TX-ff104 アリュゼウス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4b535492c24c055fe7b660edfb1029594485d75267f6345a9aefb25364e21f49ce8d61dcb731e908e0252c94856e932e41d23b44dfceda69b3327b9af206c52c.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4b535492c24c055fe7b660edfb1029594485d75267f6345a9aefb25364e21f49ce8d61dcb731e908e0252c94856e932e41d23b44dfceda69b3327b9af206c52c.jpg",
+    "Cost": 2500
   },
   {
     "Name": "V2ガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/28a0f8a5ea6351cb7b23c39c14118356743dad53f5fea23c924083bfee24703bd86bed4e236beb3465e5ecc7b4874c4b8238e7e71737134e7c147c8ed2289ca5.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/28a0f8a5ea6351cb7b23c39c14118356743dad53f5fea23c924083bfee24703bd86bed4e236beb3465e5ecc7b4874c4b8238e7e71737134e7c147c8ed2289ca5.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ZZガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/48b670428aae8194ef21133065165ccf6235c389de1115a7d85d15f30a57df3b2b38e4a92c9131dca2f9a40f64cf59578868d3754d0835a9100bf8a558b733e1.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/48b670428aae8194ef21133065165ccf6235c389de1115a7d85d15f30a57df3b2b38e4a92c9131dca2f9a40f64cf59578868d3754d0835a9100bf8a558b733e1.jpg",
+    "Cost": 2500
   },
   {
     "Name": "Zガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/5d576860fe42499a9b769f1e8ce3fe20dd9553c9875c1ca0c0c042823e132a245c0b5b3d01e5ff88051c1f6f62d770bc916b1b060c843806e505cca4e7c11244.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/5d576860fe42499a9b769f1e8ce3fe20dd9553c9875c1ca0c0c042823e132a245c0b5b3d01e5ff88051c1f6f62d770bc916b1b060c843806e505cca4e7c11244.jpg",
+    "Cost": 2500
   },
   {
     "Name": "Zガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6566ff2c8414f3b307a9f408c45be0ca82365212c7f12325242bef3626cb435e3bd8b25f3968cf929ed9819279aa1e35a95f3f7f2c93e5471c7a6549e935c6ff.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6566ff2c8414f3b307a9f408c45be0ca82365212c7f12325242bef3626cb435e3bd8b25f3968cf929ed9819279aa1e35a95f3f7f2c93e5471c7a6549e935c6ff.jpg",
+    "Cost": 2500
   },
   {
     "Name": "Zガンダム（ルー搭乗）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/55009fb975adff94325e662676c254cd1e6b4bb09110dbc35c3b591832e4d89576869972c39ca29df452998e1f4090ac6bce256c3d12b6058514e42d546133a6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/55009fb975adff94325e662676c254cd1e6b4bb09110dbc35c3b591832e4d89576869972c39ca29df452998e1f4090ac6bce256c3d12b6058514e42d546133a6.jpg",
+    "Cost": 2000
   },
   {
     "Name": "Ξガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/1d8fdca12f34c3e2b4290a2471a91e16e76cccce7c641bb48e7dc2b07454818609bedbf83a95423ebda5fd61a67e78bf570532cb0d494e04ec857c301c8d3b9d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/1d8fdca12f34c3e2b4290a2471a91e16e76cccce7c641bb48e7dc2b07454818609bedbf83a95423ebda5fd61a67e78bf570532cb0d494e04ec857c301c8d3b9d.jpg",
+    "Cost": 3000
   },
   {
     "Name": "νガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b55420748f34c8b6a659149725c2d01881d140284489e1c14048dff77d431dde557de20650694447692415f9ccc5edef676bbb1c5d9d81fb44b566af992969d7.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b55420748f34c8b6a659149725c2d01881d140284489e1c14048dff77d431dde557de20650694447692415f9ccc5edef676bbb1c5d9d81fb44b566af992969d7.jpg",
+    "Cost": 3000
   },
   {
     "Name": "νガンダムHWS",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/75523e27d1744730b9bb924e5693ebadc37e9ad4546b0b29e56ede68ad10f1fdc0e59387050bdea70ee625e339940275deaa0edc903ef4864edb4cb4645fb7c5.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/75523e27d1744730b9bb924e5693ebadc37e9ad4546b0b29e56ede68ad10f1fdc0e59387050bdea70ee625e339940275deaa0edc903ef4864edb4cb4645fb7c5.jpg",
+    "Cost": 3000
   },
   {
     "Name": "∀ガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ae8ddebee752a6138529b13c9c05c632eebaa8906ced0d7093eeeda7c8780544f9ddd6e82ff4c67f7d38f50233a0c082c5a6b06513f7f612262372c86bad48c7.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ae8ddebee752a6138529b13c9c05c632eebaa8906ced0d7093eeeda7c8780544f9ddd6e82ff4c67f7d38f50233a0c082c5a6b06513f7f612262372c86bad48c7.jpg",
+    "Cost": 3000
   },
   {
     "Name": "アカツキ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a15c8e0fc07f6bea660f9f369822475b589af44cc01f2492266c0ff73b6c3e489cf731c97305cfefdb36a85316360b3d3b5eaa98517d47100b267bca33c7dc2a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a15c8e0fc07f6bea660f9f369822475b589af44cc01f2492266c0ff73b6c3e489cf731c97305cfefdb36a85316360b3d3b5eaa98517d47100b267bca33c7dc2a.jpg",
+    "Cost": 2500
   },
   {
     "Name": "アストレイゴールドフレーム天",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e6eb7badc9c731fec0c78f1eeb89193ac414208de7a9073712a72c8484fcc7251646c25e3b8c6d53b6d5d271b53b929717c145c1ab3f3107700131ebeca00f65.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e6eb7badc9c731fec0c78f1eeb89193ac414208de7a9073712a72c8484fcc7251646c25e3b8c6d53b6d5d271b53b929717c145c1ab3f3107700131ebeca00f65.jpg",
+    "Cost": 2000
   },
   {
     "Name": "アストレイゴールドフレーム天ミナ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/bc14c1605c7f26cd28834bc151c138a59513f66b440eb2619df4bf65dfd8ffeadb79e6fad65ee78b3626b7d7104b629156fc3666c596c34c6e5ec405021388b8.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/bc14c1605c7f26cd28834bc151c138a59513f66b440eb2619df4bf65dfd8ffeadb79e6fad65ee78b3626b7d7104b629156fc3666c596c34c6e5ec405021388b8.jpg",
+    "Cost": 2500
   },
   {
     "Name": "アストレイブルーフレームD",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/623fdfd7c8f1403cd58eeada33a60fadbda9091c74216d9c52477c3ac178e48408cd3ace652158fcf49f37285ce8fc3e82b5982943dbe3d85de66a28423db25e.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/623fdfd7c8f1403cd58eeada33a60fadbda9091c74216d9c52477c3ac178e48408cd3ace652158fcf49f37285ce8fc3e82b5982943dbe3d85de66a28423db25e.jpg",
+    "Cost": 2500
   },
   {
     "Name": "アストレイブルーフレームセカンドL",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/195723b3f5c8cb01bd7a5dc5dcddd700a9d99a2ebf07033b85b276a58999b84cd7729bfe870068f2b91ef0d0156fd6b3c58b5d3744cdcd6c6e42c3c698e34275.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/195723b3f5c8cb01bd7a5dc5dcddd700a9d99a2ebf07033b85b276a58999b84cd7729bfe870068f2b91ef0d0156fd6b3c58b5d3744cdcd6c6e42c3c698e34275.jpg",
+    "Cost": 2000
   },
   {
     "Name": "アストレイレッドフレーム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/5998ff21e25d3a13e6333687061e2732138acd5cb0cb20be578c5ce9f72935666079c8a657b1de739e5c656042bac8c432900875bc1f2f5ee945b5129adcd747.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/5998ff21e25d3a13e6333687061e2732138acd5cb0cb20be578c5ce9f72935666079c8a657b1de739e5c656042bac8c432900875bc1f2f5ee945b5129adcd747.jpg",
+    "Cost": 2000
   },
   {
     "Name": "アストレイレッドフレーム改",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/984daa0b3a0a03aa3f7803917c76ed17ddebf3750b64d35b147aaadb8f0595f68123033a53699bab5bd72834738f05c809d7e62a4d4d837669b591f2eed57e38.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/984daa0b3a0a03aa3f7803917c76ed17ddebf3750b64d35b147aaadb8f0595f68123033a53699bab5bd72834738f05c809d7e62a4d4d837669b591f2eed57e38.jpg",
+    "Cost": 2500
   },
   {
     "Name": "アストレイレッドフレーム（レッドドラゴン）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9f30ec8540b8bbe710cdb88ac4dd7b9372643c46f9dcc7fa3e9b785b15c3e3939c0f13ce2dae6dd1ec6c572acaa805405ff5a45985caa0184091d2603e648810.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9f30ec8540b8bbe710cdb88ac4dd7b9372643c46f9dcc7fa3e9b785b15c3e3939c0f13ce2dae6dd1ec6c572acaa805405ff5a45985caa0184091d2603e648810.jpg",
+    "Cost": 2500
   },
   {
     "Name": "アッガイ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a5982e6b91ce1c678e824fad80ae9371135f4fecd31829106f13f0db8efade35b899f53270f9705f248bc9020c390c22f46951dfa67aff8f1d51f745afd9e2e4.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a5982e6b91ce1c678e824fad80ae9371135f4fecd31829106f13f0db8efade35b899f53270f9705f248bc9020c390c22f46951dfa67aff8f1d51f745afd9e2e4.jpg",
+    "Cost": 1500
   },
   {
     "Name": "アッガイ（ダリル搭乗）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/112da368272324014e02691621c02621fad991e3c8062faf783d01caab4cf31ee64a6429648fb715a5bdae07ed45d61f3c896613d900176071c989f7b3b3479d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/112da368272324014e02691621c02621fad991e3c8062faf783d01caab4cf31ee64a6429648fb715a5bdae07ed45d61f3c896613d900176071c989f7b3b3479d.jpg",
+    "Cost": 2000
   },
   {
     "Name": "アッガイ（ハマーン搭乗）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9f34f0b1ba184af012f12282bd570bcc8ef2dea43d66868c9dc5c306dfc4b1897eafe05f19eb8c8efffcdb3d5a1cdf4eea3eb97981442c21cb81e8b7457c36c2.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9f34f0b1ba184af012f12282bd570bcc8ef2dea43d66868c9dc5c306dfc4b1897eafe05f19eb8c8efffcdb3d5a1cdf4eea3eb97981442c21cb81e8b7457c36c2.jpg",
+    "Cost": 2000
   },
   {
     "Name": "アトラスガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4943087e22616f3f1a4e7e800655c6378fca1f8bf8137b544a0e3becec98aafda9feda5e7caabddf2609418c8d25196fe11feb019c2f0e705a811174836174d2.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4943087e22616f3f1a4e7e800655c6378fca1f8bf8137b544a0e3becec98aafda9feda5e7caabddf2609418c8d25196fe11feb019c2f0e705a811174836174d2.jpg",
+    "Cost": 2500
   },
   {
     "Name": "アヘッド脳量子波対応型（スマルトロン）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/377d55a259dffaab84ff31f1ea1b7fcc4fafa406febc6f9a048d1a63734ff64b3e8943b2c5e94eb830da07a9f1250c1023aceb482b7b5dc26c3908ec5b1fa90f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/377d55a259dffaab84ff31f1ea1b7fcc4fafa406febc6f9a048d1a63734ff64b3e8943b2c5e94eb830da07a9f1250c1023aceb482b7b5dc26c3908ec5b1fa90f.jpg",
+    "Cost": 1500
   },
   {
     "Name": "アリオスガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ea6bea3af73c5696bbb8ba710cf5a3b7a6c0dcfe15ff0edf831c00f92240751c104d36cc12158127f6d19a461e5c7ed22c2eed2a9925929b70ef2eb74b312545.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ea6bea3af73c5696bbb8ba710cf5a3b7a6c0dcfe15ff0edf831c00f92240751c104d36cc12158127f6d19a461e5c7ed22c2eed2a9925929b70ef2eb74b312545.jpg",
+    "Cost": 2500
   },
   {
     "Name": "アルケーガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/587cc1d927def7103bffe9118b1f2f98f907cae0cb14f8260e0987915f9528c17e639e048facd809d71894de1a9f3147d039beea480d1354849072c106e4a602.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/587cc1d927def7103bffe9118b1f2f98f907cae0cb14f8260e0987915f9528c17e639e048facd809d71894de1a9f3147d039beea480d1354849072c106e4a602.jpg",
+    "Cost": 2500
   },
   {
     "Name": "アルトロンガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/229ec67f2f7a948038276000b17c65f7472a138715527aebab651ca029e6367bce0e929b586e3bc00520f6e864bc0a720291f84307d5a9429e697920dd9d6b79.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/229ec67f2f7a948038276000b17c65f7472a138715527aebab651ca029e6367bce0e929b586e3bc00520f6e864bc0a720291f84307d5a9429e697920dd9d6b79.jpg",
+    "Cost": 2500
   },
   {
     "Name": "アレックス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/019e8b749a286c6e8da7ce5bdff12af4d62e5b2eab3e3099e3e91969d66d9d68b4339fde9eac22d69ae8d28fb7cfa6d5bafb4fa563e6c54a86e5da97dafbb1fd.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/019e8b749a286c6e8da7ce5bdff12af4d62e5b2eab3e3099e3e91969d66d9d68b4339fde9eac22d69ae8d28fb7cfa6d5bafb4fa563e6c54a86e5da97dafbb1fd.jpg",
+    "Cost": 1500
   },
   {
     "Name": "アレックス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f5d2787e1a412af31e68a8d1c2922b8e35efba962c4e8775db890123a2746a0840b9b18bdaf2f16cc797298a22cd6233fc06abc4ae9bd41e05d90d3e1c46655a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f5d2787e1a412af31e68a8d1c2922b8e35efba962c4e8775db890123a2746a0840b9b18bdaf2f16cc797298a22cd6233fc06abc4ae9bd41e05d90d3e1c46655a.jpg",
+    "Cost": 1500
   },
   {
     "Name": "アヴァランチエクシア",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/16b86a816709a44345a2b2871757361fad8901f8e557fbdf97f4cd5199ddaebff992deeddc5c5528bd020f319c267431567bbfb1c00b84c4168c1ea48a219d6a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/16b86a816709a44345a2b2871757361fad8901f8e557fbdf97f4cd5199ddaebff992deeddc5c5528bd020f319c267431567bbfb1c00b84c4168c1ea48a219d6a.jpg",
+    "Cost": 2500
   },
   {
     "Name": "アースリィガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/dd53103c1950aeb87b384675e65059b46fdb05977121b9ad1e73d2e90db5164a495e1c67e792e380767dede18069907473bfeb88f4ec6d5442a3729a981e7bbd.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/dd53103c1950aeb87b384675e65059b46fdb05977121b9ad1e73d2e90db5164a495e1c67e792e380767dede18069907473bfeb88f4ec6d5442a3729a981e7bbd.jpg",
+    "Cost": 2500
   },
   {
     "Name": "イフリート改",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/25225737f7c4a52b8003707e52e64fdba08c35217f0d85eb6a99817dd1148e0c1dfdfb8d3e10cf91cca3e1bbdd1ca2bbd0dfdcb89d15ae817eaa3d446f4c4e3b.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/25225737f7c4a52b8003707e52e64fdba08c35217f0d85eb6a99817dd1148e0c1dfdfb8d3e10cf91cca3e1bbdd1ca2bbd0dfdcb89d15ae817eaa3d446f4c4e3b.jpg",
+    "Cost": 1500
   },
   {
     "Name": "イフリート（シュナイド機）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4739f5429aac606d50d067ff55e0cfd50438fafc8c0d7c09ba14b9cb6bd27f7624474bfa16d399e15adb0cc8c7239a9fafd27d1e1ca5133477fa05f795fbe9f3.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4739f5429aac606d50d067ff55e0cfd50438fafc8c0d7c09ba14b9cb6bd27f7624474bfa16d399e15adb0cc8c7239a9fafd27d1e1ca5133477fa05f795fbe9f3.jpg",
+    "Cost": 2000
   },
   {
     "Name": "インパルスガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/138a71d815b83a3998d804a8fc5f13a3e78fbacd6d6ba0adeaa4a055f11172d7c9b6e1ef3cf05ebb400ab8db02077a04659ff3918e08baa0c9b651b68dbf3749.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/138a71d815b83a3998d804a8fc5f13a3e78fbacd6d6ba0adeaa4a055f11172d7c9b6e1ef3cf05ebb400ab8db02077a04659ff3918e08baa0c9b651b68dbf3749.jpg",
+    "Cost": 2500
   },
   {
     "Name": "インパルスガンダム(ルナマリア搭乗)",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b72f3403fe7d55ace924182ac8221f2bc144665f3ed24c30bcfb5bcc717c2c2f7b19c7f0415aeb7edf6a40abfee04a1498d859e4a1d4e10dd8621d09721701e5.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b72f3403fe7d55ace924182ac8221f2bc144665f3ed24c30bcfb5bcc717c2c2f7b19c7f0415aeb7edf6a40abfee04a1498d859e4a1d4e10dd8621d09721701e5.jpg",
+    "Cost": 2000
   },
   {
     "Name": "インフィニットジャスティスガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/669b10b4d99351f8c4d4c03b9c45803e99af736c7cbe176ea1031ccd8680117cbe1aad2ca6d1f38cfe27ed50ba4dbb7a9c76de2ecbff5b1f6ffdf62110c91202.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/669b10b4d99351f8c4d4c03b9c45803e99af736c7cbe176ea1031ccd8680117cbe1aad2ca6d1f38cfe27ed50ba4dbb7a9c76de2ecbff5b1f6ffdf62110c91202.jpg",
+    "Cost": 3000
   },
   {
     "Name": "インフィニットジャスティスガンダム弐式",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d4597d318ec354244312e7de54cc1dcd754c8f54caaad357faa755f7bfd4789d86521086377e980427aa538d19e8fb4200519f1b3c7e3a48f3f46d1d7ad00ce6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d4597d318ec354244312e7de54cc1dcd754c8f54caaad357faa755f7bfd4789d86521086377e980427aa538d19e8fb4200519f1b3c7e3a48f3f46d1d7ad00ce6.jpg",
+    "Cost": 3000
   },
   {
     "Name": "インフィニットジャスティスガンダム（ラクス搭乗）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b29a06773749922066da7ebcd7acabe9979b368859ee4023db2fb0458ce345750d221431c68a75b61aee691d273cb06c1b32def6dfdaa5bc8ab4a47d1c8d0395.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b29a06773749922066da7ebcd7acabe9979b368859ee4023db2fb0458ce345750d221431c68a75b61aee691d273cb06c1b32def6dfdaa5bc8ab4a47d1c8d0395.jpg",
+    "Cost": 2000
   },
   {
     "Name": "イージスガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b7916b2166e8cd5d2431b46dad305fb97cd45474ce22d513376f89de73c7ac324b95410bbfc81e950a5f5234afea05938b4bc6238cebb66f9be6696e840ae827.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b7916b2166e8cd5d2431b46dad305fb97cd45474ce22d513376f89de73c7ac324b95410bbfc81e950a5f5234afea05938b4bc6238cebb66f9be6696e840ae827.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ウイングガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/22c5b3c67fbf9251aa01d9f7b1effb4159f3529ae2903a0979d1490b5887fefe49616c66df5f7abf8a7ab009ffef306fee8c18b354e2e8017fef4b5c94748a41.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/22c5b3c67fbf9251aa01d9f7b1effb4159f3529ae2903a0979d1490b5887fefe49616c66df5f7abf8a7ab009ffef306fee8c18b354e2e8017fef4b5c94748a41.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ウイングガンダムゼロ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0d7dc85be08b656679d3ccb4d19e68803bacf3791c162fcf7b5558ab5df4e9151881ffd960e07ee439aebdce6738ffba519a0673a9e194a59dc3a35e08332b6f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0d7dc85be08b656679d3ccb4d19e68803bacf3791c162fcf7b5558ab5df4e9151881ffd960e07ee439aebdce6738ffba519a0673a9e194a59dc3a35e08332b6f.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ウイングガンダムゼロ（EW版）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b661a6b1888b7670f7f004cbcf82655b61a6b30f6dd919c43db3aa774229a9f3910905e560f63202fd19e87f6304ad91d629867baf32d0618592e8cab24eca4a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b661a6b1888b7670f7f004cbcf82655b61a6b30f6dd919c43db3aa774229a9f3910905e560f63202fd19e87f6304ad91d629867baf32d0618592e8cab24eca4a.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ウイングガンダムフェニーチェ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/106a20d35db7afd6af13fac40644fe48ca01f0ba5d11914c22cbc17c272435f96fb1e83ce6fc38d4962441b5484f6e53f9eff51ff85781fdab5e80d11ca27667.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/106a20d35db7afd6af13fac40644fe48ca01f0ba5d11914c22cbc17c272435f96fb1e83ce6fc38d4962441b5484f6e53f9eff51ff85781fdab5e80d11ca27667.jpg",
+    "Cost": 2500
   },
   {
     "Name": "エクストリームガンダム type-レオスⅡ Vs.",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7893641492c114dc99739170c65fa5b985e07fa3b354d0d4ec8db17e41208b441886bc3178d15131c7c59b682c607b25b0d4ee8bb2add7a3f1d529bcc417c44d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7893641492c114dc99739170c65fa5b985e07fa3b354d0d4ec8db17e41208b441886bc3178d15131c7c59b682c607b25b0d4ee8bb2add7a3f1d529bcc417c44d.jpg",
+    "Cost": 3000
   },
   {
     "Name": "エクストリームガンダム アイオス-F",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e47be3a914a9ce45518a2da1961ab795a375a886282180f2152cb66e3603640965edaa17c80f6947c74692232bbf58427687883a8b2eb96a471c166817130301.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e47be3a914a9ce45518a2da1961ab795a375a886282180f2152cb66e3603640965edaa17c80f6947c74692232bbf58427687883a8b2eb96a471c166817130301.jpg",
+    "Cost": 2500
   },
   {
     "Name": "エクストリームガンダム エクセリア",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a641fd9994a29c89dd6c0483e6485699b66141ef9ebcb47db3129983756aa20761845934ff96a3e84e5ca906f96c7d22c928a192b2549a4d728464fb1e956805.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a641fd9994a29c89dd6c0483e6485699b66141ef9ebcb47db3129983756aa20761845934ff96a3e84e5ca906f96c7d22c928a192b2549a4d728464fb1e956805.jpg",
+    "Cost": 2500
   },
   {
     "Name": "エクストリームガンダム エクリプス-F",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/39777180d390cf77b233b3b51c1c76a151088b1addb759c20bea06e702c291d1c5ed15904df9d0fdc269f0984cfa2dbdc9956c24a84ef338993db93bdf6282c4.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/39777180d390cf77b233b3b51c1c76a151088b1addb759c20bea06e702c291d1c5ed15904df9d0fdc269f0984cfa2dbdc9956c24a84ef338993db93bdf6282c4.jpg",
+    "Cost": 2500
   },
   {
     "Name": "エクストリームガンダム エクリプス-F",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ecfb8579d520a57cdd6b9b338dc8abf238ec6ab0762c3ca02d4f30f6e05ccebb867fc8e3c41289f4531da985c001e9499112c71aa60ed0c5e8022f06a6fd2df1.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ecfb8579d520a57cdd6b9b338dc8abf238ec6ab0762c3ca02d4f30f6e05ccebb867fc8e3c41289f4531da985c001e9499112c71aa60ed0c5e8022f06a6fd2df1.jpg",
+    "Cost": 2500
   },
   {
     "Name": "エクストリームガンダム ゼノン-F",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/71cf5f50f5222fb2cd52a523e8fcc031c340d7d4647fdcfa203b2f9481ce8f7c2d995c42a73fa633111fa8453fc435cb8f443db37fc7899fc447cd921a958b3d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/71cf5f50f5222fb2cd52a523e8fcc031c340d7d4647fdcfa203b2f9481ce8f7c2d995c42a73fa633111fa8453fc435cb8f443db37fc7899fc447cd921a958b3d.jpg",
+    "Cost": 2500
   },
   {
     "Name": "オーヴェロン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/caae25d72eff3e36828c84f3b099c64eeab91d2e3f99dbd0bde191cf35d2203d0850097a6ab0a7334130b70d63be9584a88e94fc47179609b77b3e8bcb83b45b.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/caae25d72eff3e36828c84f3b099c64eeab91d2e3f99dbd0bde191cf35d2203d0850097a6ab0a7334130b70d63be9584a88e94fc47179609b77b3e8bcb83b45b.jpg",
+    "Cost": 2500
   },
   {
     "Name": "カバカーリー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/52ef01cdef0ba3c3f20f4bb08b3ff6f24a6bad9b90b8614ff08e1e4cafd3319715b195739046565e63d00b18f25c3067ea9f3a532c6d0de1d78c18cc9d98f397.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/52ef01cdef0ba3c3f20f4bb08b3ff6f24a6bad9b90b8614ff08e1e4cafd3319715b195739046565e63d00b18f25c3067ea9f3a532c6d0de1d78c18cc9d98f397.jpg",
+    "Cost": 3000
   },
   {
     "Name": "カプル",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/25cd6792a625b2c652da435b3a95ecf239772ee5847dc165b473d052363cf3f7da5939c316dfcf3e19e0f25d6d6d20ef40c6d6c4dc6cc0108541b9bf97ee0d1c.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/25cd6792a625b2c652da435b3a95ecf239772ee5847dc165b473d052363cf3f7da5939c316dfcf3e19e0f25d6d6d20ef40c6d6c4dc6cc0108541b9bf97ee0d1c.jpg",
+    "Cost": 1500
   },
   {
     "Name": "カラミティガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0b8dc9048c79c725c13b6785735b7d6188a3b35f8eaa32355cd0901dbe1ca0ca9c02899f407908e60c6c97e79e117ebf977180115e80c0a8a1c4b4e28c04262c.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0b8dc9048c79c725c13b6785735b7d6188a3b35f8eaa32355cd0901dbe1ca0ca9c02899f407908e60c6c97e79e117ebf977180115e80c0a8a1c4b4e28c04262c.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガイアガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f32854ee4b08b9a829869d7306c0ab49f94a0466c01369fc1f50dec6cfedba686b397293e50b6cfb016e49cdd0aa5fdb0485e3078c01a87b5d5e0d576f55652f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f32854ee4b08b9a829869d7306c0ab49f94a0466c01369fc1f50dec6cfedba686b397293e50b6cfb016e49cdd0aa5fdb0485e3078c01a87b5d5e0d576f55652f.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガナーザクウォーリア",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/153f0c0ec66d815b31db854dfe3242f45b3f738d492e1907fbd2d9d55e0c188263297240152ccf9bb4a2cc58dfd562824fecb9816f5e25dd1a5060f2e21b2efc.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/153f0c0ec66d815b31db854dfe3242f45b3f738d492e1907fbd2d9d55e0c188263297240152ccf9bb4a2cc58dfd562824fecb9816f5e25dd1a5060f2e21b2efc.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガブスレイ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2f929ca1d59cde1fe0cbdccedf6de9dd979c4727b8e2c1160a0d1789e52b9b10d412a38f620efc0e097e8396f23efca0025ad46a673eaccc12baf62c71b248f8.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2f929ca1d59cde1fe0cbdccedf6de9dd979c4727b8e2c1160a0d1789e52b9b10d412a38f620efc0e097e8396f23efca0025ad46a673eaccc12baf62c71b248f8.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガラッゾ (ヒリング・ケア機)",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f5f4dbcda9045c52ba0f772c4434b2d25a9fdbfa1a5a3177db5c4bb2b83137f9f57ee646d29185e38bdf8858f09150b1d2740f451de6493d6374390e028a9b71.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f5f4dbcda9045c52ba0f772c4434b2d25a9fdbfa1a5a3177db5c4bb2b83137f9f57ee646d29185e38bdf8858f09150b1d2740f451de6493d6374390e028a9b71.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンイージ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9126867d054ec78aafdc89b1dd4a25accfe0853231dcb80bea54ca9d2a6714e7f32a8b92eddf63ec5d6b1e934846484653a645f5c0edf2175502c68e0cf6d495.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9126867d054ec78aafdc89b1dd4a25accfe0853231dcb80bea54ca9d2a6714e7f32a8b92eddf63ec5d6b1e934846484653a645f5c0edf2175502c68e0cf6d495.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ガンキャノン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ff2380635af516a4cc72c25a68cbd85fce548c4476101c80772fb499c3b7f923a35844b4b19afc0dff2d56c6128c4263ba8bd1464b47d0c211b6e2a0de80a369.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ff2380635af516a4cc72c25a68cbd85fce548c4476101c80772fb499c3b7f923a35844b4b19afc0dff2d56c6128c4263ba8bd1464b47d0c211b6e2a0de80a369.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/74e03929778aed89727a913aabe6ed8df6889c0d6a3ac0433add571f70802bb6c9a63e37862ced14bc04b567a381c64dfbbc3fc553b8f7e65ce516ac03450ced.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/74e03929778aed89727a913aabe6ed8df6889c0d6a3ac0433add571f70802bb6c9a63e37862ced14bc04b567a381c64dfbbc3fc553b8f7e65ce516ac03450ced.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c0ce9b6279e244972b9d4f6c131fb455c95b29ceb6dbff2b1c34c62039e7f33ac425fa2269ca418879f0269aff9a1f0904cbc757d43f955280ded0df081eca23.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c0ce9b6279e244972b9d4f6c131fb455c95b29ceb6dbff2b1c34c62039e7f33ac425fa2269ca418879f0269aff9a1f0904cbc757d43f955280ded0df081eca23.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムAGE-1",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c5a3d888f16002584cb99405b36e15986874040b8a136d6704683801dba651035cd1ccf9c680893931e4446bbde8c2ba25f8e1c761ea0ec78e450edb92e25bff.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c5a3d888f16002584cb99405b36e15986874040b8a136d6704683801dba651035cd1ccf9c680893931e4446bbde8c2ba25f8e1c761ea0ec78e450edb92e25bff.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムAGE-1 フルグランサ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/270231525b3b8eebb689cff415bc55f0781c3173d8109b7a792f524a1873e86e63d9f19e70e2e563f00ea2cd515211ff83f6b27ebea9156c4670b5e48bbb07a3.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/270231525b3b8eebb689cff415bc55f0781c3173d8109b7a792f524a1873e86e63d9f19e70e2e563f00ea2cd515211ff83f6b27ebea9156c4670b5e48bbb07a3.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダムAGE-2",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7284fb73852d7ff32cc2e9c67f1dc96e38ab1b57e0e89d0c534a1ee351e4bb7e47ee3bc8b875e1e25132a7311741c80d0d3c4502359461fd927bdfbdc76019dc.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7284fb73852d7ff32cc2e9c67f1dc96e38ab1b57e0e89d0c534a1ee351e4bb7e47ee3bc8b875e1e25132a7311741c80d0d3c4502359461fd927bdfbdc76019dc.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダムAGE-2",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f20d3a45ab6b46204fa3abcecf3ef665071083974d93a18cd67fd95cfbb9153b78c75b8c0d8b4e9c73ffd2d65c2b6336b00835093907dc2dd7246c4dc167491a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f20d3a45ab6b46204fa3abcecf3ef665071083974d93a18cd67fd95cfbb9153b78c75b8c0d8b4e9c73ffd2d65c2b6336b00835093907dc2dd7246c4dc167491a.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダムAGE-2 ダークハウンド",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d64449fbf8d1dfe77bcf1fe91000f4aad60c1a3651ebf93815ef20555f44c972978d4b69dd88425916f15d77f81573969ff31ed59fe22944efca07e0b383099f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d64449fbf8d1dfe77bcf1fe91000f4aad60c1a3651ebf93815ef20555f44c972978d4b69dd88425916f15d77f81573969ff31ed59fe22944efca07e0b383099f.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダムAGE-3",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/1d04609c3cb44080ec5a362ef8c95cc3a96662d194482322889421e57b631e6bd95cde497cd30d20394bb18ef652a55a0d62fc00e31624cb43eeea8e54a112b8.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/1d04609c3cb44080ec5a362ef8c95cc3a96662d194482322889421e57b631e6bd95cde497cd30d20394bb18ef652a55a0d62fc00e31624cb43eeea8e54a112b8.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダムAGE-FX",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/830e25a18a124ea387125151df2384ad047331d72726930f45eef6702052de10e8ec510a939213d61b98b6ab80c1cece8b94abbe7e5231eead13424e6e2d769e.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/830e25a18a124ea387125151df2384ad047331d72726930f45eef6702052de10e8ec510a939213d61b98b6ab80c1cece8b94abbe7e5231eead13424e6e2d769e.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダムDX",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6870191e908e693c2380c3a47f01b807c3133320116777e099f86421b3ccf16bdae8bbd64b2ffa51eadcc259f4bc9cb7c16e47d1453bf42c7bbbf759e9df2d8b.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6870191e908e693c2380c3a47f01b807c3133320116777e099f86421b3ccf16bdae8bbd64b2ffa51eadcc259f4bc9cb7c16e47d1453bf42c7bbbf759e9df2d8b.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダムEz8",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/17ef2435653f2a8b269e791b65c43a7b5bfe69935cf3efe704ba1942b22be0a85321cc2094fd43435c0b92bf0cb86f59a2d1d8e37d372a8327ea9ea53a73598a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/17ef2435653f2a8b269e791b65c43a7b5bfe69935cf3efe704ba1942b22be0a85321cc2094fd43435c0b92bf0cb86f59a2d1d8e37d372a8327ea9ea53a73598a.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ガンダムF91",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/30cefbb8180423200fd0022074a497424e7e4e371a5e7f2512b62a7d9190f8226baec1a8bab5e352b45a17af6be88fd8556ca50c7a990fa4695b1dcb1fa462e8.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/30cefbb8180423200fd0022074a497424e7e4e371a5e7f2512b62a7d9190f8226baec1a8bab5e352b45a17af6be88fd8556ca50c7a990fa4695b1dcb1fa462e8.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダムMk-Ⅱ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6d10fb13d9218d6f417bd037fab17ebf6b80f092bd69627142a69380c2583d260ec1e5cbc2d50fd03fce459662bfefa1ff7962a722ddf5fd3dbc32ea29e32410.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6d10fb13d9218d6f417bd037fab17ebf6b80f092bd69627142a69380c2583d260ec1e5cbc2d50fd03fce459662bfefa1ff7962a722ddf5fd3dbc32ea29e32410.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムXディバイダー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/28837b53aa45539082e6137d7e4dc1ba2172d01549439e235fbef2eeba7d1e4990ca5df23b1503ecb27628656200ef62faaebcb2f56e2899c981d1d4b1ee13f6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/28837b53aa45539082e6137d7e4dc1ba2172d01549439e235fbef2eeba7d1e4990ca5df23b1503ecb27628656200ef62faaebcb2f56e2899c981d1d4b1ee13f6.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダムX（ガロード＆ティファ）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/163d56be3a284f6b4789c190fb3b64470e20f0eb712e51476eb8d9be2a517b9bf6e5b2d997e5d29ce7e8af2ad51bc2ed567d55d13fe98efc356102dc85b15d50.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/163d56be3a284f6b4789c190fb3b64470e20f0eb712e51476eb8d9be2a517b9bf6e5b2d997e5d29ce7e8af2ad51bc2ed567d55d13fe98efc356102dc85b15d50.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムX（ガロード＆ティファ）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/fce38bc050b40f404bfe3e720c32f34dedd14df6d64b38374a9589a82146c882bae52292cdd4a7817ca674c9bea87ebdb9bff266b143dda863735be95b19ed46.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/fce38bc050b40f404bfe3e720c32f34dedd14df6d64b38374a9589a82146c882bae52292cdd4a7817ca674c9bea87ebdb9bff266b143dda863735be95b19ed46.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムエクシア",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0a9b3cb5116083a6158c224e48b8fdfd7f8e9cfe20680fe10791d25fdd55be7c3ce46d057cd76adb1eafc64e8e102b5617963bb835eed69dffe5331a94221bf1.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0a9b3cb5116083a6158c224e48b8fdfd7f8e9cfe20680fe10791d25fdd55be7c3ce46d057cd76adb1eafc64e8e102b5617963bb835eed69dffe5331a94221bf1.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムエピオン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/59685b4d64fa06e16b76d65532d87361fed6aaf916d88f8a74aa781582ac4e0d23858df0203a3a559f1f004c35ce3a91f2c23abbc132d2d7718a0d56440633b3.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/59685b4d64fa06e16b76d65532d87361fed6aaf916d88f8a74aa781582ac4e0d23858df0203a3a559f1f004c35ce3a91f2c23abbc132d2d7718a0d56440633b3.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダムキュリオス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/bb13cd8e5f1267c0245e571021bca14c95aec3592efb356064e51b473d67575246f536d3643429596de01a7eeb49b88760f6d27bb2ebd5e5eb3e2c27896bf088.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/bb13cd8e5f1267c0245e571021bca14c95aec3592efb356064e51b473d67575246f536d3643429596de01a7eeb49b88760f6d27bb2ebd5e5eb3e2c27896bf088.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムサバーニャ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/784ea59b66c4682a0e00fdd98692dc401c463010b6ff6e8465b6d9be23662a8255b79b26a29e5f35d1d12256a6db0de61f274347cdadd698be1f3aa11e23de8f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/784ea59b66c4682a0e00fdd98692dc401c463010b6ff6e8465b6d9be23662a8255b79b26a29e5f35d1d12256a6db0de61f274347cdadd698be1f3aa11e23de8f.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダムサンドロック改",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/eee6c8690c48b6c14e2858a47a08d8c5d41256e008a3bf607356da33af4445159e7036bb4843e13558e9e685fba0ebd9507e822a6e3506ea3213ee61a6667888.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/eee6c8690c48b6c14e2858a47a08d8c5d41256e008a3bf607356da33af4445159e7036bb4843e13558e9e685fba0ebd9507e822a6e3506ea3213ee61a6667888.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムシュピーゲル",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e3d71c559f4095e8a1897a3848336f14a0a3795fb18e93ca23f24aaf33c829ecb3d063b29ae518169f903e5118832006ee73cc927d704ca37b8b8974214cb272.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e3d71c559f4095e8a1897a3848336f14a0a3795fb18e93ca23f24aaf33c829ecb3d063b29ae518169f903e5118832006ee73cc927d704ca37b8b8974214cb272.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダムスローネツヴァイ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9e81562f599c93468daf4c564008abf765994985ab22b56fbfae09ac47f223ecde6434c218373c517d4472c98ddde8bb82433856bc951776b43018104bd446cd.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9e81562f599c93468daf4c564008abf765994985ab22b56fbfae09ac47f223ecde6434c218373c517d4472c98ddde8bb82433856bc951776b43018104bd446cd.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムスローネドライ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6080b3da4a5e1b4fd5295177bb1315fd91fc0f37660d3b75e5cfdfdf7e485c228b32bec6affac2cc4bf54d20722a901942c3d1932fcaacb12c645beaccdac343.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6080b3da4a5e1b4fd5295177bb1315fd91fc0f37660d3b75e5cfdfdf7e485c228b32bec6affac2cc4bf54d20722a901942c3d1932fcaacb12c645beaccdac343.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムダブルオースカイ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0346686f59a9d4d0499624948c824e28b3115ab72ddcefd6a1cc590ef1157cb50382a5d93092b8cbea7f2f2b175595870554d53989386bc59ff24d62856b6528.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0346686f59a9d4d0499624948c824e28b3115ab72ddcefd6a1cc590ef1157cb50382a5d93092b8cbea7f2f2b175595870554d53989386bc59ff24d62856b6528.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダムダブルオーダイバーエース",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/350418a04e92023cfd9ed769db1134b8e8f2826d882950112bff442358d4737bec2ac8ce58405fc7b8da18ba02fb31ffe8c828f0db02d5351ca9c7985aa71644.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/350418a04e92023cfd9ed769db1134b8e8f2826d882950112bff442358d4737bec2ac8ce58405fc7b8da18ba02fb31ffe8c828f0db02d5351ca9c7985aa71644.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムデスサイズヘル",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/79df30c58d59187392c24e9e8299e8da00402ee6a195f1923b68a7be833f0b1d759419dd61ca1012ba5df802b81c56ac616419e736d0b955c13a062044d4d25d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/79df30c58d59187392c24e9e8299e8da00402ee6a195f1923b68a7be833f0b1d759419dd61ca1012ba5df802b81c56ac616419e736d0b955c13a062044d4d25d.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムデスサイズヘル（EW版）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0b65fed36a6f40cf89ffc0e6f556e6fd792c244781c4c331e45a56648e5de582c37d1d12a88a3922a029ba9e56cfc77dcb3226dff54b7f162361d0a98a21478a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0b65fed36a6f40cf89ffc0e6f556e6fd792c244781c4c331e45a56648e5de582c37d1d12a88a3922a029ba9e56cfc77dcb3226dff54b7f162361d0a98a21478a.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダムデュナメス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ab51989afb35a40e695ea84c9ee8da39f9f687f41d4435fc8b6aaa2961d0b52dde142ae4254f1d91ba1364ca1f8dce812781614a1acf7054f64da16e7717f80c.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ab51989afb35a40e695ea84c9ee8da39f9f687f41d4435fc8b6aaa2961d0b52dde142ae4254f1d91ba1364ca1f8dce812781614a1acf7054f64da16e7717f80c.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムハルート",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/446fbe89d05b5419160f8448f24940715bf391ed3e70ab68bafff8cee31cbd6a15d5df5ad41502848649a63316389bee189c5f26d58a96059c94fd75c23b7c31.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/446fbe89d05b5419160f8448f24940715bf391ed3e70ab68bafff8cee31cbd6a15d5df5ad41502848649a63316389bee189c5f26d58a96059c94fd75c23b7c31.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダムヘビーアームズ改",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f06d649cd35a557884de6f9aa239cd02cce60c4ef976ebdae991f936f4a76ad708118d97803955ec49aed5ede29af3dfa4570462434e4293d294faa636833689.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f06d649cd35a557884de6f9aa239cd02cce60c4ef976ebdae991f936f4a76ad708118d97803955ec49aed5ede29af3dfa4570462434e4293d294faa636833689.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムヘビーアームズ改（EW版）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9dad9df1100408a394e1ede1a4b45249ab15989137335c05cb54ad9f4b8bef9fc1b5bd6a93534cd786bd6da943c9f799ac8973c9f3544ca175cb243be910ed2f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9dad9df1100408a394e1ede1a4b45249ab15989137335c05cb54ad9f4b8bef9fc1b5bd6a93534cd786bd6da943c9f799ac8973c9f3544ca175cb243be910ed2f.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダムマックスター",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7064f85b622a19feafd0eee689846301e2ae82cd282aa3b661d73fb74f593d282272932b4a926ec54c1106811e6a49f332706942caae7ddb3659a5e05f9acff4.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7064f85b622a19feafd0eee689846301e2ae82cd282aa3b661d73fb74f593d282272932b4a926ec54c1106811e6a49f332706942caae7ddb3659a5e05f9acff4.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムレギルス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/20abf8fea9321925aee1d9aee57e8ca51b8036d5821cf198f82f793c948d103714720b5096e08c6707ba6c51f985e71e6324aead47fb6a81913f0857f80b62e0.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/20abf8fea9321925aee1d9aee57e8ca51b8036d5821cf198f82f793c948d103714720b5096e08c6707ba6c51f985e71e6324aead47fb6a81913f0857f80b62e0.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダムレギルス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/84a0ab194e4229973a40e94b0269c763b0e2a00af6ac2864be31d6f5778488fa172e434b4dd7e49ebaecb37b50d3ac573a8bc8cd5d2aa00d809ebf43c9098139.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/84a0ab194e4229973a40e94b0269c763b0e2a00af6ac2864be31d6f5778488fa172e434b4dd7e49ebaecb37b50d3ac573a8bc8cd5d2aa00d809ebf43c9098139.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダムヴァサーゴ・チェストブレイク",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/17f665120030115451f925db514474db8fe74f13f675b69092e45eb05666024b52cee0d3d784892ae34581b4210e73a67c727c9ad5b93cd204acacfb999f3e3b.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/17f665120030115451f925db514474db8fe74f13f675b69092e45eb05666024b52cee0d3d784892ae34581b4210e73a67c727c9ad5b93cd204acacfb999f3e3b.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダムヴァーチェ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/79cba19c4cc9a884b0b3bbff18bf806f1c0a80291d9332e0cb8fcd929242eaca47cee5fe112e3d2da10493be3c856456d85ae491ee77d588c39c1107d97ebc42.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/79cba19c4cc9a884b0b3bbff18bf806f1c0a80291d9332e0cb8fcd929242eaca47cee5fe112e3d2da10493be3c856456d85ae491ee77d588c39c1107d97ebc42.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダム・エアリアル",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6ba47de2956a1fe7080443594003b7eaa4b5f667dd28f7d47be6da212445720e9b62155ef2e6eb918cd78c67d8b11a151b825eaed58c3634d2cc2fd124814f0f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6ba47de2956a1fe7080443594003b7eaa4b5f667dd28f7d47be6da212445720e9b62155ef2e6eb918cd78c67d8b11a151b825eaed58c3634d2cc2fd124814f0f.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダム・エアリアル（改修型）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/993784bce7264523f9df6ea33eebfa842da6a4bf0e62ff66c7eaa2176f9d617ffe14b5f4c9c8302d54798dc71ddf9a4d33bd3c19da80dff69f12d7cad31490d5.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/993784bce7264523f9df6ea33eebfa842da6a4bf0e62ff66c7eaa2176f9d617ffe14b5f4c9c8302d54798dc71ddf9a4d33bd3c19da80dff69f12d7cad31490d5.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダム・エアリアル（改修型） パーメットスコア・エイト",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/91806b072aa002ef0922041ad8672de326d85de427c539d810279e0afba2e1126ad528679c905ffacdf0700a0c939e2369c7be336a20daa003f32287a64be93b.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/91806b072aa002ef0922041ad8672de326d85de427c539d810279e0afba2e1126ad528679c905ffacdf0700a0c939e2369c7be336a20daa003f32287a64be93b.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダム・キマリストルーパー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/24feb607774a70c9b778c25f6fd7b7e556bba307f775e7939a4ab68738c37ba82d50160395ef103e643147ea9794f869be1f55f4d7f9fc2a42eaa9a11f5f0600.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/24feb607774a70c9b778c25f6fd7b7e556bba307f775e7939a4ab68738c37ba82d50160395ef103e643147ea9794f869be1f55f4d7f9fc2a42eaa9a11f5f0600.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダム・キマリスヴィダール",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/71bb5c1a50a72ca6d86ec5f2682b4e3e6283d1178c14536c1b451d3e1093af253194f4c3395311a0221ac52f50f2f97a7a9b8c97b0cb116f1a3a6082f8d28d09.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/71bb5c1a50a72ca6d86ec5f2682b4e3e6283d1178c14536c1b451d3e1093af253194f4c3395311a0221ac52f50f2f97a7a9b8c97b0cb116f1a3a6082f8d28d09.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダム・グシオンリベイクフルシティ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6fd000d493030a1a5684072cd1f2a99359b83f772bd9bffc1e3a5a8db81961edbf5db1c32ecf035d56a374dc8bbb835b23fc6b7d84803faaeb0072bf892715b8.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6fd000d493030a1a5684072cd1f2a99359b83f772bd9bffc1e3a5a8db81961edbf5db1c32ecf035d56a374dc8bbb835b23fc6b7d84803faaeb0072bf892715b8.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダム・バエル",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d532f05b48a47b567dbcbdc348524a44e12c1fe113ef531e3c7a6737684d04fedfe7d078edb3922df46215b07791c1af88746937e75f8a0adc620016777a7aca.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d532f05b48a47b567dbcbdc348524a44e12c1fe113ef531e3c7a6737684d04fedfe7d078edb3922df46215b07791c1af88746937e75f8a0adc620016777a7aca.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダム・バルバトス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/393181f4e2209890a1537958516c2c9b7ae151b8207ca22c2763d6114532fd6c57a4715dddb374d4eaa1201344ca537dc98d9024fb1153412077c632fa5bbc95.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/393181f4e2209890a1537958516c2c9b7ae151b8207ca22c2763d6114532fd6c57a4715dddb374d4eaa1201344ca537dc98d9024fb1153412077c632fa5bbc95.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダム・バルバトスルプス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2ec800ecddab879aab22a2b2479055213bd12bb87bf9a4cebe55c89085e57042008d9dc48474ed38ab0d4e223940dd0c8e91cc60871814366a749986b911a1a0.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2ec800ecddab879aab22a2b2479055213bd12bb87bf9a4cebe55c89085e57042008d9dc48474ed38ab0d4e223940dd0c8e91cc60871814366a749986b911a1a0.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダム・バルバトスルプスレクス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b6d8d607ea0352e072e770bbd91b0d8d7f0dc392ddd23f37c11136dbac3ee11da97ca8737f8ea31aef6000d9981980a00d92d7b7c2e0e3487dec5d5bed4dddf1.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b6d8d607ea0352e072e770bbd91b0d8d7f0dc392ddd23f37c11136dbac3ee11da97ca8737f8ea31aef6000d9981980a00d92d7b7c2e0e3487dec5d5bed4dddf1.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ガンダム・ファラクト",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f3021181bb1a85b86e72c7e2c333acc408f6788367b0a7871475490529e96759cb43ed764231c29097a0ac812b79ff2f0971e0b72843c2cf5b42633de4b6a1c4.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f3021181bb1a85b86e72c7e2c333acc408f6788367b0a7871475490529e96759cb43ed764231c29097a0ac812b79ff2f0971e0b72843c2cf5b42633de4b6a1c4.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダム・フラウロス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/99dd8c6d334b8c487e07d0230e10a4d12e76fd7c30f064d57c8a66f50337181753f6be20735dfb9be01fa9a77b4f5e22dfe6400a2fb4c8195f9989cedd727b93.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/99dd8c6d334b8c487e07d0230e10a4d12e76fd7c30f064d57c8a66f50337181753f6be20735dfb9be01fa9a77b4f5e22dfe6400a2fb4c8195f9989cedd727b93.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダム・フラウロス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f5e78a4c1235fa5144ee85f18e6941c49950fb9f3aa05ce7805b6498899077decd220dfed5efd636ed77c17b27be6e9eabe445ad7c119e1671fe7bd3eebf2c51.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f5e78a4c1235fa5144ee85f18e6941c49950fb9f3aa05ce7805b6498899077decd220dfed5efd636ed77c17b27be6e9eabe445ad7c119e1671fe7bd3eebf2c51.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダム試作1号機フルバーニアン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/83a4b1ac08fce82b56b334211a4280273d7a6c05f22562af8b37b08bfcdde4816a06251c84b7cd410205b7c0738db5e3c64caf229e20b95219ddbbcb7318acf9.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/83a4b1ac08fce82b56b334211a4280273d7a6c05f22562af8b37b08bfcdde4816a06251c84b7cd410205b7c0738db5e3c64caf229e20b95219ddbbcb7318acf9.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダム試作2号機",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/43d5ca09f63b27574d8bd93d2d2f3e77ce21f67f74bafb3dcaf68768a76cfb84770c050ca631dfcb95a2293c0ad4bf3131e6dd7d0407002b7d279e5ea46ff737.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/43d5ca09f63b27574d8bd93d2d2f3e77ce21f67f74bafb3dcaf68768a76cfb84770c050ca631dfcb95a2293c0ad4bf3131e6dd7d0407002b7d279e5ea46ff737.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダム試作3号機",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/8ea831b3290488434e575ccdda36a3833e7ca8c5aeb0d6d6c56f6e07680baca6663dc2dd1c1eff07e232d9f28a9a6892350bb2407f3081678eaec298394d5eca.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/8ea831b3290488434e575ccdda36a3833e7ca8c5aeb0d6d6c56f6e07680baca6663dc2dd1c1eff07e232d9f28a9a6892350bb2407f3081678eaec298394d5eca.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ガンダム（Gメカ）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/36047b3ae84787e5403bbeef3cf3d870b1ac8b270934a7110102397761a91ff761380c684141e559dc07725d51426599f8ffbedadcee4117633e2bfe349a75fd.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/36047b3ae84787e5403bbeef3cf3d870b1ac8b270934a7110102397761a91ff761380c684141e559dc07725d51426599f8ffbedadcee4117633e2bfe349a75fd.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガンダムＸ魔王",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/21de12bfa42c2978f898461043641f7f1b720bfe4328b76e788d47769fe6d7d006438b38750ac52d1d381bbd9e30a50008cb0cb34e5b920b310cfc33a40df857.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/21de12bfa42c2978f898461043641f7f1b720bfe4328b76e788d47769fe6d7d006438b38750ac52d1d381bbd9e30a50008cb0cb34e5b920b310cfc33a40df857.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ガーベラ・テトラ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6e3b73785b1d3bc38312aab79922adab8a72deb48a39b5c48bf0d358e8060aab497c41e5ac146d0d83ba4061bc7555853001a44da57ba937d26a67a2eda45321.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6e3b73785b1d3bc38312aab79922adab8a72deb48a39b5c48bf0d358e8060aab497c41e5ac146d0d83ba4061bc7555853001a44da57ba937d26a67a2eda45321.jpg",
+    "Cost": 2000
   },
   {
     "Name": "キュベレイ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0cc2f5e162e85f85d0615a41515a9dc7e830a4dd82841d1d4e8462c72e1b047c888273a7392bd930677d9893fdce5a6d22681edbb6ae0188935791be70369ced.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0cc2f5e162e85f85d0615a41515a9dc7e830a4dd82841d1d4e8462c72e1b047c888273a7392bd930677d9893fdce5a6d22681edbb6ae0188935791be70369ced.jpg",
+    "Cost": 3000
   },
   {
     "Name": "キュベレイMk-Ⅱ（プルツー）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b4270ab4031e672f31a729ad29c785b45c5b2f4ad4784401cc542f7c17bf7b76d82ed73b42ff28f278d8314006bd08e4b709d0743862f67197535ebe894a7de2.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b4270ab4031e672f31a729ad29c785b45c5b2f4ad4784401cc542f7c17bf7b76d82ed73b42ff28f278d8314006bd08e4b709d0743862f67197535ebe894a7de2.jpg",
+    "Cost": 1500
   },
   {
     "Name": "キュベレイMk-Ⅱ（プル）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/8f281fef3bfd98a927b31a05e7f686c8c6da9b82712b2d236f80e4534666d383125b9c440aee9869b654fdd1d48b0405b03c7dede983e254384da542df9391b5.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/8f281fef3bfd98a927b31a05e7f686c8c6da9b82712b2d236f80e4534666d383125b9c440aee9869b654fdd1d48b0405b03c7dede983e254384da542df9391b5.jpg",
+    "Cost": 2000
   },
   {
     "Name": "キュベレイパピヨン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e97e1681d168417cc1f47a4eb447cda954430a23036e57225b73272c0eab13b783ae23986d0e446b18f186518d4b1d42f4cce522787875fdfbde94b7b241a392.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e97e1681d168417cc1f47a4eb447cda954430a23036e57225b73272c0eab13b783ae23986d0e446b18f186518d4b1d42f4cce522787875fdfbde94b7b241a392.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ギャプラン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4d3bb546ce7a09bef8d839f60d42595be252bb5eef023a22c24687263a65bd68d99798c9b661b9428a11c717d2947c037ddf2a07c963e6adbe5befd8e27a2b8d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4d3bb546ce7a09bef8d839f60d42595be252bb5eef023a22c24687263a65bd68d99798c9b661b9428a11c717d2947c037ddf2a07c963e6adbe5befd8e27a2b8d.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ギャン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7790b02c3b368c24e794b10e1de14f10bbf55a7b935e8606aef088568144fb572ae50114fba24882c39515fcf128046d3d96ef079ff0496399b3f09a43d29b69.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7790b02c3b368c24e794b10e1de14f10bbf55a7b935e8606aef088568144fb572ae50114fba24882c39515fcf128046d3d96ef079ff0496399b3f09a43d29b69.jpg",
+    "Cost": 2000
   },
   {
     "Name": "クシャトリヤ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/29394d5df6e642b2b451a747390108e8d75be77b7a7447a3835bf5abe7655943827cd70b018c666d5bc0d706d9d3d68ca7dabbf628ef445f2bba20eb21657fba.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/29394d5df6e642b2b451a747390108e8d75be77b7a7447a3835bf5abe7655943827cd70b018c666d5bc0d706d9d3d68ca7dabbf628ef445f2bba20eb21657fba.jpg",
+    "Cost": 2000
   },
   {
     "Name": "クロスボーン・ガンダムX1フルクロス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/007d2a796f22468c2beffe3c0c26bb8ee133950542d7428758f7c51e763929c3f69891bae74cb0582eea0a40dcbf0ded7fa4ff4c8e1595e20aa90b397462d487.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/007d2a796f22468c2beffe3c0c26bb8ee133950542d7428758f7c51e763929c3f69891bae74cb0582eea0a40dcbf0ded7fa4ff4c8e1595e20aa90b397462d487.jpg",
+    "Cost": 3000
   },
   {
     "Name": "クロスボーン・ガンダムX1改",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7dd9b06c82367a5d91c1ccfaa25f0808a4124bb20b1fa59c8f358c830afa7d049dac18e52b77ede3aa8f319fa83308b0f851935080d70d0b3565c293063396b0.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7dd9b06c82367a5d91c1ccfaa25f0808a4124bb20b1fa59c8f358c830afa7d049dac18e52b77ede3aa8f319fa83308b0f851935080d70d0b3565c293063396b0.jpg",
+    "Cost": 2500
   },
   {
     "Name": "クロスボーン・ガンダムX2改",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/98a2e0fa0f2f2e01cd8c8b8c842941635b621180724259f8a9c2cade0da1f78c53e36acaa175152f27445bc1810b1a94d379e93928b722944934c12596e5f456.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/98a2e0fa0f2f2e01cd8c8b8c842941635b621180724259f8a9c2cade0da1f78c53e36acaa175152f27445bc1810b1a94d379e93928b722944934c12596e5f456.jpg",
+    "Cost": 2500
   },
   {
     "Name": "クロスボーン・ガンダムX3",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/dcbc9c8a1ea69bcd9aefea1f6c186705fcbdf2d3ef02c7eb7f82acdeb9bf77688d1d0bdefceafbbba5d567f2011d54e65fcaaa6ad3b61989b5394730e5e1d8d6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/dcbc9c8a1ea69bcd9aefea1f6c186705fcbdf2d3ef02c7eb7f82acdeb9bf77688d1d0bdefceafbbba5d567f2011d54e65fcaaa6ad3b61989b5394730e5e1d8d6.jpg",
+    "Cost": 2500
   },
   {
     "Name": "グフイグナイテッド",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/8cd56b74ba69fd578ff899c04fbeb7b1980110d544f42571abddab13ace6e7ce4d5c148bdfb55cc9b4a8782677b9a367ea40fea2599f48ac383f5afdaa4a3ef6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/8cd56b74ba69fd578ff899c04fbeb7b1980110d544f42571abddab13ace6e7ce4d5c148bdfb55cc9b4a8782677b9a367ea40fea2599f48ac383f5afdaa4a3ef6.jpg",
+    "Cost": 2000
   },
   {
     "Name": "グフ・カスタム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/29af4e451d7819047a96dec8c6683c6f21d3d8fd375642c29d26152451da61abb660370bb784acc7e67bd2b820540ee46a53f0eee65407b034034dae6baf94eb.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/29af4e451d7819047a96dec8c6683c6f21d3d8fd375642c29d26152451da61abb660370bb784acc7e67bd2b820540ee46a53f0eee65407b034034dae6baf94eb.jpg",
+    "Cost": 1500
   },
   {
     "Name": "グラハム専用ユニオンフラッグカスタム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/284b082861db1327455d0cd5e2ac2e4e9d42f1c05d2556697510ddfebdcf5becb1be0ed5ad2bfc26097901bdac10cb516bb09e92d7a16c2770f5c2e48fc3ee11.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/284b082861db1327455d0cd5e2ac2e4e9d42f1c05d2556697510ddfebdcf5becb1be0ed5ad2bfc26097901bdac10cb516bb09e92d7a16c2770f5c2e48fc3ee11.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ケルディムガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4ef9db3db9834e94513ee23641c957f9f794b26ba2d930e6ebf52679f4d266ad0dc5e9c5f4991600c764bfaafe0ecf8a71dd4849fb74704778d657beb3b1737e.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4ef9db3db9834e94513ee23641c957f9f794b26ba2d930e6ebf52679f4d266ad0dc5e9c5f4991600c764bfaafe0ecf8a71dd4849fb74704778d657beb3b1737e.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ケンプファー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/5fe8af3f5115d10b816c20e421c880cb0923724fc7a738b989047e6ef0cadfdfc7669816d9428d89f48f6bcb039b3be88e5022054e108e4ce310fcc12fd89743.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/5fe8af3f5115d10b816c20e421c880cb0923724fc7a738b989047e6ef0cadfdfc7669816d9428d89f48f6bcb039b3be88e5022054e108e4ce310fcc12fd89743.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ゲドラフ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/782305d1641143a5e135dc2cae63525612861c57e8150e3cee4ee7f1602d419206042471ba68f85efd8002d4290420dbf213cb3dbb02838b93454c5a091ed282.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/782305d1641143a5e135dc2cae63525612861c57e8150e3cee4ee7f1602d419206042471ba68f85efd8002d4290420dbf213cb3dbb02838b93454c5a091ed282.jpg",
+    "Cost": 2000
   },
   {
     "Name": "コレンカプル",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/1fc2d433f063ff686bcdc198662494601ce8496bc9efb28768187fc634a013eba8b5b81cb8a5e9e1ac6e100434a88fe3f564706049f94ea1d3c6ae0152ae8adb.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/1fc2d433f063ff686bcdc198662494601ce8496bc9efb28768187fc634a013eba8b5b81cb8a5e9e1ac6e100434a88fe3f564706049f94ea1d3c6ae0152ae8adb.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ゴッドガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d26062b24ad521eb0fcb0ce512539239bc55039cb866ff6d623b6b16da863415c90f4d566683b3dfac40e774684a8736b6f4f8a5d697e79fa23b9463928ea1c9.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d26062b24ad521eb0fcb0ce512539239bc55039cb866ff6d623b6b16da863415c90f4d566683b3dfac40e774684a8736b6f4f8a5d697e79fa23b9463928ea1c9.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ゴトラタン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e060c9d3b7d7a22d23c5deda192989a3541f1bb390c0589d2aa1992fe194493913ebbe081cf0b9b4fc3b1ca243d1555db43292bf28cd828ab0dd5fff287ee63a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e060c9d3b7d7a22d23c5deda192989a3541f1bb390c0589d2aa1992fe194493913ebbe081cf0b9b4fc3b1ca243d1555db43292bf28cd828ab0dd5fff287ee63a.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ゴールドスモー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e5ac4720f9ec3f0d478afd563f00d0d0385053463efd0c28092e30ad0865e3bc7b936e3848b7c23369c06e2a32fc484f9d25fa0b4ebec14e4545d5eee204bdcd.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e5ac4720f9ec3f0d478afd563f00d0d0385053463efd0c28092e30ad0865e3bc7b936e3848b7c23369c06e2a32fc484f9d25fa0b4ebec14e4545d5eee204bdcd.jpg",
+    "Cost": 2500
   },
   {
     "Name": "サイコ・ザク",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/da9b5490bd6b3437e6a90024a984891da75e6e617cd2aeebb0184daf5853faa11f3acc135b86e75c814ff2ce582e177551e89102ac12d981c2720335bb7de0e5.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/da9b5490bd6b3437e6a90024a984891da75e6e617cd2aeebb0184daf5853faa11f3acc135b86e75c814ff2ce582e177551e89102ac12d981c2720335bb7de0e5.jpg",
+    "Cost": 2500
   },
   {
     "Name": "サザビー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/33a82f35be0a84eda3131bc5316cba0e9b910f9e9985da0c91e1bd074e51b98e15ce0195d05f43047471da1795ee427f978b139d27bedaf9c0d9d081c8c7550e.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/33a82f35be0a84eda3131bc5316cba0e9b910f9e9985da0c91e1bd074e51b98e15ce0195d05f43047471da1795ee427f978b139d27bedaf9c0d9d081c8c7550e.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ザクⅡ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/125be9450751e32b9ef1c16621d4e6ec5b14d4d20e952aea2c2c2a412fc3bee2a95069b12c52874b44f29a0df52fb51a2eeb9c1118f5a47374343f3fe16cb88e.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/125be9450751e32b9ef1c16621d4e6ec5b14d4d20e952aea2c2c2a412fc3bee2a95069b12c52874b44f29a0df52fb51a2eeb9c1118f5a47374343f3fe16cb88e.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ザクⅡ改",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c7ba29084bd09e148dc4e38dc70802fd6e6750059c26214644f63abe8956b8cf83b2476dc166325462b77620aa865d3a95bf4466c1a96dfb65f2a8ccb036f802.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c7ba29084bd09e148dc4e38dc70802fd6e6750059c26214644f63abe8956b8cf83b2476dc166325462b77620aa865d3a95bf4466c1a96dfb65f2a8ccb036f802.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ザクⅢ改",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/06eb422ad4a218bc1d52989d1e8b8ac9ecb1dcb9a8b8f43c1603080d4317b0f2f9f873aab75101d7c398ac9a2135b9bf5fa7f1e1e51643cf1e6b6dca6436675b.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/06eb422ad4a218bc1d52989d1e8b8ac9ecb1dcb9a8b8f43c1603080d4317b0f2f9f873aab75101d7c398ac9a2135b9bf5fa7f1e1e51643cf1e6b6dca6436675b.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ザクアメイジング",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/8e45a14c743b2861a611cd474f7b0b89f0e4ab1b90cbe91ccd994034a8d4667eb098f97f23ad07473a0a4524683bd29a778fc4234be527fd9825834ad791ddb8.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/8e45a14c743b2861a611cd474f7b0b89f0e4ab1b90cbe91ccd994034a8d4667eb098f97f23ad07473a0a4524683bd29a778fc4234be527fd9825834ad791ddb8.jpg",
+    "Cost": 2000
   },
   {
     "Name": "シナンジュ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0af27952ae5ac2c31135e8d225b474e54039c1a629a8456c8609d0bdcc2cdd1b02baac4eb0a094bc2d93455d06d3269dd1827b12b540e2447e824449fce83ffc.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0af27952ae5ac2c31135e8d225b474e54039c1a629a8456c8609d0bdcc2cdd1b02baac4eb0a094bc2d93455d06d3269dd1827b12b540e2447e824449fce83ffc.jpg",
+    "Cost": 3000
   },
   {
     "Name": "シナンジュ・スタイン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/134a62e94a6f7953f190abb35e1eb2b98fcd0b19d7e08f2167d123ed7cc0e707344d6c966245f909cce02c984762f65b268b041fe0645fc21b38ad7afcde3123.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/134a62e94a6f7953f190abb35e1eb2b98fcd0b19d7e08f2167d123ed7cc0e707344d6c966245f909cce02c984762f65b268b041fe0645fc21b38ad7afcde3123.jpg",
+    "Cost": 2000
   },
   {
     "Name": "シャア専用ゲルググ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/99fa6c9fa957c517575c9d795e135b96adf51d77c83f0b46905b9bb6c354641b48e6785b4325bad0cafd45f41fcd64a509035265a7ed96f2348eebae9ee93e88.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/99fa6c9fa957c517575c9d795e135b96adf51d77c83f0b46905b9bb6c354641b48e6785b4325bad0cafd45f41fcd64a509035265a7ed96f2348eebae9ee93e88.jpg",
+    "Cost": 2000
   },
   {
     "Name": "シャア専用ザクⅡ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/3d2ed7e2300683bf67526ad92c2eda2df2fc59d796d6a024dce9a03dca2e0e1ca90d4abe51bb85b58c1437ebf8204d32d9fd2dc1ecb0b0668b9326cec24aaec6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/3d2ed7e2300683bf67526ad92c2eda2df2fc59d796d6a024dce9a03dca2e0e1ca90d4abe51bb85b58c1437ebf8204d32d9fd2dc1ecb0b0668b9326cec24aaec6.jpg",
+    "Cost": 1500
   },
   {
     "Name": "シャイニングガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9b5be3e9603a81b8d7d8a50a27a6600bdb43d1425fc7e5b0bf9fcceee572cca5d0ef36abf3a1756ca0085c777fdc230fd4cbd6659f92f021883fc2803b0daf5d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9b5be3e9603a81b8d7d8a50a27a6600bdb43d1425fc7e5b0bf9fcceee572cca5d0ef36abf3a1756ca0085c777fdc230fd4cbd6659f92f021883fc2803b0daf5d.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ジオング",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/24fb5b292c3602f80ebd0bc3a8e921fee3fcb598b9bc1a2cff0b3c86c39064de1121ffb0f0cb2358aeae76210ba07d1761e1e61b7335ad3fda3fea5177935384.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/24fb5b292c3602f80ebd0bc3a8e921fee3fcb598b9bc1a2cff0b3c86c39064de1121ffb0f0cb2358aeae76210ba07d1761e1e61b7335ad3fda3fea5177935384.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ジャスティスガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/65d47bd1604210153b9e8da7cb1a26720a9e49dae4d020067b93740359f365919d166b61fcf7394a1ad26b6266f0967a5be8caf4739e68213599399319d343a8.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/65d47bd1604210153b9e8da7cb1a26720a9e49dae4d020067b93740359f365919d166b61fcf7394a1ad26b6266f0967a5be8caf4739e68213599399319d343a8.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ジ・O",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6462d5fa90f80bede46afdc40d9ed21f59ae736b9a974eafb41550ee442a8e23b507c0d988bc328ab9981b38417020ee34907269fd93fbe08c5b31fdcb546f97.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6462d5fa90f80bede46afdc40d9ed21f59ae736b9a974eafb41550ee442a8e23b507c0d988bc328ab9981b38417020ee34907269fd93fbe08c5b31fdcb546f97.jpg",
+    "Cost": 2500
   },
   {
     "Name": "スサノオ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4eeae257429f384b125c84ce1ce59e6482b395c23704015b99918fe1dd5d3c30ad64253c29030d66d56fc64052a90c2c52b582d8eb27030c5c804c6a910aabe6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4eeae257429f384b125c84ce1ce59e6482b395c23704015b99918fe1dd5d3c30ad64253c29030d66d56fc64052a90c2c52b582d8eb27030c5c804c6a910aabe6.jpg",
+    "Cost": 2500
   },
   {
     "Name": "スターウイニングガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a2e88f161c48c60400d34193be877014c98fc80e2802508bb7994664e4ee8f8b45adffca31a2dea8c3251feea33c8c732acc16dd7f568e4dea4370022fd614ff.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a2e88f161c48c60400d34193be877014c98fc80e2802508bb7994664e4ee8f8b45adffca31a2dea8c3251feea33c8c732acc16dd7f568e4dea4370022fd614ff.jpg",
+    "Cost": 2500
   },
   {
     "Name": "スターゲイザー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/eddd7da7a3d672b9766ce926087d829975f2843851438d05a42e8b133c6a093fcca46e8783843822c40cb55a71bb8291053007a15312278287c23b93771750f1.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/eddd7da7a3d672b9766ce926087d829975f2843851438d05a42e8b133c6a093fcca46e8783843822c40cb55a71bb8291053007a15312278287c23b93771750f1.jpg",
+    "Cost": 2000
   },
   {
     "Name": "スタービルドストライクガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/87e32cb8ab876c08686681abb9fa1aa99ddb1322e64c6a99f9f07d89bf973c63e2b72bdf6a409e678446fc45cdff4c52066b37037b4732efe397b346d2abacb6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/87e32cb8ab876c08686681abb9fa1aa99ddb1322e64c6a99f9f07d89bf973c63e2b72bdf6a409e678446fc45cdff4c52066b37037b4732efe397b346d2abacb6.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ストライクガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/402f014f40ca1bb6eb5833a78674b5f6d18114699ad3843881ef625f4368e9725d833aa15763713d73013a2c205631e9895802c7c9b728a4f55c344b7d432aeb.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/402f014f40ca1bb6eb5833a78674b5f6d18114699ad3843881ef625f4368e9725d833aa15763713d73013a2c205631e9895802c7c9b728a4f55c344b7d432aeb.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ストライクノワール",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c0f740972d93c8f4c97dfd6affe2d12288f9e0af195acc7c745214d21480a5b637e75c9263d4717d0bbb3006440d9d545c034a0ac990d101c911d749df15516f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c0f740972d93c8f4c97dfd6affe2d12288f9e0af195acc7c745214d21480a5b637e75c9263d4717d0bbb3006440d9d545c034a0ac990d101c911d749df15516f.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ストライクフリーダムガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/437cc6a26e11c8dd758691806736eb44d8a4f4cb58a2a6a96078dd010cdfe4138cfa4ed939d7a6e6776b0bee0e14886afade1a4ee7ed5b97250d560ad403ac29.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/437cc6a26e11c8dd758691806736eb44d8a4f4cb58a2a6a96078dd010cdfe4138cfa4ed939d7a6e6776b0bee0e14886afade1a4ee7ed5b97250d560ad403ac29.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ストライクルージュ（オオトリ装備）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/cca84c849e0e7d0835da7dabc6a0e1879e2dddd80dbcfa72c86f60be5ca9b8b118c95c3c8290f491fd83fa406c41014047007f1209bca9d053f642e86c79db86.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/cca84c849e0e7d0835da7dabc6a0e1879e2dddd80dbcfa72c86f60be5ca9b8b118c95c3c8290f491fd83fa406c41014047007f1209bca9d053f642e86c79db86.jpg",
+    "Cost": 2000
   },
   {
     "Name": "セラヴィーガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/5733ec50c5c7bc4213e5bdb536170da9679da6659899babc7e99c6ff1da8ba35bb5a977ae1ca18aec13ae03d2c2f7ab0a642559b7a0748248937c208a7dfe571.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/5733ec50c5c7bc4213e5bdb536170da9679da6659899babc7e99c6ff1da8ba35bb5a977ae1ca18aec13ae03d2c2f7ab0a642559b7a0748248937c208a7dfe571.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ゼイドラ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/32ed86ffd66d2805e34e2b483f5145d6e5f1573e04f925dd4d834f4b4140f136407694e169654ce1f45c359e35202ccf6e6340d4804922a234fd2e37a7049643.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/32ed86ffd66d2805e34e2b483f5145d6e5f1573e04f925dd4d834f4b4140f136407694e169654ce1f45c359e35202ccf6e6340d4804922a234fd2e37a7049643.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ターンX",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/547fc227f502f137cba9139790e240597f8c66df8799db389c059f75eabb57901dc8ab15980d8f72e260557db06f6e4c315077aee8c61c59ce0792415be5738b.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/547fc227f502f137cba9139790e240597f8c66df8799db389c059f75eabb57901dc8ab15980d8f72e260557db06f6e4c315077aee8c61c59ce0792415be5738b.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ダハック",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f017186602f91dcfdd5eea6c66e619cccb5d6c58c059151df87f791ac4ea6d8e824d1d61624b7d5c0ff9300aa522c169ef5bebf8c1101fe814a2e14630c69ec0.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f017186602f91dcfdd5eea6c66e619cccb5d6c58c059151df87f791ac4ea6d8e824d1d61624b7d5c0ff9300aa522c169ef5bebf8c1101fe814a2e14630c69ec0.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ダブルオーガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/be9f1f2e64dbb6d967e7c4829fcff8170d3ab4b13cadaa6c1a0128cbe3a071dc02f6c3e8c165d8adb7db67fa34477a53bb0d69e1ebe1d17f51d47f194ca6d709.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/be9f1f2e64dbb6d967e7c4829fcff8170d3ab4b13cadaa6c1a0128cbe3a071dc02f6c3e8c165d8adb7db67fa34477a53bb0d69e1ebe1d17f51d47f194ca6d709.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ダブルオーガンダム セブンソード/G",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2054ab65e55067812eae9df1a635c9b7d0dc4bf54fc77a089ed780c5e09713420ab2c49b1a5f327288b7b31887870b6b90c76eb0005f4fb61ca6759977523d1a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2054ab65e55067812eae9df1a635c9b7d0dc4bf54fc77a089ed780c5e09713420ab2c49b1a5f327288b7b31887870b6b90c76eb0005f4fb61ca6759977523d1a.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ダブルオーガンダム セブンソード/G",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/3f03303f82b8e8a75b1134f9805929221260cc4940999426431de12f413711b51568bb6ceb8716d5b8d910d6c46b194c6eebda43922e52efd8fcf35f55b74b04.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/3f03303f82b8e8a75b1134f9805929221260cc4940999426431de12f413711b51568bb6ceb8716d5b8d910d6c46b194c6eebda43922e52efd8fcf35f55b74b04.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ダブルオークアンタ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7ffd2793d16aaef1eddfcab1bf699ec67d348b654f8f07f127558e654f31fa6cda76e6753d431590bf055b1a2837527d001218a1da1da909ab8e3e2d0a7683a4.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7ffd2793d16aaef1eddfcab1bf699ec67d348b654f8f07f127558e654f31fa6cda76e6753d431590bf055b1a2837527d001218a1da1da909ab8e3e2d0a7683a4.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ダブルオークアンタ フルセイバー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/cddbcfe992e41266a083de8e9569a54476e80de52606b9899272193403ac55aeedf57eb9bbcffedc65c9ee81c4620e2e11964f7b00be163f9a31406fe14380bb.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/cddbcfe992e41266a083de8e9569a54476e80de52606b9899272193403ac55aeedf57eb9bbcffedc65c9ee81c4620e2e11964f7b00be163f9a31406fe14380bb.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ダリルバルデ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e8d9f057dd5066a820505a03bca4598f7f752a64dfc6ab883d85a56837b105bfee320233b37a9459f239ee98722df6194ab0ba5aad6886065bf80da68568887a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e8d9f057dd5066a820505a03bca4598f7f752a64dfc6ab883d85a56837b105bfee320233b37a9459f239ee98722df6194ab0ba5aad6886065bf80da68568887a.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ヅダ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7e11dc8d5c628184dc9191985fe62e00f02284b2e9d93ca5cd5bdff0a70d914d3c1f4fdaac636d83ea85b7f3d8bda468ea678a6c409b8b97e6d8612d3e571c18.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7e11dc8d5c628184dc9191985fe62e00f02284b2e9d93ca5cd5bdff0a70d914d3c1f4fdaac636d83ea85b7f3d8bda468ea678a6c409b8b97e6d8612d3e571c18.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ティエレンタオツー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/02a328e9fa72d59409b5b999e4662ff37a3edb5a1048f8137e4c28ef32bded1e4c8a56e3aecd6ed10c0b2383a22c6ab52b5a98b28a9069441936b29204cccceb.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/02a328e9fa72d59409b5b999e4662ff37a3edb5a1048f8137e4c28ef32bded1e4c8a56e3aecd6ed10c0b2383a22c6ab52b5a98b28a9069441936b29204cccceb.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ディジェ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/71fb351554c6420646b006f0b0d835cf85309978da9fcbb239cc53c3ab3dd9fc7614f5cb9fca14d1b159c74d53a894541cc4fabbdcd63dabd6d04b03b04ff2c9.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/71fb351554c6420646b006f0b0d835cf85309978da9fcbb239cc53c3ab3dd9fc7614f5cb9fca14d1b159c74d53a894541cc4fabbdcd63dabd6d04b03b04ff2c9.jpg",
+    "Cost": 2000
   },
   {
     "Name": "デスティニーガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e504504d1ff0614efc8e3aba1637eae211456fb1c90199d75b2799f6a58aabe3f9b79a8aeee4d614f56bc14794b60e9994ae72a1d59dfeb9526c52200fdbaddb.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e504504d1ff0614efc8e3aba1637eae211456fb1c90199d75b2799f6a58aabe3f9b79a8aeee4d614f56bc14794b60e9994ae72a1d59dfeb9526c52200fdbaddb.jpg",
+    "Cost": 3000
   },
   {
     "Name": "デスティニーガンダム（ハイネ機）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c8aa2c269fad18bb198488b642149de819918d950fe45d81bbd88bb8b72ef01bd5ccfa734c2f6e695f275ea54acb216d76474f1e3f695573db5a031eb494ac0f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c8aa2c269fad18bb198488b642149de819918d950fe45d81bbd88bb8b72ef01bd5ccfa734c2f6e695f275ea54acb216d76474f1e3f695573db5a031eb494ac0f.jpg",
+    "Cost": 2500
   },
   {
     "Name": "デュエルガンダムアサルトシュラウド",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/512d24ee7e4407c286c1c57f344967f0e787dccac5dcf7c8bb3e3332a20f742b176c7c83cec8f1351b654253f3423b227f86be65a3ac1b8f2bd924c7961231df.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/512d24ee7e4407c286c1c57f344967f0e787dccac5dcf7c8bb3e3332a20f742b176c7c83cec8f1351b654253f3423b227f86be65a3ac1b8f2bd924c7961231df.jpg",
+    "Cost": 1500
   },
   {
     "Name": "デルタプラス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e1a36bd360743cf6cf85b8e9e4c78d393f5c5e4c151cd1416a24adbd1eeb9f13818da3fb29743671d45c1b67053540287e96ca898f3012781304d880f606fa36.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e1a36bd360743cf6cf85b8e9e4c78d393f5c5e4c151cd1416a24adbd1eeb9f13818da3fb29743671d45c1b67053540287e96ca898f3012781304d880f606fa36.jpg",
+    "Cost": 2000
   },
   {
     "Name": "トライバーニングガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ed59d5d148cfaae39e418e7b3a1bf4c7e77357deaaf909b6a461f366240f00077e69956ada79081e76fe8506e010f4821b84aaa2ac8a4f14968dd1fc3de7d1c6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ed59d5d148cfaae39e418e7b3a1bf4c7e77357deaaf909b6a461f366240f00077e69956ada79081e76fe8506e010f4821b84aaa2ac8a4f14968dd1fc3de7d1c6.jpg",
+    "Cost": 2500
   },
   {
     "Name": "トランジェントガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0cf360977a594caaa0470c1ebab89cbc99823c18c8fe91b8f99363c5ab9efca4d504f4d8076b24696489d42974744bcc24c950ecd7e5257ffb86ce7b02d7f485.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0cf360977a594caaa0470c1ebab89cbc99823c18c8fe91b8f99363c5ab9efca4d504f4d8076b24696489d42974744bcc24c950ecd7e5257ffb86ce7b02d7f485.jpg",
+    "Cost": 2500
   },
   {
     "Name": "トーリスリッター",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d835877d2657c82396888a09a108faa2b4f044473064e3c727a048fb5db8a7b7be3c29a19e4acabca193c9483481bd3a7bd5ea0dd0230fd07bb55517318decac.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d835877d2657c82396888a09a108faa2b4f044473064e3c727a048fb5db8a7b7be3c29a19e4acabca193c9483481bd3a7bd5ea0dd0230fd07bb55517318decac.jpg",
+    "Cost": 2500
   },
   {
     "Name": "トールギス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9905b8cee724ad65e6cb0639b43fd6442e16afd57be1cd9a2a32ddc0a0699a5a6d0b289c80edb0526771ca570510e676876da9639d573cb279defe1cb7035983.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9905b8cee724ad65e6cb0639b43fd6442e16afd57be1cd9a2a32ddc0a0699a5a6d0b289c80edb0526771ca570510e676876da9639d573cb279defe1cb7035983.jpg",
+    "Cost": 2500
   },
   {
     "Name": "トールギスⅡ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/dce1752f84299a41bd5802e514bd0545c1f828668c978ec6b3bfcc6f1cd9b31ea4d11b85abbe648e53cb274de584f90b6d4677d18e72da5f294dc2081a9643ee.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/dce1752f84299a41bd5802e514bd0545c1f828668c978ec6b3bfcc6f1cd9b31ea4d11b85abbe648e53cb274de584f90b6d4677d18e72da5f294dc2081a9643ee.jpg",
+    "Cost": 2500
   },
   {
     "Name": "トールギスⅢ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ca7d06bce903b8bf8d8796171a82ff5621aec6a7fee0eb2d040f40122b64ef4e67998fe3f9250f1a8b4bd18e9c77c65a6d662e885c9e08a0f63a78fd0f8c0813.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ca7d06bce903b8bf8d8796171a82ff5621aec6a7fee0eb2d040f40122b64ef4e67998fe3f9250f1a8b4bd18e9c77c65a6d662e885c9e08a0f63a78fd0f8c0813.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ドラゴンガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/080c1c80ad0e79db33c6b715b584a90421a0f448fa67e4efedb4f91b4ef12ee866f11dd33bb7ac0edcfdb3451343b9b0f85a68e8f83ec05118bd48b27d9d7d40.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/080c1c80ad0e79db33c6b715b584a90421a0f448fa67e4efedb4f91b4ef12ee866f11dd33bb7ac0edcfdb3451343b9b0f85a68e8f83ec05118bd48b27d9d7d40.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ドレッドノートイータ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/30325c540b8add9ff9a10a214dd63352121ffb9c28e72d5228cc791c23e68cd5f591bb29e33f84b135bca2bc64c0126c20c8c2a0064844312995bd3205b938b0.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/30325c540b8add9ff9a10a214dd63352121ffb9c28e72d5228cc791c23e68cd5f591bb29e33f84b135bca2bc64c0126c20c8c2a0064844312995bd3205b938b0.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ドレッドノートガンダム（Xアストレイ）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c567900331c2f6b29dd8db248ebd2370a882e7479c7196f4b160853dd37aa9719a4e885829c6f3077c78d1ac5432b673bbc960095a2b6110115a72dca0797dae.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c567900331c2f6b29dd8db248ebd2370a882e7479c7196f4b160853dd37aa9719a4e885829c6f3077c78d1ac5432b673bbc960095a2b6110115a72dca0797dae.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ドーベン・ウルフ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e272864d4bdc7b40e52944cd6480ea93bbd68288356c670b2b0f78c7d7566e85ba66746b3ed1f577d0edf89d1fd447ce3524cac29a765796c11fdf9ab81b9f4d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e272864d4bdc7b40e52944cd6480ea93bbd68288356c670b2b0f78c7d7566e85ba66746b3ed1f577d0edf89d1fd447ce3524cac29a765796c11fdf9ab81b9f4d.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ナイチンゲール",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/eda426e21cc47e25f8c98c0cc5bd3795fd3cdc8de0ce9af2ed35788ec83a3ea5856c90ff2038019d16d80dd05128036b5ef518424dc2c22c97b067b39d3840b0.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/eda426e21cc47e25f8c98c0cc5bd3795fd3cdc8de0ce9af2ed35788ec83a3ea5856c90ff2038019d16d80dd05128036b5ef518424dc2c22c97b067b39d3840b0.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ナラティブガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/29c77c186c39131f26d16b14c5cd3718cdb9a444f6e34f21b2453e34f0555e76883afc835d67098d094b35196c6c163fb9213c581360b467df801abe3cd38ccc.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/29c77c186c39131f26d16b14c5cd3718cdb9a444f6e34f21b2453e34f0555e76883afc835d67098d094b35196c6c163fb9213c581360b467df801abe3cd38ccc.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ノーベルガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/751c63de05f5ac91b6ba8437d89d1ceaaf3a36066af47515c2ed1ab305257b6e7ad44a325ac304a944fa352c2bf579afb5f67431626ee0c102c4a3ef74745225.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/751c63de05f5ac91b6ba8437d89d1ceaaf3a36066af47515c2ed1ab305257b6e7ad44a325ac304a944fa352c2bf579afb5f67431626ee0c102c4a3ef74745225.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ハイペリオンガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d33628d98a760f815e11aa7ca15ed20445e4ff3a8e4a4da6a032403dd1cacacb93fa76a4bb77e63736ccbb8f08259e222a8b3899cf947363058a88d807b3eabc.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d33628d98a760f815e11aa7ca15ed20445e4ff3a8e4a4da6a032403dd1cacacb93fa76a4bb77e63736ccbb8f08259e222a8b3899cf947363058a88d807b3eabc.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ハンブラビ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4b29989d0d4a37127bc2c7f6f21cf970dbfc309494ac15f37acea12487cd7a28dccf89b02c91f18ce511fe8bd03e08087ebeb8fc7ee6fc86003bd2b06dd78853.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4b29989d0d4a37127bc2c7f6f21cf970dbfc309494ac15f37acea12487cd7a28dccf89b02c91f18ce511fe8bd03e08087ebeb8fc7ee6fc86003bd2b06dd78853.jpg",
+    "Cost": 2500
   },
   {
     "Name": "バウンド・ドック",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b28c3d120f0b9e8a49d0df0141fded4cc55e6ece974b882f160f0e7e4a46a6bade1dbcda5832ac13edadb110ec63843b070c0503cffbf0ddfcec2f4f7937f754.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b28c3d120f0b9e8a49d0df0141fded4cc55e6ece974b882f160f0e7e4a46a6bade1dbcda5832ac13edadb110ec63843b070c0503cffbf0ddfcec2f4f7937f754.jpg",
+    "Cost": 2500
   },
   {
     "Name": "バスターガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/631ae8fb763978d9d2e2a43f5999cb51c173797b4890f08b8befa12098d75e265438fed1c3daad05e635f8a05a1ea10d4fae50fd4ea8dc748b67078e3089fdfb.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/631ae8fb763978d9d2e2a43f5999cb51c173797b4890f08b8befa12098d75e265438fed1c3daad05e635f8a05a1ea10d4fae50fd4ea8dc748b67078e3089fdfb.jpg",
+    "Cost": 1500
   },
   {
     "Name": "バンシィ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7372bca7f0a7ef3039180675d1220ff60bcdef2eb51f1f68815ae1e81717bfe5976af2422096a7a26650878c3a8ed866f5f52169c5091838c0f6a3b7e2db7202.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7372bca7f0a7ef3039180675d1220ff60bcdef2eb51f1f68815ae1e81717bfe5976af2422096a7a26650878c3a8ed866f5f52169c5091838c0f6a3b7e2db7202.jpg",
+    "Cost": 2500
   },
   {
     "Name": "バンシィ・ノルン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/917942194e8ceb5719add9b202bdab1377651a1df5214f2ee61a80e8c73a32808db13d1aa8db912ac246b3d6b2cf700717d07b269270c827d8424c55fbcd6671.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/917942194e8ceb5719add9b202bdab1377651a1df5214f2ee61a80e8c73a32808db13d1aa8db912ac246b3d6b2cf700717d07b269270c827d8424c55fbcd6671.jpg",
+    "Cost": 3000
   },
   {
     "Name": "パーフェクトストライクガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2c2e380b4ab382711923669e11f6648f0a650494e04c9af64359d9daa0b7994074e0af749497aad9a92b7d7b342422bc8fa73663f18f64620c8a7f2ff74d50cf.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2c2e380b4ab382711923669e11f6648f0a650494e04c9af64359d9daa0b7994074e0af749497aad9a92b7d7b342422bc8fa73663f18f64620c8a7f2ff74d50cf.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ヒルドルブ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/88e82451d38ce2a3358eeaec5fdbd00ab870f2e697969d7451c90736c945b3ed12819b748967fb706ffc9ce9e82d9ce4e31dbb003de7c94a2957f5fdf772326f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/88e82451d38ce2a3358eeaec5fdbd00ab870f2e697969d7451c90736c945b3ed12819b748967fb706ffc9ce9e82d9ce4e31dbb003de7c94a2957f5fdf772326f.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ビギナ・ギナⅡ（木星決戦仕様）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6ea03a93a6148e78bd2283f78a47d5247c1637a0232aad7a0d6462eb301d829f22ba03a7c0af97918e60324d029af7493a5bdf5736e5fa2569f084504008925d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6ea03a93a6148e78bd2283f78a47d5247c1637a0232aad7a0d6462eb301d829f22ba03a7c0af97918e60324d029af7493a5bdf5736e5fa2569f084504008925d.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ビルドストライクガンダム（フルパッケージ）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c2ba164d6f29007d8023adcbc0a2d55073d69b19f6c3a3da7652e261ccb8c5760125a006ef614930e850be36cd52bd5d3f7766068ecae46bd3ea039725fa9a23.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c2ba164d6f29007d8023adcbc0a2d55073d69b19f6c3a3da7652e261ccb8c5760125a006ef614930e850be36cd52bd5d3f7766068ecae46bd3ea039725fa9a23.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ファルシア",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4a753254f18cbbe3b3b029bb941659dbcb1b8b4dd8f11502d74230b599eb3dbfeb7af318faafed70c4cdef72f2c4825bf467d23982f0bf731a7200ef2e0220f9.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/4a753254f18cbbe3b3b029bb941659dbcb1b8b4dd8f11502d74230b599eb3dbfeb7af318faafed70c4cdef72f2c4825bf467d23982f0bf731a7200ef2e0220f9.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ファントムガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2c2252cf4c43621b40d1c717b354f05fbc2a9a06c3c9e9328788e2816375b3c3dc477353115637f532a12a2da1c27a3bb62949b47dd43d95eaaf5434bfff6531.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/2c2252cf4c43621b40d1c717b354f05fbc2a9a06c3c9e9328788e2816375b3c3dc477353115637f532a12a2da1c27a3bb62949b47dd43d95eaaf5434bfff6531.jpg",
+    "Cost": 2500
   },
   {
     "Name": "フォビドゥンガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/5e9f3574c3b1843deb7a5474fce03a3bdbd5c9bac902e34afcefa6670f81225b322a04b102261d14b0d88f29372c390443cf9ae76f862c66c07cd4867f08ec6d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/5e9f3574c3b1843deb7a5474fce03a3bdbd5c9bac902e34afcefa6670f81225b322a04b102261d14b0d88f29372c390443cf9ae76f862c66c07cd4867f08ec6d.jpg",
+    "Cost": 2000
   },
   {
     "Name": "フォーンファルシア",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/307cf74382d6664ad0c7011dda34d40fdaeaee13c69523c79b9ab5939e347369a3715b818e7da66b48178da1b167587c49f16212c6aa24a6b867b8bb81876882.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/307cf74382d6664ad0c7011dda34d40fdaeaee13c69523c79b9ab5939e347369a3715b818e7da66b48178da1b167587c49f16212c6aa24a6b867b8bb81876882.jpg",
+    "Cost": 2500
   },
   {
     "Name": "フリーダムガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/37f4c6c003dcbcf90bae32705850e6dcd2681490c553a492d0566cd8a27f0c20b296287ad4d6d8a40f3b9ea4ef32add162e286bd3795b8400a45210bf6effcc1.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/37f4c6c003dcbcf90bae32705850e6dcd2681490c553a492d0566cd8a27f0c20b296287ad4d6d8a40f3b9ea4ef32add162e286bd3795b8400a45210bf6effcc1.jpg",
+    "Cost": 2500
   },
   {
     "Name": "フルアーマーZZガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/80d10d181b926529c60ba2fac0b509c43e010830911c1fe2bf8e23e064993182cc93b1be7ed72ef326721ebec03a48cc01a2f35ff814017694c252dbcb66251d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/80d10d181b926529c60ba2fac0b509c43e010830911c1fe2bf8e23e064993182cc93b1be7ed72ef326721ebec03a48cc01a2f35ff814017694c252dbcb66251d.jpg",
+    "Cost": 3000
   },
   {
     "Name": "フルアーマー・ガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a3dbd10e4c07b899f569e0312341a32bc77dd2735cb60cd295ae4863897a1eca488662aaac73d9aa0938d5caa97e96649f027e4813da1eb70ce3085846b217c8.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a3dbd10e4c07b899f569e0312341a32bc77dd2735cb60cd295ae4863897a1eca488662aaac73d9aa0938d5caa97e96649f027e4813da1eb70ce3085846b217c8.jpg",
+    "Cost": 2500
   },
   {
     "Name": "フルアーマー・ユニコーンガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/23218b939971780601bbdfa0c0260439c883d7410b99a063ecfeee062a785aa5730deea401c84ba358dfe3d6f86cdaccd644d2f3fb6fd802ea113a732d692dd9.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/23218b939971780601bbdfa0c0260439c883d7410b99a063ecfeee062a785aa5730deea401c84ba358dfe3d6f86cdaccd644d2f3fb6fd802ea113a732d692dd9.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ブリッツガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/756e2716d06d33aaed606f18e4d383a813d53e90c5bd4f716c02e27512f131eaeda8876871c4f7355ad6b762d941687a24b4e518ff100179b403ce3415f220f0.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/756e2716d06d33aaed606f18e4d383a813d53e90c5bd4f716c02e27512f131eaeda8876871c4f7355ad6b762d941687a24b4e518ff100179b403ce3415f220f0.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ブルーディスティニー1号機",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/57fb68fa7cbc27b4eadc9a94b8f919ed98351a30c07c34155c95ad52039a67f744ba07cc430785b5a92dd9c125feab4b1f4f7382462b5e8f2fdf135877a4fc67.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/57fb68fa7cbc27b4eadc9a94b8f919ed98351a30c07c34155c95ad52039a67f744ba07cc430785b5a92dd9c125feab4b1f4f7382462b5e8f2fdf135877a4fc67.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ブレイヴ指揮官用試験機",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ac8b6bdf0244785d1080783fa15bd1f2e2f76b5510a6e62379eccf93208c1d39244df9f923cdbfef2c97193322021953ba629bce803631fd72addfcc5d983982.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ac8b6bdf0244785d1080783fa15bd1f2e2f76b5510a6e62379eccf93208c1d39244df9f923cdbfef2c97193322021953ba629bce803631fd72addfcc5d983982.jpg",
+    "Cost": 2500
   },
   {
     "Name": "プロヴィデンスガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6cc400e302f81d5b0da9cdebfd5dd229400215449b106eba2d596d2f7b88288af97961820a82136ec830c7107ed0ff9400f15fc9ee6b30282083e2037591a737.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6cc400e302f81d5b0da9cdebfd5dd229400215449b106eba2d596d2f7b88288af97961820a82136ec830c7107ed0ff9400f15fc9ee6b30282083e2037591a737.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ヘカテー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/58f19cd542ed69c83a8ce92726f8328baf645e401804b90fe2f71a5c801b529e8543fc9589d2728f4db778a402f56d70c4184ff1c9565f8fc8393a9437b3167a.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/58f19cd542ed69c83a8ce92726f8328baf645e401804b90fe2f71a5c801b529e8543fc9589d2728f4db778a402f56d70c4184ff1c9565f8fc8393a9437b3167a.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ベルガ・ギロス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/8bb4e7d7cc4277fe804628951453439609c0b082747695a0abba8b27c165cdb66f36bf400d710d1e7f15e80c400b342530615e6486a0473bbc1f3a9e228d2df8.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/8bb4e7d7cc4277fe804628951453439609c0b082747695a0abba8b27c165cdb66f36bf400d710d1e7f15e80c400b342530615e6486a0473bbc1f3a9e228d2df8.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ベルティゴ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c0d89e7048e93ca119f747592acb7aa56643d7dd220ce01c6f12653a6797ab657265cbfbb529c0745f4dec55a0986aee7185661888372b6daf950fdd3125d069.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c0d89e7048e93ca119f747592acb7aa56643d7dd220ce01c6f12653a6797ab657265cbfbb529c0745f4dec55a0986aee7185661888372b6daf950fdd3125d069.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ペイルライダー（陸戦重装仕様）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d5f94b324409024d2baa1cf7c30699f8f5bed4b1e6a44afef158566d579be066ed01cd7ae916dd127f18096b52cf944544489468e7530d02f9af9db24d45ce94.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/d5f94b324409024d2baa1cf7c30699f8f5bed4b1e6a44afef158566d579be066ed01cd7ae916dd127f18096b52cf944544489468e7530d02f9af9db24d45ce94.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ペーネロペー",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/aaaa148b7fed10b5228c760215ed55572568f8b38d2354a14bad4c0406551e1b0a7b3ad0cc2ecb2f6fe5d8c7a619d16844512d32e4af039502300c1ce467f832.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/aaaa148b7fed10b5228c760215ed55572568f8b38d2354a14bad4c0406551e1b0a7b3ad0cc2ecb2f6fe5d8c7a619d16844512d32e4af039502300c1ce467f832.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ホットスクランブルガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/95dd1344aa34ae0a3826e542c57f0a673c86279c61507b088145397314ab820ea3643d0548fb0d22c9a98acfb054ab692098fe4d371c2ff0a71eec85ba58b87d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/95dd1344aa34ae0a3826e542c57f0a673c86279c61507b088145397314ab820ea3643d0548fb0d22c9a98acfb054ab692098fe4d371c2ff0a71eec85ba58b87d.jpg",
+    "Cost": 3000
   },
   {
     "Name": "マイティーストライクフリーダムガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/464e5518682eae11709d7b7139c024084d6c78d3fb207510d337b89ef1628730102b9b0f49aff9032246f26e691dd3cb89040ef54365a6f2db9018daa28c8185.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/464e5518682eae11709d7b7139c024084d6c78d3fb207510d337b89ef1628730102b9b0f49aff9032246f26e691dd3cb89040ef54365a6f2db9018daa28c8185.jpg",
+    "Cost": 3000
   },
   {
     "Name": "マスターガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/69db342b12a6e02f73f5a5b353ffdaeaf30d611a68fd581d0d94fc39ef93b032683b6a788b989c83ce4e38df7353bd850322b12a7dc4cc388f6370fbb5da2128.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/69db342b12a6e02f73f5a5b353ffdaeaf30d611a68fd581d0d94fc39ef93b032683b6a788b989c83ce4e38df7353bd850322b12a7dc4cc388f6370fbb5da2128.jpg",
+    "Cost": 3000
   },
   {
     "Name": "マックナイフ（マスク機）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/23bedbf8ece170326bc2ea8876fdc7f3da7b11f7ed8d767fb5902c3c53597b981e521bf40ef7f2dc85f44853ee84e866c6377ff0cd818f82ec7b47f5c9231113.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/23bedbf8ece170326bc2ea8876fdc7f3da7b11f7ed8d767fb5902c3c53597b981e521bf40ef7f2dc85f44853ee84e866c6377ff0cd818f82ec7b47f5c9231113.jpg",
+    "Cost": 2000
   },
   {
     "Name": "マラサイ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e099e616c6aa4da23f0336d9558f09ff081e46f9303ad3c5954b9fad2cdb5cf4cf4d873e7d6603ca223bdfb45b4cf5203d782ef7cfacc880b208448ebd581a07.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/e099e616c6aa4da23f0336d9558f09ff081e46f9303ad3c5954b9fad2cdb5cf4cf4d873e7d6603ca223bdfb45b4cf5203d782ef7cfacc880b208448ebd581a07.jpg",
+    "Cost": 2000
   },
   {
     "Name": "メッサーラ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6b6ebfc041d6958b781d62f982a371c47a04f74946835b1ee0851ab255a9970d818093514d39ab1a4939ce05e271b9d7f498587619254de6f9bf5ecd1823cba1.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/6b6ebfc041d6958b781d62f982a371c47a04f74946835b1ee0851ab255a9970d818093514d39ab1a4939ce05e271b9d7f498587619254de6f9bf5ecd1823cba1.jpg",
+    "Cost": 2000
   },
   {
     "Name": "モンテーロ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/36e133bd22eec100e812baec215b1734f4cae850be2650d04c8d40e410e4574b21c5404887b609ff0c5c1d0b8fe63fff8914564db2e64861b48b5d8230584346.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/36e133bd22eec100e812baec215b1734f4cae850be2650d04c8d40e410e4574b21c5404887b609ff0c5c1d0b8fe63fff8914564db2e64861b48b5d8230584346.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ヤクト・ドーガ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/1b087ddd52bded746e37be2e53db00dfab6d27c521f8d8d4e1c64372bb5ca4d4a774ec3bee867bb8a1e367ec88d8e7efafcf65355e16711695d52699b8d18d29.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/1b087ddd52bded746e37be2e53db00dfab6d27c521f8d8d4e1c64372bb5ca4d4a774ec3bee867bb8a1e367ec88d8e7efafcf65355e16711695d52699b8d18d29.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ヤークトアルケーガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/64cb76e81b022d96817c7a3b75c97b3919262ff6f92a16cde8693031c64bd349b2a65b7717c18ed1f1df77ecf1a103e2e1e0e3b9230c1044ce73a13d138b90d3.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/64cb76e81b022d96817c7a3b75c97b3919262ff6f92a16cde8693031c64bd349b2a65b7717c18ed1f1df77ecf1a103e2e1e0e3b9230c1044ce73a13d138b90d3.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ユニコーンガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c7aefa2af6ec7ea538d78c2c429cd2295c8be11153bf868eb2a73b26de19ed33a8aac314b0259ed3b6a8aebde7224c2a5701c4d4d9bbe11e50a55a0c57cec3b5.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/c7aefa2af6ec7ea538d78c2c429cd2295c8be11153bf868eb2a73b26de19ed33a8aac314b0259ed3b6a8aebde7224c2a5701c4d4d9bbe11e50a55a0c57cec3b5.jpg",
+    "Cost": 3000
   },
   {
     "Name": "ユニコーンガンダム3号機フェネクス",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/bb411935ff845ec114188f32dc7d2c5e89022550138399289bdabd5f2942f7d92c6f8e8cad30e1f105607dc18dd77654abfff369a7dcf036913f8317d7bc1724.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/bb411935ff845ec114188f32dc7d2c5e89022550138399289bdabd5f2942f7d92c6f8e8cad30e1f105607dc18dd77654abfff369a7dcf036913f8317d7bc1724.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ライジングガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/29c76db124aa88eca6c5f9422676a7254ef8889d6dae47f77da648ef4e68fc07f7f2c9376d520f392c3df621945047145f88077a5ba5323ec3f66d51e2059cb9.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/29c76db124aa88eca6c5f9422676a7254ef8889d6dae47f77da648ef4e68fc07f7f2c9376d520f392c3df621945047145f88077a5ba5323ec3f66d51e2059cb9.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ライジングフリーダムガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9060425210c8e8d8b4fbbf578ff3523b865a68848b97e7eb7891f57b1197613c535906b3476ffb6155d12b6470b5cf7e52507d705d0851ebf5e5495dd2c50994.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9060425210c8e8d8b4fbbf578ff3523b865a68848b97e7eb7891f57b1197613c535906b3476ffb6155d12b6470b5cf7e52507d705d0851ebf5e5495dd2c50994.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ライトニングガンダムフルバーニアン",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/215fea132f33a3dddfe371c6ec6c94f7a282ca272988b2ee08cbfeeaa04f2888bbb3b6a87bee4750be7cd6063db9b82ad4194e5755cc8a7a7b746e890983a94c.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/215fea132f33a3dddfe371c6ec6c94f7a282ca272988b2ee08cbfeeaa04f2888bbb3b6a87bee4750be7cd6063db9b82ad4194e5755cc8a7a7b746e890983a94c.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ラゴゥ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a49f359acb1fdf425b086b72378d5e556293e1fa0a909bac7f11251508cdb63d11a987b7a7b4bc5fa442e0bc0d7aba76060cdc1d481931009621681a5ecb5c59.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/a49f359acb1fdf425b086b72378d5e556293e1fa0a909bac7f11251508cdb63d11a987b7a7b4bc5fa442e0bc0d7aba76060cdc1d481931009621681a5ecb5c59.jpg",
+    "Cost": 1500
   },
   {
     "Name": "ラファエルガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f8d27298b087bef4b08b75be3af97608c10818920f4a37e53e4f0477e7f3dc6812059ee08dbdff909dc23aa551f7a76251c950906caef05e987141c59a4f96b6.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f8d27298b087bef4b08b75be3af97608c10818920f4a37e53e4f0477e7f3dc6812059ee08dbdff909dc23aa551f7a76251c950906caef05e987141c59a4f96b6.jpg",
+    "Cost": 2500
   },
   {
     "Name": "リグ・コンティオ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7206af2dd0ae55cce59298f8c260a726966b4fa42ff5556efc204eefc146b0b3e5ef0ec6f09120a8a8dad8da06493142111115557fd19c400c99f77cdddc970d.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/7206af2dd0ae55cce59298f8c260a726966b4fa42ff5556efc204eefc146b0b3e5ef0ec6f09120a8a8dad8da06493142111115557fd19c400c99f77cdddc970d.jpg",
+    "Cost": 2500
   },
   {
     "Name": "リボーンズガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f9b26e9354c1c0f344bccae65d165524d2db3f3d9cb5d2bd4f79fb8bc69a8868de4dcabcf277a8d3d908367f5f7d6383317cd2277e7896a2ba7532fd8c2d1ec5.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/f9b26e9354c1c0f344bccae65d165524d2db3f3d9cb5d2bd4f79fb8bc69a8868de4dcabcf277a8d3d908367f5f7d6383317cd2277e7896a2ba7532fd8c2d1ec5.jpg",
+    "Cost": 3000
   },
   {
     "Name": "リ・ガズィ",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/bba306e767d38f54dd3afd679eec641c4a7375220c860f7a9249d36d4447953e4f79d51bafdce43c9aa32c5709ce543cbcd7465299c101b9b97a1d196d17ea3f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/bba306e767d38f54dd3afd679eec641c4a7375220c860f7a9249d36d4447953e4f79d51bafdce43c9aa32c5709ce543cbcd7465299c101b9b97a1d196d17ea3f.jpg",
+    "Cost": 1500
   },
   {
     "Name": "レイダーガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/1c2e878b98831cfd485346d6990793ce2f3bd863fe31e7d986290576a9dc7ed26558c9fbcb67045cd6aef4c08ed6d39321bf4111238cd22acdf52076c44691a4.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/1c2e878b98831cfd485346d6990793ce2f3bd863fe31e7d986290576a9dc7ed26558c9fbcb67045cd6aef4c08ed6d39321bf4111238cd22acdf52076c44691a4.jpg",
+    "Cost": 2000
   },
   {
     "Name": "レジェンドガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b6d7cb050ee206103392f7b6e9dd3e96a5026f7b4a227b0527bfc78baf4c480136620e070c37259a54d76a253cc4ffa2cd006609303ce73e0acb218495d9293f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b6d7cb050ee206103392f7b6e9dd3e96a5026f7b4a227b0527bfc78baf4c480136620e070c37259a54d76a253cc4ffa2cd006609303ce73e0acb218495d9293f.jpg",
+    "Cost": 2500
   },
   {
     "Name": "ローゼン・ズール",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9538702c1629e5831f86f34aaf484ea7176fe2cc930cd6285be5ff50f55985687a747817aa95585c04ff88b2f3d4b0f347c4459a3681d9b3aacb5be5106afe87.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/9538702c1629e5831f86f34aaf484ea7176fe2cc930cd6285be5ff50f55985687a747817aa95585c04ff88b2f3d4b0f347c4459a3681d9b3aacb5be5106afe87.jpg",
+    "Cost": 2000
   },
   {
     "Name": "ヴィクトリーガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/740c0b7052956e6f3470fcd85a86d300f89d92dd66f60767f06ec3d9bdde54463fd858d9c1659b367e57bc641fbfb9faba520a8b6a4b33d39f08ffd24ab79f3c.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/740c0b7052956e6f3470fcd85a86d300f89d92dd66f60767f06ec3d9bdde54463fd858d9c1659b367e57bc641fbfb9faba520a8b6a4b33d39f08ffd24ab79f3c.jpg",
+    "Cost": 2000
   },
   {
     "Name": "戦国アストレイ頑駄無",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/08c4541a5f8eb55e00160421d79e980263fc47b111c8ef2500b90efcd64079c3da8be8e58f536655439c45384906537ca0234576708138b1a7cd1a3ee0baabb0.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/08c4541a5f8eb55e00160421d79e980263fc47b111c8ef2500b90efcd64079c3da8be8e58f536655439c45384906537ca0234576708138b1a7cd1a3ee0baabb0.jpg",
+    "Cost": 2500
   },
   {
     "Name": "百式",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/242c280b207ff5d63ea818dc19b2460b02290bac828aa2ea1e9812d67a28fb76c6af6e8be91acb1baec939ffdb73c8397147f00a152c85b714674aa0a5bd5562.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/242c280b207ff5d63ea818dc19b2460b02290bac828aa2ea1e9812d67a28fb76c6af6e8be91acb1baec939ffdb73c8397147f00a152c85b714674aa0a5bd5562.jpg",
+    "Cost": 2500
   },
   {
     "Name": "赤いガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ce126289fa4259a64a1c3cf971a4072807a37ebc85d49dd541d102e7c60842e4d75b3aa432fc258af4c53c8eb67f65760d66f887704c5ed19256580c870026cb.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/ce126289fa4259a64a1c3cf971a4072807a37ebc85d49dd541d102e7c60842e4d75b3aa432fc258af4c53c8eb67f65760d66f887704c5ed19256580c870026cb.jpg",
+    "Cost": 2000
   },
   {
     "Name": "騎士ガンダム",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/44b573dc2b2d1d0278c8e2341b4b0661cfe193454dab91887131474b898f14ce5769ec8a33f69e9c32f2f92faf6e79ee1fe0dd0567333d50f56cae0cb445c4eb.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/44b573dc2b2d1d0278c8e2341b4b0661cfe193454dab91887131474b898f14ce5769ec8a33f69e9c32f2f92faf6e79ee1fe0dd0567333d50f56cae0cb445c4eb.jpg",
+    "Cost": 2500
   },
   {
     "Name": "高機動型ゲルググ（ヴィンセント機）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0a21dd6051044972ee5219ace6333b8055da7b1fb5323791ac9dbc50e7908b083be1989809e2d69580856e94b9c6a8bf16af9524f12c942f2c02fb17a21d0fa8.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/0a21dd6051044972ee5219ace6333b8055da7b1fb5323791ac9dbc50e7908b083be1989809e2d69580856e94b9c6a8bf16af9524f12c942f2c02fb17a21d0fa8.jpg",
+    "Cost": 2000
   },
   {
     "Name": "高機動型ザクⅡ 後期型（ジョニー・ライデン機）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/3ab26680f9d7efb8ff8d232347bd2f2b931dc8e47a59600a0fd0739aea2d58ebcdf288f27848fb8ed0d37778829bd63f6fb8c0d57460924abcfc5c2faab934fa.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/3ab26680f9d7efb8ff8d232347bd2f2b931dc8e47a59600a0fd0739aea2d58ebcdf288f27848fb8ed0d37778829bd63f6fb8c0d57460924abcfc5c2faab934fa.jpg",
+    "Cost": 2000
   },
   {
     "Name": "高機動型ザクⅡ改（シン・マツナガ機）",
-    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b9ffa432e42c80d5a9b33c326bfc2bef2f32b0c8b6b2791a0128f67ec412edd42f64a0711249fa1120f5c1b5ddf09dd53e71b4dfbb621c1d095cd8fb0d23f86f.jpg"
+    "ImageURL": "https://resource.exvs2ib.vsmobile.jp/images/b9ffa432e42c80d5a9b33c326bfc2bef2f32b0c8b6b2791a0128f67ec412edd42f64a0711249fa1120f5c1b5ddf09dd53e71b4dfbb621c1d095cd8fb0d23f86f.jpg",
+    "Cost": 2000
   }
 ]
