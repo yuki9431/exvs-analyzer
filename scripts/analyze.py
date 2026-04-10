@@ -210,7 +210,7 @@ def md_win_loss_pattern(data_list):
 
     w_eff = dmg_efficiency(wins) if wins else 0
     l_eff = dmg_efficiency(losses) if losses else 0
-    lines.append(f"| **ダメ効率** | **{w_eff:.3f}** | **{l_eff:.3f}** | {w_eff - l_eff:+.3f} |")
+    lines.append(f"| **与被ダメ比** | **{w_eff:.3f}** | **{l_eff:.3f}** | {w_eff - l_eff:+.3f} |")
     lines.append("")
 
     # セクション別アドバイス
@@ -247,7 +247,7 @@ def md_enemy_matchup(data_list, min_matches=3):
     weak = sorted([r for r in results if r[2] <= 40], key=lambda x: -x[1])
     even = sorted([r for r in results if 40 < r[2] < 60], key=lambda x: -x[1])
 
-    header_row = "| 機体名 | 試合 | 勝率 | ダメ効率 | 与ダメ | 被ダメ |"
+    header_row = "| 機体名 | 試合 | 勝率 | 与被ダメ比 | 与ダメ | 被ダメ |"
     header_sep = "|--------|------|------|----------|--------|--------|"
     lines = []
 
@@ -306,7 +306,7 @@ def md_partner(data_list, min_matches=3):
 
     results.sort(key=lambda x: -x[1])
     lines = [
-        "| 相方機体 | 試合 | 勝率 | ダメ効率 |",
+        "| 相方機体 | 試合 | 勝率 | 与被ダメ比 |",
         "|----------|------|------|----------|",
     ]
     for ms, n, wr, eff in results:
@@ -322,7 +322,7 @@ def md_deaths_impact(data_list):
         by_deaths[key].append(d)
 
     lines = [
-        "| 被撃墜 | 試合 | 勝率 | ダメ効率 |",
+        "| 被撃墜 | 試合 | 勝率 | 与被ダメ比 |",
         "|--------|------|------|----------|",
     ]
     for key in ["0回", "1回", "2回", "3回以上"]:
@@ -346,7 +346,7 @@ def md_time_of_day(data_list):
         hourly[d["datetime"].hour].append(d)
 
     lines = [
-        "| 時間帯 | 試合 | 勝率 | ダメ効率 | |",
+        "| 時間帯 | 試合 | 勝率 | 与被ダメ比 | |",
         "|--------|------|------|----------|-|",
     ]
     for hour in sorted(hourly.keys()):
@@ -380,10 +380,10 @@ def md_day_of_week(data_list):
     weekend_data = [d for d in data_list if d["datetime"].weekday() >= 5]
 
     lines = [
-        f"- **平日**: {len(weekday_data)}戦 勝率{win_rate(weekday_data):.1f}% ダメ効率{dmg_efficiency(weekday_data):.3f}",
-        f"- **土日**: {len(weekend_data)}戦 勝率{win_rate(weekend_data):.1f}% ダメ効率{dmg_efficiency(weekend_data):.3f}",
+        f"- **平日**: {len(weekday_data)}戦 勝率{win_rate(weekday_data):.1f}% 与被ダメ比{dmg_efficiency(weekday_data):.3f}",
+        f"- **土日**: {len(weekend_data)}戦 勝率{win_rate(weekend_data):.1f}% 与被ダメ比{dmg_efficiency(weekend_data):.3f}",
         "",
-        "| 曜日 | 試合 | 勝率 | ダメ効率 |",
+        "| 曜日 | 試合 | 勝率 | 与被ダメ比 |",
         "|------|------|------|----------|",
     ]
     for dow in range(7):
@@ -412,7 +412,7 @@ def md_daily_trend(data_list):
 
     DOW_NAMES = ["月", "火", "水", "木", "金", "土", "日"]
     lines = [
-        "| 日付 | 曜日 | 試合 | 勝率 | ダメ効率 | |",
+        "| 日付 | 曜日 | 試合 | 勝率 | 与被ダメ比 | |",
         "|------|------|------|------|----------|-|",
     ]
     for date_str in sorted(daily.keys()):
@@ -493,7 +493,7 @@ def md_fixed_partners(all_data):
 
         if len(partner_ms_stats) > 1 or any(len(v) >= 2 for v in partner_ms_stats.values()):
             lines.append("\n**相方の使用機体別:**\n")
-            lines.append("| 機体 | 試合 | 勝率 | 相方ダメ効率 |")
+            lines.append("| 機体 | 試合 | 勝率 | 相方与被ダメ比 |")
             lines.append("|------|------|------|-------------|")
             for ms in sorted(partner_ms_stats.keys(), key=lambda x: -len(partner_ms_stats[x])):
                 ms_data = partner_ms_stats[ms]
@@ -506,7 +506,7 @@ def md_fixed_partners(all_data):
         # 相方ごとのアドバイス
         tips = []
         if p_eff < 0.8:
-            tips.append(f"相方のダメ効率が{p_eff:.3f}と低めです。相方が狙われやすい展開になっている可能性があります。カットやラインを意識しましょう。")
+            tips.append(f"相方の与被ダメ比が{p_eff:.3f}と低めです。相方が狙われやすい展開になっている可能性があります。カットやラインを意識しましょう。")
         if wr < 45 and n >= 5:
             tips.append(f"勝率が{wr:.0f}%と低調です。連携や機体の組み合わせを見直してみましょう。")
         if n >= 5:
@@ -540,14 +540,14 @@ def md_season(data_list):
     for season_name in sorted(season_data.keys()):
         data = season_data[season_name]
         lines.append(f"**{season_name}**\n")
-        lines.append(f"- 全体: {len(data)}戦 勝率{win_rate(data):.1f}% ダメ効率{dmg_efficiency(data):.3f}")
+        lines.append(f"- 全体: {len(data)}戦 勝率{win_rate(data):.1f}% 与被ダメ比{dmg_efficiency(data):.3f}")
 
         first_half = season_half[season_name].get("前半", [])
         second_half = season_half[season_name].get("後半", [])
         if first_half:
-            lines.append(f"- 前半: {len(first_half)}戦 勝率{win_rate(first_half):.1f}% ダメ効率{dmg_efficiency(first_half):.3f}")
+            lines.append(f"- 前半: {len(first_half)}戦 勝率{win_rate(first_half):.1f}% 与被ダメ比{dmg_efficiency(first_half):.3f}")
         if second_half:
-            lines.append(f"- 後半: {len(second_half)}戦 勝率{win_rate(second_half):.1f}% ダメ効率{dmg_efficiency(second_half):.3f}")
+            lines.append(f"- 後半: {len(second_half)}戦 勝率{win_rate(second_half):.1f}% 与被ダメ比{dmg_efficiency(second_half):.3f}")
 
         if first_half and second_half:
             f_wr = win_rate(first_half)
