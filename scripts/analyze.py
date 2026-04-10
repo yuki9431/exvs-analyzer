@@ -982,7 +982,7 @@ def main():
     for ms_name in ms_names_for_toc:
         data = ms_data[ms_name]
 
-        report.append(f"\n---\n\n## 機体別分析: {ms_name} ({len(data)}戦)\n")
+        report.append(f"\n---\n\n<details><summary><strong>機体別分析: {ms_name} ({len(data)}戦)</strong></summary>\n")
         report.append(f"### 基本データ（{ms_name}）\n")
         report.append(md_basic_stats(data))
         report.append(f"\n### 勝ち/負け時のダメージ傾向（{ms_name}）\n")
@@ -991,6 +991,7 @@ def main():
         report.append(md_enemy_matchup(data))
         report.append(f"\n### 相方機体との相性（{ms_name}）\n")
         report.append(md_partner(data))
+        report.append("\n</details>")
 
     # 固定相方分析
     report.append("\n---\n\n## 固定相方分析（連続10戦以上）\n")
