@@ -25,6 +25,7 @@
     }
     button:hover { background: #81d4fa; }
     button:disabled { background: #333; color: #666; cursor: not-allowed; }
+    .security-note { margin: 16px 0; padding: 12px; font-size: 0.8em; color: #aaa; line-height: 1.6; background: #162029; border-radius: 8px; border-left: 3px solid #4fc3f7; }
     .note { margin-top: 16px; font-size: 0.8em; color: #777; line-height: 1.6; }
     .status { text-align: center; margin: 20px 0; color: #aaa; }
     .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #333; border-top: 3px solid #4fc3f7; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 8px; vertical-align: middle; }
@@ -76,6 +77,7 @@
         <label for="password">パスワード</label>
         <input type="password" id="password" placeholder="パスワード">
       </div>
+      <p class="security-note">パスワードはバンダイナムコの公式サイトへのログインにのみ使用し、サーバーには保存しません。通信はHTTPSで暗号化されています。</p>
       <button id="analyzeBtn">分析開始</button>
       <p class="note">公式サイトから直近30日分の戦績を取得して分析します。初回は全データを取得するため5〜10分ほどかかりますが、2回目以降は前回からの差分のみ取得するため短時間で完了します。</p>
     </div>
