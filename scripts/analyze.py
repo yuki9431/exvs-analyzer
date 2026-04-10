@@ -165,7 +165,7 @@ def md_basic_stats(data_list):
         f"| **勝率** | **{wr:.1f}%** |",
         f"| 平均与ダメージ | {avg([d['dmg_given'] for d in data_list]):.0f} |",
         f"| 平均被ダメージ | {avg([d['dmg_taken'] for d in data_list]):.0f} |",
-        f"| **ダメージ効率** | **{eff:.3f}** |",
+        f"| **与被ダメ比** | **{eff:.3f}** |",
         f"| 平均撃墜 | {avg([d['kills'] for d in data_list]):.2f} |",
         f"| 平均被撃墜 | {avg([d['deaths'] for d in data_list]):.2f} |",
         f"| K/D比 | {kd:.2f} |",
@@ -176,9 +176,9 @@ def md_basic_stats(data_list):
     # セクション別アドバイス
     tips = []
     if eff < 1.0:
-        tips.append(f"ダメージ効率が{eff:.3f}で1.0未満です。被ダメが与ダメを上回っており、被弾を減らす立ち回りが必要です。")
+        tips.append(f"与被ダメ比が{eff:.3f}で1.0未満です。被ダメが与ダメを上回っており、被弾を減らす立ち回りが必要です。")
     elif eff >= 1.2:
-        tips.append(f"ダメージ効率{eff:.3f}は優秀です。この調子を維持しましょう。")
+        tips.append(f"与被ダメ比{eff:.3f}は優秀です。この調子を維持しましょう。")
     if kd < 1.0:
         tips.append(f"K/D比が{kd:.2f}で1.0未満です。撃墜数を増やすか、被撃墜を減らすことを意識しましょう。")
     if tips:
@@ -482,7 +482,7 @@ def md_fixed_partners(all_data):
         lines.append("|------|------|------|")
         lines.append(f"| 平均与ダメージ | {my_avg_given:.0f} | {p_avg_given:.0f} |")
         lines.append(f"| 平均被ダメージ | {my_avg_taken:.0f} | {p_avg_taken:.0f} |")
-        lines.append(f"| ダメージ効率 | {my_eff:.3f} | {p_eff:.3f} |")
+        lines.append(f"| 与被ダメ比 | {my_eff:.3f} | {p_eff:.3f} |")
         lines.append(f"| 平均撃墜 | {avg([d['kills'] for d in data]):.2f} | {p_avg_kills:.2f} |")
         lines.append(f"| 平均被撃墜 | {avg([d['deaths'] for d in data]):.2f} | {p_avg_deaths:.2f} |")
 
@@ -580,7 +580,7 @@ def md_advice(all_data, ms_data):
         eff = dmg_efficiency(data)
         if eff < 1.0:
             advices.append(
-                f"**{ms_name}** のダメージ効率は{eff:.3f}で1.0未満です。"
+                f"**{ms_name}** の与被ダメ比は{eff:.3f}で1.0未満です。"
                 f"被ダメージが与ダメージを上回っており、立ち回りの改善が必要です。"
             )
 
@@ -689,9 +689,39 @@ def md_advice(all_data, ms_data):
                 else:
                     advices.append(f"{season_name}: 前半の勝率が後半より{-diff:.0f}ポイント高いです。後半は対戦環境が厳しくなっている可能性があります。")
 
+    # カテゴリ分けして出力
+    categories = {
+        "survival": {"title": "耐久管理", "items": []},
+        "ms": {"title": "機体", "items": []},
+        "time": {"title": "時間帯・曜日", "items": []},
+        "partner": {"title": "相方", "items": []},
+        "mental": {"title": "メンタル", "items": []},
+        "season": {"title": "シーズン", "items": []},
+    }
+
+    for a in advices:
+        if "2落ち" in a or "被撃墜" in a:
+            categories["survival"]["items"].append(a)
+        elif "苦手機体" in a or "与被ダメ比" in a or "立ち回り" in a:
+            categories["ms"]["items"].append(a)
+        elif "時間帯" in a or "平日" in a or "土日" in a:
+            categories["time"]["items"].append(a)
+        elif "相方" in a:
+            categories["partner"]["items"].append(a)
+        elif "連敗" in a:
+            categories["mental"]["items"].append(a)
+        elif "シーズン" in a or "前半" in a or "後半" in a:
+            categories["season"]["items"].append(a)
+        else:
+            categories["ms"]["items"].append(a)
+
     lines = []
-    for i, a in enumerate(advices, 1):
-        lines.append(f"{i}. {a}")
+    for cat in categories.values():
+        if cat["items"]:
+            lines.append(f"**{cat['title']}**\n")
+            for item in cat["items"]:
+                lines.append(f"- {item}")
+            lines.append("")
     return "\n".join(lines)
 
 
@@ -726,8 +756,9 @@ def main():
 
     ms_names_for_toc = [ms for ms in sorted(ms_data.keys(), key=lambda x: -len(ms_data[x])) if len(ms_data[ms]) >= 3]
     toc = ["<details open><summary><strong>目次</strong></summary>\n"]
-    toc.append(f"1. {toc_link('基本データ', '基本データ')}")
-    n = 2
+    toc.append(f"1. {toc_link('総合アドバイス', '総合アドバイス')}")
+    toc.append(f"2. {toc_link('基本データ', '基本データ')}")
+    n = 3
     for i, ms_name in enumerate(ms_names_for_toc):
         ms_count = len(ms_data[ms_name])
         heading = f"機体別分析:-{ms_name}-({ms_count}戦)"
@@ -742,12 +773,15 @@ def main():
     toc.append(f"{n+3}. {toc_link('曜日別', '曜日別の勝率（平日-vs-土日）')}")
     toc.append(f"{n+4}. {toc_link('日別推移', '日別勝率推移')}")
     toc.append(f"{n+5}. {toc_link('シーズン別', 'シーズン別分析')}")
-    toc.append(f"{n+6}. {toc_link('総合アドバイス', '総合アドバイス')}")
     toc.append("\n</details>")
     report.append("\n".join(toc))
 
+    # 総合アドバイス（冒頭に配置）
+    report.append("\n\n---\n\n## 総合アドバイス\n")
+    report.append(md_advice(all_data, ms_data))
+
     # 基本データ
-    report.append("\n\n---\n\n## 基本データ\n")
+    report.append("\n---\n\n## 基本データ\n")
     report.append(md_basic_stats(all_data))
     report.append("\n### 勝ち/負け時のダメージ傾向\n")
     report.append(md_win_loss_pattern(all_data))
@@ -789,10 +823,6 @@ def main():
     # シーズン分析
     report.append("\n## シーズン別分析\n")
     report.append(md_season(all_data))
-
-    # 総合アドバイス
-    report.append("\n---\n\n## 総合アドバイス\n")
-    report.append(md_advice(all_data, ms_data))
 
     # ファイル出力
     output_path = os.path.join(os.path.dirname(csv_path), "report.md")
