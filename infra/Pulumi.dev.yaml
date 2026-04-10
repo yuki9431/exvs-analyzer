@@ -14,3 +14,6 @@ config:
   exvs-analyzer:image:
     secure: v1:M0xwOizR13d1hFXd:NNKu4x2RQ5y20QPaE9b+/zhsh4MWfRFdWzTCQz6erSt0wboyLy8TT44PsFxNJM0q7vLeJ18=
   exvs-analyzer:domain: www.exvs-analyzer.com
+  exvs-analyzer:domainVerificationTxt: google-site-verification=TAXKxm2PncupGRZkk0mBxIxslp_7aZj-w9dxPAi-ObE
+  exvs-analyzer:pulumiStateBucket:
+    secure: v1:DTT5hikna9CWd6by:Nx5wUNbRTnn7SC03sCc5yPzugTPiZSwmiwJ0vjNRrsparkbP48cmYa5OJAFp
