@@ -94,10 +94,36 @@ func (ds DatedScores) CheckUnknownMS() {
 	}
 }
 
-// SaveMSList はMSInfoリストを名前順でソートしてJSONファイルに保存する
+// MergeMSList はスクレイピング結果と既存リストをマージする（ImageURLのパス部分で重複排除、クエリパラメータを除去）
+func MergeMSList(scraped, existing []MSInfo) []MSInfo {
+	seen := make(map[string]bool)
+	var merged []MSInfo
+	for _, ms := range scraped {
+		key := stripQuery(ms.ImageURL)
+		if !seen[key] {
+			seen[key] = true
+			ms.ImageURL = key
+			merged = append(merged, ms)
+		}
+	}
+	for _, ms := range existing {
+		key := stripQuery(ms.ImageURL)
+		if !seen[key] {
+			seen[key] = true
+			ms.ImageURL = key
+			merged = append(merged, ms)
+		}
+	}
+	return merged
+}
+
+// SaveMSList はMSInfoリストをName→ImageURLの順でソートしてJSONファイルに保存する
 func SaveMSList(msList []MSInfo, path string) error {
 	sort.Slice(msList, func(i, j int) bool {
-		return msList[i].Name < msList[j].Name
+		if msList[i].Name != msList[j].Name {
+			return msList[i].Name < msList[j].Name
+		}
+		return msList[i].ImageURL < msList[j].ImageURL
 	})
 
 	f, err := os.Create(path)
