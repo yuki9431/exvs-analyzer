@@ -1,0 +1,3 @@
+name: exvs-analyzer
+runtime: nodejs
+description: EXVS Analyzer のGCPインフラをPulumiで管理

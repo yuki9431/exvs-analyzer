@@ -1,7 +1,7 @@
 IMAGE_NAME := exvs-analyzer
 PORT ?= 8080
 
-.PHONY: build run restart stop test
+.PHONY: build run restart stop test pulumi-install pulumi-preview pulumi-up
 
 ## Docker イメージをビルド（キャッシュなし）
 build:
@@ -25,3 +25,15 @@ stop:
 ## Go テストを実行
 test:
 	docker run --rm -v "$(CURDIR)":/app -w /app golang:1.26-alpine go test ./internal/...
+
+## Pulumi依存パッケージをインストール
+pulumi-install:
+	cd infra && npm install
+
+## インフラ変更のプレビュー
+pulumi-preview:
+	cd infra && pulumi preview
+
+## インフラ変更を適用
+pulumi-up:
+	cd infra && pulumi up
