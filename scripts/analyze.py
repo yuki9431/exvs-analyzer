@@ -282,42 +282,41 @@ def md_win_loss_pattern(data_list):
         if cost in COST_LABEL:
             cost_groups[cost].append(d)
 
-    if cost_groups:
-        lines.append("\n### コスト帯別 勝ちパターン分析\n")
-        for cost in sorted(cost_groups.keys(), reverse=True):
-            data = cost_groups[cost]
-            if len(data) < 3:
-                continue
-            label = COST_LABEL[cost]
-            fatal = COST_FATAL_DEATHS[cost]
-            c_wins = [d for d in data if d["win"]]
-            c_losses = [d for d in data if not d["win"]]
-            if not c_wins or not c_losses:
-                continue
+    lines.append("\n### コスト帯別 勝ちパターン分析\n")
+    for cost in sorted(cost_groups.keys(), reverse=True):
+        data = cost_groups[cost]
+        if len(data) < 3:
+            continue
+        label = COST_LABEL[cost]
+        fatal = COST_FATAL_DEATHS[cost]
+        c_wins = [d for d in data if d["win"]]
+        c_losses = [d for d in data if not d["win"]]
+        if not c_wins or not c_losses:
+            continue
 
-            lines.append(f"**{label}（{len(data)}戦 / 勝率{win_rate(data):.1f}%）**\n")
-            lines.append("| 項目 | 勝ち | 負け | 差 |")
-            lines.append("|------|------|------|-----|")
+        lines.append(f"**{label}（{len(data)}戦 / 勝率{win_rate(data):.1f}%）**\n")
+        lines.append("| 項目 | 勝ち | 負け | 差 |")
+        lines.append("|------|------|------|-----|")
 
-            for m_label, key in [("与ダメージ", "dmg_given"), ("被ダメージ", "dmg_taken"),
-                                 ("撃墜", "kills"), ("被撃墜", "deaths")]:
-                w_v = avg([d[key] for d in c_wins])
-                l_v = avg([d[key] for d in c_losses])
-                diff = w_v - l_v
-                sign = "+" if diff >= 0 else ""
-                lines.append(f"| {m_label} | {w_v:.1f} | {l_v:.1f} | {sign}{diff:.1f} |")
+        for m_label, key in [("与ダメージ", "dmg_given"), ("被ダメージ", "dmg_taken"),
+                             ("撃墜", "kills"), ("被撃墜", "deaths")]:
+            w_v = avg([d[key] for d in c_wins])
+            l_v = avg([d[key] for d in c_losses])
+            diff = w_v - l_v
+            sign = "+" if diff >= 0 else ""
+            lines.append(f"| {m_label} | {w_v:.1f} | {l_v:.1f} | {sign}{diff:.1f} |")
 
-            c_w_eff = dmg_efficiency(c_wins)
-            c_l_eff = dmg_efficiency(c_losses)
-            lines.append(f"| **与被ダメ比** | **{c_w_eff:.3f}** | **{c_l_eff:.3f}** | {c_w_eff - c_l_eff:+.3f} |")
+        c_w_eff = dmg_efficiency(c_wins)
+        c_l_eff = dmg_efficiency(c_losses)
+        lines.append(f"| **与被ダメ比** | **{c_w_eff:.3f}** | **{c_l_eff:.3f}** | {c_w_eff - c_l_eff:+.3f} |")
 
-            # 負け試合で負け確定ラインに達した割合
-            fatal_losses = [d for d in c_losses if d["deaths"] >= fatal]
-            if c_losses:
-                fatal_rate = len(fatal_losses) / len(c_losses) * 100
-                lines.append(f"\n負け試合のうち{fatal}落ち以上: {len(fatal_losses)}/{len(c_losses)}戦({fatal_rate:.0f}%)")
+        # 負け試合で負け確定ラインに達した割合
+        fatal_losses = [d for d in c_losses if d["deaths"] >= fatal]
+        if c_losses:
+            fatal_rate = len(fatal_losses) / len(c_losses) * 100
+            lines.append(f"\n負け試合のうち{fatal}落ち以上: {len(fatal_losses)}/{len(c_losses)}戦({fatal_rate:.0f}%)")
 
-            lines.append("")
+        lines.append("")
 
     return "\n".join(lines)
 
@@ -411,95 +410,69 @@ def md_partner(data_list, min_matches=3):
 def md_deaths_impact(data_list):
     # コスト帯別に分類
     cost_groups = defaultdict(list)
-    no_cost_data = []
     for d in data_list:
         cost = d.get("ms_cost", 0)
         if cost in COST_FATAL_DEATHS:
             cost_groups[cost].append(d)
-        else:
-            no_cost_data.append(d)
 
     lines = []
+    for cost in sorted(cost_groups.keys(), reverse=True):
+        data = cost_groups[cost]
+        fatal = COST_FATAL_DEATHS[cost]
+        label = COST_LABEL[cost]
+        lines.append(f"### {label}（{len(data)}戦）\n")
+        lines.append(f"負け確定ライン: **{fatal}落ち**（{cost}×{fatal}={cost*fatal}コスト消費）\n")
 
-    if cost_groups:
-        for cost in sorted(cost_groups.keys(), reverse=True):
-            data = cost_groups[cost]
-            fatal = COST_FATAL_DEATHS[cost]
-            label = COST_LABEL[cost]
-            lines.append(f"### {label}（{len(data)}戦）\n")
-            lines.append(f"負け確定ライン: **{fatal}落ち**（{cost}×{fatal}={cost*fatal}コスト消費）\n")
-
-            by_deaths = defaultdict(list)
-            max_bucket = fatal + 1
-            for d in data:
-                deaths = d["deaths"]
-                if deaths >= max_bucket:
-                    key = f"{max_bucket}回以上"
-                else:
-                    key = f"{deaths}回"
-                by_deaths[key].append(d)
-
-            lines.append("| 被撃墜 | 試合 | 勝率 | 与被ダメ比 | 判定 |")
-            lines.append("|--------|------|------|----------|------|")
-            for i in range(max_bucket):
-                key = f"{i}回"
-                if key in by_deaths:
-                    matches = by_deaths[key]
-                    wr = win_rate(matches)
-                    eff = dmg_efficiency(matches)
-                    if i >= fatal:
-                        mark = "⚠️ 負け確定"
-                    elif i == fatal - 1:
-                        mark = "⚡ 危険"
-                    else:
-                        mark = "✅ 安全"
-                    lines.append(f"| {key} | {len(matches)} | **{wr:.1f}%** | {eff:.3f} | {mark} |")
-            over_key = f"{max_bucket}回以上"
-            if over_key in by_deaths:
-                matches = by_deaths[over_key]
-                wr = win_rate(matches)
-                eff = dmg_efficiency(matches)
-                lines.append(f"| {over_key} | {len(matches)} | **{wr:.1f}%** | {eff:.3f} | ⚠️ 負け確定 |")
-
-            # データに基づくアドバイス
-            fatal_count = sum(len(by_deaths.get(f"{i}回", [])) for i in range(fatal, max_bucket))
-            fatal_count += len(by_deaths.get(over_key, []))
-            total = len(data)
-            safe_data = []
-            for i in range(fatal):
-                safe_data.extend(by_deaths.get(f"{i}回", []))
-            safe_wr = win_rate(safe_data) if safe_data else 0
-
-            tips = []
-            if fatal_count > 0 and total > 0:
-                tips.append(f"負け確定({fatal}落ち以上)に達した試合は{fatal_count}/{total}戦({fatal_count/total*100:.0f}%)。")
-            if safe_data:
-                tips.append(f"{fatal-1}落ち以内に抑えた場合の勝率は**{safe_wr:.1f}%**。")
-            if tips:
-                lines.append("")
-                lines.append("> **💡 アドバイス:** " + "".join(tips))
-            lines.append("")
-    else:
-        # コスト情報がない場合は従来の分析
         by_deaths = defaultdict(list)
-        for d in data_list:
+        max_bucket = fatal + 1
+        for d in data:
             deaths = d["deaths"]
-            key = f"{deaths}回" if deaths <= 2 else "3回以上"
+            if deaths >= max_bucket:
+                key = f"{max_bucket}回以上"
+            else:
+                key = f"{deaths}回"
             by_deaths[key].append(d)
 
-        lines.append("| 被撃墜 | 試合 | 勝率 | 与被ダメ比 |")
-        lines.append("|--------|------|------|----------|")
-        for key in ["0回", "1回", "2回", "3回以上"]:
+        lines.append("| 被撃墜 | 試合 | 勝率 | 与被ダメ比 | 判定 |")
+        lines.append("|--------|------|------|----------|------|")
+        for i in range(max_bucket):
+            key = f"{i}回"
             if key in by_deaths:
                 matches = by_deaths[key]
                 wr = win_rate(matches)
                 eff = dmg_efficiency(matches)
-                lines.append(f"| {key} | {len(matches)} | **{wr:.1f}%** | {eff:.3f} |")
+                if i >= fatal:
+                    mark = "⚠️ 負け確定"
+                elif i == fatal - 1:
+                    mark = "⚡ 危険"
+                else:
+                    mark = "✅ 安全"
+                lines.append(f"| {key} | {len(matches)} | **{wr:.1f}%** | {eff:.3f} | {mark} |")
+        over_key = f"{max_bucket}回以上"
+        if over_key in by_deaths:
+            matches = by_deaths[over_key]
+            wr = win_rate(matches)
+            eff = dmg_efficiency(matches)
+            lines.append(f"| {over_key} | {len(matches)} | **{wr:.1f}%** | {eff:.3f} | ⚠️ 負け確定 |")
 
-        d2 = len(by_deaths.get("2回", [])) + len(by_deaths.get("3回以上", []))
-        total = len(data_list)
+        # データに基づくアドバイス
+        fatal_count = sum(len(by_deaths.get(f"{i}回", [])) for i in range(fatal, max_bucket))
+        fatal_count += len(by_deaths.get(over_key, []))
+        total = len(data)
+        safe_data = []
+        for i in range(fatal):
+            safe_data.extend(by_deaths.get(f"{i}回", []))
+        safe_wr = win_rate(safe_data) if safe_data else 0
+
+        tips = []
+        if fatal_count > 0 and total > 0:
+            tips.append(f"負け確定({fatal}落ち以上)に達した試合は{fatal_count}/{total}戦({fatal_count/total*100:.0f}%)。")
+        if safe_data:
+            tips.append(f"{fatal-1}落ち以内に抑えた場合の勝率は**{safe_wr:.1f}%**。")
+        if tips:
+            lines.append("")
+            lines.append("> **💡 アドバイス:** " + "".join(tips))
         lines.append("")
-        lines.append(f"> **💡 アドバイス:** 被撃墜2回以上の試合は{d2}/{total}戦({d2/total*100:.0f}%)。")
 
     return "\n".join(lines)
 
@@ -736,27 +709,17 @@ def md_advice(all_data, ms_data):
         if cost in COST_FATAL_DEATHS:
             cost_groups[cost].append(d)
 
-    if cost_groups:
-        for cost in sorted(cost_groups.keys(), reverse=True):
-            data = cost_groups[cost]
-            fatal = COST_FATAL_DEATHS[cost]
-            label = COST_LABEL[cost]
-            fatal_matches = [d for d in data if d["deaths"] >= fatal]
-            if fatal_matches:
-                rate = len(fatal_matches) / len(data) * 100
-                wr = win_rate(fatal_matches)
-                advices.append(
-                    f"**{label}**で{fatal}落ち以上の試合が{rate:.0f}%あり、その勝率は{wr:.0f}%です。"
-                    f"**{fatal-1}落ち以内に抑えることが勝率改善のポイント**です。"
-                )
-    else:
-        deaths_2plus = [d for d in all_data if d["deaths"] >= 2]
-        if deaths_2plus:
-            rate = len(deaths_2plus) / len(all_data) * 100
-            wr = win_rate(deaths_2plus)
+    for cost in sorted(cost_groups.keys(), reverse=True):
+        data = cost_groups[cost]
+        fatal = COST_FATAL_DEATHS[cost]
+        label = COST_LABEL[cost]
+        fatal_matches = [d for d in data if d["deaths"] >= fatal]
+        if fatal_matches:
+            rate = len(fatal_matches) / len(data) * 100
+            wr = win_rate(fatal_matches)
             advices.append(
-                f"被撃墜2回以上の試合が全体の{rate:.0f}%あり、その勝率は{wr:.0f}%です。"
-                f"**被撃墜を減らすことが勝率改善のポイント**です。"
+                f"**{label}**で{fatal}落ち以上の試合が{rate:.0f}%あり、その勝率は{wr:.0f}%です。"
+                f"**{fatal-1}落ち以内に抑えることが勝率改善のポイント**です。"
             )
 
     for ms_name, data in ms_data.items():
