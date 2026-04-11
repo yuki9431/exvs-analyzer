@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/yuki9431/exvs-analyzer/internal/model"
+	"github.com/yuki9431/exvs-analyzer/internal/mslist"
 	"github.com/yuki9431/exvs-analyzer/internal/scraper"
 )
 
@@ -22,7 +22,7 @@ func main() {
 		outputPath = os.Args[1]
 	}
 
-	existing, err := model.LoadMSList(outputPath)
+	existing, err := mslist.LoadMSList(outputPath)
 	if err != nil {
 		log.Printf("No existing MS list found, starting fresh: %v", err)
 	}
@@ -34,9 +34,9 @@ func main() {
 		log.Fatal("No MS data found")
 	}
 
-	merged := model.MergeMSList(scraped, existing)
+	merged := mslist.MergeMSList(scraped, existing)
 
-	if err := model.SaveMSList(merged, outputPath); err != nil {
+	if err := mslist.SaveMSList(merged, outputPath); err != nil {
 		log.Fatalf("Failed to save MS list: %v", err)
 	}
 
