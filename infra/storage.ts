@@ -4,6 +4,7 @@ import * as gcp from "@pulumi/gcp";
 const config = new pulumi.Config();
 const pulumiStateBucket = config.requireSecret("pulumiStateBucket");
 const gcsBucket = config.requireSecret("gcsBucket");
+const computeSa = config.requireSecret("computeSa");
 
 // Pulumiステート保存用バケット
 export const stateBucket = new gcp.storage.Bucket("pulumi-state", {
@@ -32,3 +33,13 @@ export const dataBucket = new gcp.storage.Bucket("app-data", {
     },
   ],
 });
+
+// Cloud Runデフォルトcompute SAにデータバケットへの最低限の権限を付与
+export const dataBucketIam = new gcp.storage.BucketIAMMember(
+  "app-data-compute-sa",
+  {
+    bucket: dataBucket.name,
+    role: "roles/storage.objectUser",
+    member: pulumi.interpolate`serviceAccount:${computeSa}`,
+  }
+);
