@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gocolly/colly/v2"
@@ -20,7 +21,7 @@ const (
 	mobileMSUsedRate = "https://web.vsmobile.jp/exvs2ib/ranking/ms_used_rate"
 
 	// maxParallelism はバンナムサーバーへの最大同時リクエスト数
-	maxParallelism = 3
+	maxParallelism = 5
 )
 
 // dailyLink はrankpageから収集した日別ページ情報
@@ -52,7 +53,7 @@ func parseNumber(s string) int {
 type ProgressFunc func(current, total int)
 
 // Scraping はスクレイピング処理を実行し、DatedScoresを返す
-// 日別ページと詳細ページを並列で取得し、高速化を図る
+// 日別ページ収集と詳細ページ取得をパイプラインで並行実行し、高速化を図る
 func Scraping(username, password string, since time.Time, onProgress ...ProgressFunc) model.DatedScores {
 	notify := func(current, total int) {
 		if len(onProgress) > 0 && onProgress[0] != nil {
@@ -66,20 +67,18 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 	// Phase 1: rankpageから日別ページURLを収集
 	dailyLinks := collectDailyLinks(m.HTTPClient.Jar, since)
 
-	// Phase 2: 日別ページから試合エントリを並列収集
-	entries := collectAllMatchEntries(m.HTTPClient.Jar, dailyLinks, since)
+	// Phase 2+3: 日別ページ収集→詳細ページ取得をパイプラインで並行実行
+	// Phase 2で試合エントリが見つかり次第、Phase 3の詳細取得を開始する
+	entryCh := make(chan matchEntry, 50)
 
-	// 日時降順でソートして元の取得順序を再現
-	sort.Slice(entries, func(i, j int) bool {
-		ti, _ := time.Parse("2006/01/02 15:04", entries[i].date+" "+entries[i].hour)
-		tj, _ := time.Parse("2006/01/02 15:04", entries[j].date+" "+entries[j].hour)
-		return ti.After(tj)
-	})
+	go func() {
+		defer close(entryCh)
+		streamMatchEntries(m.HTTPClient.Jar, dailyLinks, since, entryCh)
+	}()
 
-	// Phase 3: 試合詳細ページを並列取得
-	scores := fetchDetailPages(m.HTTPClient.Jar, entries, notify)
+	scores := fetchDetailPagesStreaming(m.HTTPClient.Jar, entryCh, notify)
 
-	// 日時降順・プレイヤーNo昇順でソートして元の順序を保つ
+	// 日時降順・プレイヤーNo昇順でソート
 	sort.Slice(scores, func(i, j int) bool {
 		if !scores[i].Datetime.Equal(scores[j].Datetime) {
 			return scores[i].Datetime.After(scores[j].Datetime)
@@ -116,13 +115,8 @@ func collectDailyLinks(jar http.CookieJar, since time.Time) []dailyLink {
 	return links
 }
 
-// collectAllMatchEntries は複数の日別ページから試合エントリを並列で収集する
-func collectAllMatchEntries(jar http.CookieJar, links []dailyLink, since time.Time) []matchEntry {
-	var (
-		allEntries []matchEntry
-		mu         sync.Mutex
-	)
-
+// streamMatchEntries は複数の日別ページから試合エントリを並列で収集し、チャネルにストリーミングする
+func streamMatchEntries(jar http.CookieJar, links []dailyLink, since time.Time, out chan<- matchEntry) {
 	sem := make(chan struct{}, maxParallelism)
 	var wg sync.WaitGroup
 
@@ -134,14 +128,13 @@ func collectAllMatchEntries(jar http.CookieJar, links []dailyLink, since time.Ti
 			defer func() { <-sem }()
 
 			entries := collectMatchEntries(jar, dl, since)
-			mu.Lock()
-			allEntries = append(allEntries, entries...)
-			mu.Unlock()
+			for _, e := range entries {
+				out <- e
+			}
 		}(dl)
 	}
 
 	wg.Wait()
-	return allEntries
 }
 
 // collectMatchEntries は単一の日別ページから試合エントリを収集する（ページネーション対応）
@@ -198,50 +191,55 @@ func collectMatchEntries(jar http.CookieJar, dl dailyLink, since time.Time) []ma
 	return entries
 }
 
-// fetchDetailPages は試合詳細ページを並列で取得しDatedScoresを返す
-func fetchDetailPages(jar http.CookieJar, entries []matchEntry, notify func(int, int)) model.DatedScores {
+// fetchDetailPagesStreaming はチャネルから試合エントリを受信しつつ詳細ページを並列取得する
+func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, notify func(int, int)) model.DatedScores {
 	var (
-		scores model.DatedScores
-		mu     sync.Mutex
+		scores    model.DatedScores
+		mu        sync.Mutex
+		wg        sync.WaitGroup
+		processed int
+		found     int64 // atomic: 発見済みエントリ数
 	)
 
-	c := colly.NewCollector(
-		colly.AllowedDomains(vsmobile),
-		colly.Async(true),
-	)
-	c.SetCookieJar(jar)
-	c.Limit(&colly.LimitRule{
-		DomainGlob:  "*",
-		Parallelism: maxParallelism,
-	})
+	sem := make(chan struct{}, maxParallelism)
 
-	total := len(entries)
-	processed := 0
+	for entry := range entryCh {
+		atomic.AddInt64(&found, 1)
 
-	c.OnHTML("div.panel_area", func(e *colly.HTMLElement) {
-		date := e.Request.Ctx.Get("date")
-		hour := e.Request.Ctx.Get("hour")
-		wins := strings.Split(e.Request.Ctx.Get("wins"), ",")
+		sem <- struct{}{}
+		wg.Add(1)
+		go func(e matchEntry) {
+			defer wg.Done()
+			defer func() { <-sem }()
 
-		parsed := parseDetailPage(e, date, hour, wins)
-		mu.Lock()
-		scores = append(scores, parsed...)
-		processed++
-		current := processed
-		mu.Unlock()
+			parsed := fetchSingleDetail(jar, e)
+			mu.Lock()
+			scores = append(scores, parsed...)
+			processed++
+			current := processed
+			mu.Unlock()
 
-		notify(current, total)
-	})
-
-	for _, entry := range entries {
-		ctx := colly.NewContext()
-		ctx.Put("date", entry.date)
-		ctx.Put("hour", entry.hour)
-		ctx.Put("wins", strings.Join(entry.wins, ","))
-		c.Request("GET", entry.detailURL, nil, ctx, nil)
+			total := int(atomic.LoadInt64(&found))
+			notify(current, total)
+		}(entry)
 	}
 
-	c.Wait()
+	wg.Wait()
+	return scores
+}
+
+// fetchSingleDetail は単一の試合詳細ページを取得しスコアを返す
+func fetchSingleDetail(jar http.CookieJar, e matchEntry) model.DatedScores {
+	var scores model.DatedScores
+
+	c := colly.NewCollector(colly.AllowedDomains(vsmobile))
+	c.SetCookieJar(jar)
+
+	c.OnHTML("div.panel_area", func(el *colly.HTMLElement) {
+		scores = parseDetailPage(el, e.date, e.hour, e.wins)
+	})
+
+	c.Visit(e.detailURL)
 	return scores
 }
 
