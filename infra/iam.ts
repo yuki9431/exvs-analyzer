@@ -101,3 +101,13 @@ export const dataBucketBinding = new gcp.storage.BucketIAMMember(
     member: githubActionsSa.member,
   }
 );
+
+// Cloud Buildバケットへのストレージ権限（gcloud builds submitのソースアップロード用）
+export const cloudbuildBucketBinding = new gcp.storage.BucketIAMMember(
+  "github-actions-cloudbuild-bucket",
+  {
+    bucket: `${gcp.config.project}_cloudbuild`,
+    role: "roles/storage.objectUser",
+    member: githubActionsSa.member,
+  }
+);
