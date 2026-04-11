@@ -23,6 +23,14 @@ const (
 	maxParallelism = 3
 )
 
+// progressBar はプログレスバー文字列を生成する
+func progressBar(label string, current, total int) string {
+	const barLen = 20
+	filled := barLen * current / total
+	bar := strings.Repeat("\u2588", filled) + strings.Repeat("\u2591", barLen-filled)
+	return fmt.Sprintf("%s [%s] %d/%d", label, bar, current, total)
+}
+
 // dailyLink はrankpageから収集した日別ページ情報
 type dailyLink struct {
 	date string
@@ -216,6 +224,9 @@ func fetchDetailPages(jar http.CookieJar, entries []matchEntry, notify func(stri
 		Parallelism: maxParallelism,
 	})
 
+	total := len(entries)
+	processed := 0
+
 	c.OnHTML("div.panel_area", func(e *colly.HTMLElement) {
 		date := e.Request.Ctx.Get("date")
 		hour := e.Request.Ctx.Get("hour")
@@ -224,14 +235,14 @@ func fetchDetailPages(jar http.CookieJar, entries []matchEntry, notify func(stri
 		parsed := parseDetailPage(e, date, hour, wins)
 		mu.Lock()
 		scores = append(scores, parsed...)
+		processed++
+		current := processed
 		mu.Unlock()
+
+		notify(progressBar("戦歴データを取得中", current, total))
 	})
 
 	for _, entry := range entries {
-		if d, err := time.Parse("2006/01/02 15:04", entry.date+" "+entry.hour); err == nil {
-			notify(fmt.Sprintf("%sの戦歴データを取得中...", d.Format("01/02 15:04")))
-		}
-
 		ctx := colly.NewContext()
 		ctx.Put("date", entry.date)
 		ctx.Put("hour", entry.hour)
