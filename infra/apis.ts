@@ -6,6 +6,8 @@ const enabledApis = [
   "cloudbuild.googleapis.com",
   "dns.googleapis.com",
   "iam.googleapis.com",
+  "cloudresourcemanager.googleapis.com",
+  "compute.googleapis.com",
 ];
 
 export const services = enabledApis.map(
