@@ -1,6 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
 import { service } from "./cloudrun";
+import { services as enabledApis } from "./apis";
 
 const config = new pulumi.Config();
 const domain = config.require("domain");
@@ -9,12 +10,6 @@ const domainVerificationTxt = config.require("domainVerificationTxt");
 const parts = domain.split(".");
 const rootDomain = parts.slice(-2).join(".");
 
-// Cloud DNS API有効化
-export const dnsApi = new gcp.projects.Service("dns.googleapis.com", {
-  service: "dns.googleapis.com",
-  disableOnDestroy: false,
-});
-
 // Cloud DNSマネージドゾーン（ルートドメインで管理）
 export const dnsZone = new gcp.dns.ManagedZone(
   "exvs-analyzer-zone",
@@ -22,8 +17,11 @@ export const dnsZone = new gcp.dns.ManagedZone(
     name: "exvs-analyzer",
     dnsName: rootDomain + ".",
     description: "EXVS Analyzer DNS zone",
+    dnssecConfig: {
+      state: "on",
+    },
   },
-  { dependsOn: [dnsApi] }
+  { dependsOn: enabledApis }
 );
 
 // Cloud Runドメインマッピング

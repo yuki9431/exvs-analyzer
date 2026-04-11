@@ -34,12 +34,21 @@ export const service = new gcp.cloudrunv2.Service(
             },
           },
           startupProbe: {
-            failureThreshold: 1,
-            periodSeconds: 240,
+            failureThreshold: 5,
+            periodSeconds: 10,
             tcpSocket: {
               port: 8080,
             },
-            timeoutSeconds: 240,
+            timeoutSeconds: 5,
+          },
+          livenessProbe: {
+            httpGet: {
+              path: "/health",
+              port: 8080,
+            },
+            periodSeconds: 30,
+            failureThreshold: 3,
+            timeoutSeconds: 5,
           },
         },
       ],

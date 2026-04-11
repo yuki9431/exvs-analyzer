@@ -4,6 +4,8 @@ const enabledApis = [
   "run.googleapis.com",
   "artifactregistry.googleapis.com",
   "cloudbuild.googleapis.com",
+  "dns.googleapis.com",
+  "iam.googleapis.com",
 ];
 
 export const services = enabledApis.map(
