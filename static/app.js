@@ -26,6 +26,7 @@ async function analyze() {
   statusText.textContent = STATUS_MESSAGES.pending;
   error.style.display = 'none';
   report.style.display = 'none';
+  document.querySelectorAll('.share-area').forEach(function(el) { el.remove(); });
 
   try {
     // ジョブ作成
