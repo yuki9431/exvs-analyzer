@@ -119,12 +119,16 @@ func StartServer() {
 		}
 
 		snap := j.Snapshot()
-		resp := map[string]string{
+		resp := map[string]interface{}{
 			"id":     snap.ID,
 			"status": string(snap.Status),
 		}
 		if snap.Message != "" {
 			resp["message"] = snap.Message
+		}
+		if snap.ProgressTotal > 0 {
+			resp["progress"] = snap.Progress
+			resp["progress_total"] = snap.ProgressTotal
 		}
 		if snap.Error != "" {
 			resp["error"] = snap.Error
