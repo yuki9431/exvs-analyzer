@@ -43,7 +43,7 @@ PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-up        # 変更適用
 
 http://localhost:8080 でアクセス可能。
 
-**ローカル環境にはGo/Python/Pulumiはインストールされていない。** すべてDocker経由（Makefile）で実行する。Pulumi操作時は `infra/.envrc`（direnv）から `PULUMI_CONFIG_PASSPHRASE` が自動で読み込まれる。
+**ローカル環境にはGo/Python/Pulumiはインストールされていない。** すべてDocker経由（Makefile）で実行する。Pulumi操作時は `infra/.envrc`（direnv）から `PULUMI_CONFIG_PASSPHRASE` が自動で読み込まれる。**worktreeで作業する場合は、`.envrc` がgitignore対象のため元リポジトリからコピーすること。**
 
 CIでは `go vet`、`go build`、`py_compile` を実行。ラベル `skip-ci` でスキップ可能。
 
