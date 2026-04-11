@@ -10,6 +10,8 @@ export const stateBucket = new gcp.storage.Bucket("pulumi-state", {
   name: pulumiStateBucket,
   location: gcp.config.region!,
   uniformBucketLevelAccess: true,
+  publicAccessPrevention: "enforced",
+  forceDestroy: false,
 });
 
 // アプリ用データバケット（ユーザーCSV保存）
@@ -17,4 +19,16 @@ export const dataBucket = new gcp.storage.Bucket("app-data", {
   name: gcsBucket,
   location: gcp.config.region!,
   uniformBucketLevelAccess: true,
+  publicAccessPrevention: "enforced",
+  versioning: { enabled: true },
+  forceDestroy: false,
+  lifecycleRules: [
+    {
+      action: { type: "Delete" },
+      condition: {
+        numNewerVersions: 3,
+        withState: "ARCHIVED",
+      },
+    },
+  ],
 });
