@@ -70,22 +70,13 @@ jobs:
           gcloud builds submit --tag "$IMAGE"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
-      - name: Update Pulumi image config
+      - name: Deploy with Pulumi
         working-directory: infra
         run: |
           npm install -g @pulumi/pulumi 2>/dev/null || true
           pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
           pulumi stack select dev
           pulumi config set exvs-analyzer:image "$IMAGE" --secret
-        env:
-          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-
-      - name: Deploy with Pulumi
-        uses: pulumi/actions@v6
-        with:
-          command: up
-          work-dir: infra
-          stack-name: dev
-          cloud-url: gs://${{ secrets.PULUMI_STATE_BUCKET }}
+          pulumi up --yes
         env:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}

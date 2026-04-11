@@ -45,13 +45,24 @@ jobs:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
-      - uses: pulumi/actions@v6
+      - name: Pulumi preview
         if: steps.check-secrets.outputs.skip != 'true'
-        with:
-          command: preview
-          work-dir: infra
-          stack-name: dev
-          comment-on-pr: true
-          cloud-url: gs://${{ secrets.PULUMI_STATE_BUCKET }}
+        working-directory: infra
+        run: |
+          npm install -g @pulumi/pulumi 2>/dev/null || true
+          pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
+          pulumi stack select dev
+          pulumi preview 2>&1 | tee /tmp/pulumi-preview.txt
         env:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
+      - name: Comment preview on PR
+        if: steps.check-secrets.outputs.skip != 'true' && always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PREVIEW=$(cat /tmp/pulumi-preview.txt 2>/dev/null || echo "Preview output not available")
+          gh pr comment "${{ github.event.pull_request.number }}" --body "## Pulumi Preview
+          \`\`\`
+          ${PREVIEW}
+          \`\`\`"
