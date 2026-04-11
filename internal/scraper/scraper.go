@@ -24,15 +24,6 @@ const (
 	maxParallelism = 5
 )
 
-// progressBar はプログレスバー文字列を生成する
-func progressBar(label string, current, total int) string {
-	const barLen = 25
-	filled := barLen * current / total
-	bar := strings.Repeat("━", filled) + strings.Repeat("─", barLen-filled)
-	pct := 100 * current / total
-	return fmt.Sprintf("%s [%s] %d%%  %d/%d件", label, bar, pct, current, total)
-}
-
 // dailyLink はrankpageから収集した日別ページ情報
 type dailyLink struct {
 	date string
@@ -59,19 +50,18 @@ func parseNumber(s string) int {
 }
 
 // ProgressFunc はスクレイピングの進捗を通知するコールバック型
-type ProgressFunc func(message string)
+type ProgressFunc func(current, total int)
 
 // Scraping はスクレイピング処理を実行し、DatedScoresを返す
 // 日別ページ収集と詳細ページ取得をパイプラインで並行実行し、高速化を図る
 func Scraping(username, password string, since time.Time, onProgress ...ProgressFunc) model.DatedScores {
-	notify := func(msg string) {
+	notify := func(current, total int) {
 		if len(onProgress) > 0 && onProgress[0] != nil {
-			onProgress[0](msg)
+			onProgress[0](current, total)
 		}
 	}
 
 	m := NewClient(username, password)
-	notify("ログイン中...")
 	m.Login()
 
 	// Phase 1: rankpageから日別ページURLを収集

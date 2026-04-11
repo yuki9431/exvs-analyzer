@@ -56,6 +56,17 @@ async function analyze() {
 
       statusText.textContent = statusData.message || STATUS_MESSAGES[statusData.status] || statusData.status;
 
+      var progressWrap = document.getElementById('progressWrap');
+      if (statusData.progress_total > 0) {
+        var pct = Math.round(100 * statusData.progress / statusData.progress_total);
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressPct').textContent = pct + '%';
+        document.getElementById('progressCount').textContent = statusData.progress + '/' + statusData.progress_total + '件';
+        progressWrap.style.display = 'block';
+      } else {
+        progressWrap.style.display = 'none';
+      }
+
       if (statusData.status === 'error') {
         throw new Error(statusData.error || '分析に失敗しました');
       }

@@ -31,21 +31,25 @@ const (
 
 // Job はバックグラウンドジョブの情報
 type Job struct {
-	ID          string    `json:"id"`
-	Status      JobStatus `json:"status"`
-	Message     string    `json:"message,omitempty"`
-	Report      string    `json:"report,omitempty"`
-	Error       string    `json:"error,omitempty"`
-	completedAt time.Time
+	ID            string    `json:"id"`
+	Status        JobStatus `json:"status"`
+	Message       string    `json:"message,omitempty"`
+	Progress      int       `json:"progress,omitempty"`
+	ProgressTotal int       `json:"progress_total,omitempty"`
+	Report        string    `json:"report,omitempty"`
+	Error         string    `json:"error,omitempty"`
+	completedAt   time.Time
 }
 
 // JobSnapshot はジョブ状態のスナップショット
 type JobSnapshot struct {
-	ID      string
-	Status  JobStatus
-	Message string
-	Report  string
-	Error   string
+	ID            string
+	Status        JobStatus
+	Message       string
+	Progress      int
+	ProgressTotal int
+	Report        string
+	Error         string
 }
 
 // ジョブストア（インメモリ）
@@ -79,11 +83,13 @@ func (j *Job) Snapshot() JobSnapshot {
 	jobsMu.RLock()
 	defer jobsMu.RUnlock()
 	return JobSnapshot{
-		ID:      j.ID,
-		Status:  j.Status,
-		Message: j.Message,
-		Report:  j.Report,
-		Error:   j.Error,
+		ID:            j.ID,
+		Status:        j.Status,
+		Message:       j.Message,
+		Progress:      j.Progress,
+		ProgressTotal: j.ProgressTotal,
+		Report:        j.Report,
+		Error:         j.Error,
 	}
 }
 
@@ -118,9 +124,11 @@ func Run(j *Job, username, password string) {
 
 	// スクレイピング
 	log.Printf("[INFO] Scraping for user (hash: %s)", storage.UserKey(username))
-	onProgress := func(msg string) {
+	onProgress := func(current, total int) {
 		jobsMu.Lock()
-		j.Message = msg
+		j.Message = "戦歴データを取得中"
+		j.Progress = current
+		j.ProgressTotal = total
 		jobsMu.Unlock()
 	}
 	datedScores := scraper.Scraping(username, password, since, onProgress)
