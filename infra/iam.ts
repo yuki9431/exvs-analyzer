@@ -64,6 +64,7 @@ export const saUserBinding = new gcp.serviceaccount.IAMBinding(
 // プロジェクトレベルのIAMロール（最小権限）
 const projectRoles = [
   "roles/cloudbuild.builds.editor",
+  "roles/resourcemanager.projectIamAdmin",
   "roles/run.developer",
   "roles/serviceusage.serviceUsageAdmin",
   "roles/viewer",
