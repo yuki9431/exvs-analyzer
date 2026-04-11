@@ -1,5 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
+import { stateBucket, dataBucket } from "./storage";
 
 const config = new pulumi.Config();
 const githubRepo = config.require("githubRepo");
@@ -59,11 +60,10 @@ export const saUserBinding = new gcp.serviceaccount.IAMBinding(
   }
 );
 
-// プロジェクトレベルのIAMロール
+// プロジェクトレベルのIAMロール（最小権限）
 const projectRoles = [
   "roles/cloudbuild.builds.editor",
-  "roles/run.admin",
-  "roles/storage.admin",
+  "roles/run.developer",
   "roles/viewer",
 ];
 
@@ -74,4 +74,23 @@ export const projectBindings = projectRoles.map(
       role: role,
       member: githubActionsSa.member,
     })
+);
+
+// バケット単位のStorage権限（プロジェクトレベルのstorage.adminを廃止）
+export const stateBucketBinding = new gcp.storage.BucketIAMMember(
+  "github-actions-state-bucket",
+  {
+    bucket: stateBucket.name,
+    role: "roles/storage.objectAdmin",
+    member: githubActionsSa.member,
+  }
+);
+
+export const dataBucketBinding = new gcp.storage.BucketIAMMember(
+  "github-actions-data-bucket",
+  {
+    bucket: dataBucket.name,
+    role: "roles/storage.objectAdmin",
+    member: githubActionsSa.member,
+  }
 );
