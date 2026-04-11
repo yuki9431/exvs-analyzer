@@ -43,7 +43,7 @@ PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-up        # 変更適用
 
 http://localhost:8080 でアクセス可能。
 
-**ローカル環境にはGo/Python/Pulumiはインストールされていない。** すべてDocker経由（Makefile）で実行する。Pulumi操作時は `infra/.envrc`（direnv）から `PULUMI_CONFIG_PASSPHRASE` が自動で読み込まれる。
+**ローカル環境にはGo/Python/Pulumiはインストールされていない。** すべてDocker経由（Makefile）で実行する。Pulumi操作時は `infra/.envrc`（direnv）から `PULUMI_CONFIG_PASSPHRASE` が自動で読み込まれる。**worktreeで作業する場合は、`.envrc` がgitignore対象のため元リポジトリからコピーすること。**
 
 CIでは `go vet`、`go build`、`py_compile` を実行。ラベル `skip-ci` でスキップ可能。
 
@@ -119,6 +119,7 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 ## セキュリティルール
 
 - **GCPプロジェクトID、バケット名、サービスアカウント等のインフラ識別子をコードやCLAUDE.mdにハードコードしない。** 環境変数またはGitHub Secrets/Variablesを使うこと。
+- **IAM権限は最小権限の原則を徹底する。** プロジェクトレベルの広範なロール（例: `roles/storage.admin`）ではなく、バケット単位・リソース単位で必要最低限のロール（例: `roles/storage.objectUser`）を付与すること。
 - 公開リポジトリのため、コミット履歴にも残ることを意識する。
 - マルチステージDockerfile: `golang:1.26-alpine` でビルド、`python:3.11-alpine` で実行
 - CSP: `script-src 'self'`（インラインスクリプト禁止）、`style-src 'self' 'unsafe-inline'`
