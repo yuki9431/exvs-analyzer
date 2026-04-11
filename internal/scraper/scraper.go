@@ -25,10 +25,11 @@ const (
 
 // progressBar はプログレスバー文字列を生成する
 func progressBar(label string, current, total int) string {
-	const barLen = 20
+	const barLen = 25
 	filled := barLen * current / total
-	bar := strings.Repeat("\u2588", filled) + strings.Repeat("\u2591", barLen-filled)
-	return fmt.Sprintf("%s [%s] %d/%d", label, bar, current, total)
+	bar := strings.Repeat("━", filled) + strings.Repeat("─", barLen-filled)
+	pct := 100 * current / total
+	return fmt.Sprintf("%s [%s] %d%%  %d/%d件", label, bar, pct, current, total)
 }
 
 // dailyLink はrankpageから収集した日別ページ情報
