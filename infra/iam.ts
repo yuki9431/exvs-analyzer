@@ -65,6 +65,7 @@ export const saUserBinding = new gcp.serviceaccount.IAMBinding(
 const projectRoles = [
   "roles/cloudbuild.builds.editor",
   "roles/run.developer",
+  "roles/serviceusage.serviceUsageAdmin",
   "roles/viewer",
 ];
 
