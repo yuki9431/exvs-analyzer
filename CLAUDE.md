@@ -35,9 +35,15 @@ python3 -m http.server 8888 --directory static
 # レポートプレビュー更新
 python3 scripts/analyze.py /tmp/scores.csv
 cp /tmp/report.md static/sample_report.md
+
+# Pulumiコマンド（Docker経由）
+PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-preview   # 変更プレビュー
+PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-up        # 変更適用
 ```
 
 http://localhost:8080 でアクセス可能。
+
+**ローカル環境にはGo/Python/Pulumiはインストールされていない。** すべてDocker経由（Makefile）で実行する。Pulumi操作時は `infra/.envrc`（direnv）から `PULUMI_CONFIG_PASSPHRASE` が自動で読み込まれる。
 
 CIでは `go vet`、`go build`、`py_compile` を実行。ラベル `skip-ci` でスキップ可能。
 
