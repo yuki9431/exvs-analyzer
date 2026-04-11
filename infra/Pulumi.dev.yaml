@@ -20,3 +20,5 @@ config:
   exvs-analyzer:githubRepo: yuki9431/exvs-analyzer
   exvs-analyzer:computeSa:
     secure: v1:IgRCxU3FUKAgYFVM:84Vd9wpKbv4aii4ZiSsWCwdpXAEfNtx6l52NGnLzp6b2YZL/t04CeFNJTHSmsEOqGxHRazl1yAnoAUhe0ZfJKWRO
+  exvs-analyzer:ownerEmail:
+    secure: v1:PPXFgxigyRzBi94p:D9+0MQOCQGmsIsLGmPxFp8LzFnsuwRqgS+2HkAMWIXJR8FkJ
