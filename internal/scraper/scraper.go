@@ -192,7 +192,7 @@ func collectMatchEntries(jar http.CookieJar, dl dailyLink, since time.Time) []ma
 }
 
 // fetchDetailPagesStreaming はチャネルから試合エントリを受信しつつ詳細ページを並列取得する
-func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, notify func(string)) model.DatedScores {
+func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, notify func(int, int)) model.DatedScores {
 	var (
 		scores    model.DatedScores
 		mu        sync.Mutex
@@ -220,7 +220,7 @@ func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, no
 			mu.Unlock()
 
 			total := int(atomic.LoadInt64(&found))
-			notify(progressBar("戦歴データを取得中", current, total))
+			notify(current, total)
 		}(entry)
 	}
 
