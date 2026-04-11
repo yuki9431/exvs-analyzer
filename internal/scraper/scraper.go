@@ -1,9 +1,7 @@
 package scraper
 
 import (
-	"errors"
 	"fmt"
-	"math"
 	"regexp"
 	"strconv"
 	"strings"
@@ -14,9 +12,9 @@ import (
 )
 
 const (
-	vsmobile          = "web.vsmobile.jp"
-	mobileRankpage    = "https://web.vsmobile.jp/exvs2ib/results/classmatch/fight"
-	mobileMSUsedRate  = "https://web.vsmobile.jp/exvs2ib/ranking/ms_used_rate"
+	vsmobile         = "web.vsmobile.jp"
+	mobileRankpage   = "https://web.vsmobile.jp/exvs2ib/results/classmatch/fight"
+	mobileMSUsedRate = "https://web.vsmobile.jp/exvs2ib/ranking/ms_used_rate"
 )
 
 func parseNumber(s string) int {
@@ -28,16 +26,6 @@ func parseNumber(s string) int {
 	m = strings.ReplaceAll(m, ",", "")
 	v, _ := strconv.Atoi(m)
 	return v
-}
-
-func dateFormatDaily(t time.Time) time.Time {
-	var jst = time.FixedZone("Asia/Tokyo", 9*60*60)
-	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, jst)
-}
-
-func dateFormatMonthly(t time.Time) time.Time {
-	var jst = time.FixedZone("Asia/Tokyo", 9*60*60)
-	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, jst)
 }
 
 // ProgressFunc はスクレイピングの進捗を通知するコールバック型
@@ -239,98 +227,4 @@ func ScrapeMSList(username, password string) []model.MSInfo {
 	}
 
 	return msList
-}
-
-// GetDailyScores は指定した日のスコアを取得する
-func GetDailyScores(ds model.DatedScores, t time.Time) model.PlayerScores {
-	return getScores(ds, t, dateFormatDaily)
-}
-
-// GetMonthlyScores は指定した月のスコアを取得する
-func GetMonthlyScores(ds model.DatedScores, t time.Time) model.PlayerScores {
-	return getScores(ds, t, dateFormatMonthly)
-}
-
-func getScores(ds model.DatedScores, t time.Time, format func(time.Time) time.Time) model.PlayerScores {
-	var scores model.PlayerScores
-	date := format(t)
-	for _, v := range ds {
-		vd := format(v.Datetime)
-		if vd.Equal(date) {
-			scores = append(scores, v.PlayerScore)
-		}
-	}
-	return scores
-}
-
-// GetAverage はスコアリストの値を合計しAverageScoreを取得する
-func GetAverage(s model.PlayerScores) model.AverageScore {
-	var (
-		gameCount      = 0
-		sumVictories   = 0
-		sumPoint       = 0
-		sumKills       = 0
-		sumDeaths      = 0
-		sumGiveDamage  = 0
-		sumReceiveDmg  = 0
-		sumExDamage    = 0
-	)
-
-	for _, v := range s {
-		sumPoint += v.Point
-		sumKills += v.Kills
-		sumDeaths += v.Deaths
-		sumGiveDamage += v.Give_damage
-		sumReceiveDmg += v.Receive_damage
-		sumExDamage += v.Ex_damage
-		gameCount++
-		if v.Win == "win" {
-			sumVictories++
-		}
-	}
-
-	n := float64(len(s))
-	return model.AverageScore{
-		Game_count: gameCount,
-		Victories:  sumVictories,
-		PlayerScore: model.PlayerScore{
-			Point:          int(math.Round(float64(sumPoint) / n)),
-			Kills:          int(math.Round(float64(sumKills) / n)),
-			Deaths:         int(math.Round(float64(sumDeaths) / n)),
-			Give_damage:    int(math.Round(float64(sumGiveDamage) / n)),
-			Receive_damage: int(math.Round(float64(sumReceiveDmg) / n)),
-			Ex_damage:      int(math.Round(float64(sumExDamage) / n)),
-		},
-	}
-}
-
-// GetDateList は対戦を行った日付一覧を取得する
-func GetDateList(ds model.DatedScores, frequency string) ([]time.Time, error) {
-	var dates []time.Time
-	var jst = time.FixedZone("Asia/Tokyo", 9*60*60)
-
-	for _, v := range ds {
-		var day int
-		switch frequency {
-		case "daily":
-			day = v.Datetime.Day()
-		case "monthly":
-			day = 1
-		default:
-			return nil, errors.New(`ERROR: "daily" or "monthly" is required for the argument`)
-		}
-		d := time.Date(v.Datetime.Year(), v.Datetime.Month(), day, 0, 0, 0, 0, jst)
-		dates = append(dates, d)
-	}
-
-	var datelist []time.Time
-	m := make(map[time.Time]bool)
-	for _, v := range dates {
-		if !m[v] {
-			m[v] = true
-			datelist = append(datelist, v)
-		}
-	}
-
-	return datelist, nil
 }

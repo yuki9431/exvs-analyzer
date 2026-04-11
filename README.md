@@ -13,10 +13,14 @@
 │       └── main.go              # MSリスト更新CLI
 ├── internal/
 │   ├── model/
-│   │   └── types.go             # 型定義（PlayerScore, MSInfo等）、MSリストマージ
+│   │   └── types.go             # 型定義のみ（PlayerScore, MSInfo等）
+│   ├── mslist/
+│   │   └── mslist.go            # MSリストの読み書き・マージ
 │   ├── scraper/
 │   │   ├── scraper.go           # スクレイピング処理
 │   │   └── login.go             # バンダイナムコIDログイン
+│   ├── pipeline/
+│   │   └── pipeline.go          # 分析パイプライン（Job管理・実行）
 │   ├── server/
 │   │   └── server.go            # HTTPサーバー・API
 │   └── storage/
@@ -56,9 +60,11 @@
 |-------------|------|
 | `cmd/` | エントリポイント。main関数のみ |
 | `internal/` | プライベートパッケージ。外部から参照不可 |
-| `internal/model/` | データ型の定義、MSリストのマージロジック |
+| `internal/model/` | データ型の定義のみ |
+| `internal/mslist/` | MSリストの読み書き・マージ |
 | `internal/scraper/` | スクレイピング・ログイン処理 |
-| `internal/server/` | HTTPサーバー・APIエンドポイント |
+| `internal/pipeline/` | 分析パイプライン（ジョブ管理・実行） |
+| `internal/server/` | HTTPハンドラ・レート制限 |
 | `internal/storage/` | CSV・Cloud Storageの読み書き |
 | `scripts/` | Go以外のスクリプト（Python分析等） |
 | `static/` | フロントエンドHTML/JS/CSS |

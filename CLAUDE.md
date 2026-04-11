@@ -62,9 +62,11 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 
 - `cmd/server/main.go` — エントリポイント。`internal/server.StartServer()` に委譲
 - `cmd/update-mslist/main.go` — MSリストをスクレイピングして `data/ms_list.json` を更新するCLI
-- `internal/server/` — HTTPハンドラ、ジョブキュー、パイプライン制御
+- `internal/model/` — 型定義のみ（`PlayerScore`, `DatedScore`, `MSInfo`, `AverageScore`）
+- `internal/mslist/` — MSリストの読み書き・マージ（`LoadMSList`, `SaveMSList`, `MergeMSList`, `BuildMSNameMap`, `FillMsNames`, `CheckUnknownMS`）
 - `internal/scraper/` — Collyベースのスクレイパー（`scraper.go`）+ バンダイナムコID認証（`login.go`）
-- `internal/model/` — データ型（`PlayerScore`, `DatedScore`, `MSInfo`）、MS名・コストマッピング、MSリストのマージ
+- `internal/pipeline/` — 分析パイプライン（`Job`型、ジョブストア、`Run`関数）
+- `internal/server/` — HTTPハンドラ、レート制限
 - `internal/storage/` — CSV読み書き（`csv_export.go`）+ GCSアップロード/ダウンロード（`cloud_storage.go`）
 - `scripts/analyze.py` — Python分析: 目次、カテゴリ別アドバイス、勝率、与被ダメ比、固定相方検出、Markdownレポート生成
 - `static/index.html` — SPA フロントエンド（ダークテーマ、レスポンシブ対応）
@@ -103,7 +105,7 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 - **`log.Fatal`はmain関数の初期化時のみ使用可。** リクエスト処理中は`return error`でハンドリングする
 - **エラーは`fmt.Errorf("文脈: %w", err)`でラップして返す。** 呼び出し元でハンドリングできるようにする
 - **未使用のエクスポート関数は削除する。** テストでしか使われない関数はエクスポートしない
-- **循環依存を作らない。** 依存は`model` ← `mslist/scraper/storage` ← `pipeline` ← `server`の一方向
+- **循環依存を作らない。** 依存は`model` ← `mslist` / `scraper` / `storage` ← `pipeline` ← `server`の一方向
 - **構造体のフィールド名はGoの命名規則に従う。** `Give_damage`のようなスネークケースは新規コードでは使わない（既存は後方互換のため維持）
 - **テストは対象パッケージと同じディレクトリに置く。** `xxx_test.go`で`package xxx`を使う
 - **`go vet`と`make build`がパスすることを確認してからコミットする**

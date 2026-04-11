@@ -1,4 +1,4 @@
-// types_test.go — internal/model パッケージのユニットテスト
+// mslist_test.go — internal/mslist パッケージのユニットテスト
 //
 // テスト対象と観点:
 //   - BuildMSNameMap: MSリスト→マップ変換。空リスト・存在しないキーも確認
@@ -10,18 +10,21 @@
 // ファイル系テストは t.TempDir() で一時フォルダを使い、実データに影響しない。
 //
 // 実行方法:
-//   make test
-package model
+//
+//	make test
+package mslist
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/yuki9431/exvs-analyzer/internal/model"
 )
 
 func TestBuildMSNameMap(t *testing.T) {
-	msList := []MSInfo{
+	msList := []model.MSInfo{
 		{Name: "ガンダム", ImageURL: "https://example.com/gundam.png"},
 		{Name: "ザク", ImageURL: "https://example.com/zaku.png"},
 	}
@@ -50,12 +53,12 @@ func TestFillMsNames(t *testing.T) {
 	msMap := map[string]string{
 		"https://example.com/gundam.png": "ガンダム",
 	}
-	ds := DatedScores{
-		{PlayerNo: 1, PlayerScore: PlayerScore{MsImage: "https://example.com/gundam.png"}},
-		{PlayerNo: 2, PlayerScore: PlayerScore{MsImage: "https://example.com/unknown.png"}},
+	ds := model.DatedScores{
+		{PlayerNo: 1, PlayerScore: model.PlayerScore{MsImage: "https://example.com/gundam.png"}},
+		{PlayerNo: 2, PlayerScore: model.PlayerScore{MsImage: "https://example.com/unknown.png"}},
 	}
 
-	ds.FillMsNames(msMap)
+	FillMsNames(ds, msMap)
 
 	if got := ds[0].PlayerScore.MsName; got != "ガンダム" {
 		t.Errorf("player 1: got %q, want %q", got, "ガンダム")
@@ -66,10 +69,10 @@ func TestFillMsNames(t *testing.T) {
 }
 
 func TestFillMsNames_EmptyMap(t *testing.T) {
-	ds := DatedScores{
-		{PlayerNo: 1, Datetime: time.Now(), PlayerScore: PlayerScore{MsImage: "https://example.com/gundam.png"}},
+	ds := model.DatedScores{
+		{PlayerNo: 1, Datetime: time.Now(), PlayerScore: model.PlayerScore{MsImage: "https://example.com/gundam.png"}},
 	}
-	ds.FillMsNames(map[string]string{})
+	FillMsNames(ds, map[string]string{})
 
 	if got := ds[0].PlayerScore.MsName; got != "" {
 		t.Errorf("got %q, want empty", got)
@@ -80,7 +83,7 @@ func TestSaveAndLoadMSList(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "ms_list.json")
 
-	original := []MSInfo{
+	original := []model.MSInfo{
 		{Name: "ザク", ImageURL: "https://example.com/zaku.png"},
 		{Name: "ガンダム", ImageURL: "https://example.com/gundam.png"},
 	}
@@ -114,7 +117,7 @@ func TestLoadMSList_NotFound(t *testing.T) {
 }
 
 func TestSaveMSList_InvalidPath(t *testing.T) {
-	err := SaveMSList([]MSInfo{{Name: "test"}}, "/nonexistent/dir/file.json")
+	err := SaveMSList([]model.MSInfo{{Name: "test"}}, "/nonexistent/dir/file.json")
 	if err == nil {
 		t.Error("expected error for invalid path, got nil")
 	}
@@ -124,7 +127,7 @@ func TestSaveMSList_Sort(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "sorted.json")
 
-	msList := []MSInfo{
+	msList := []model.MSInfo{
 		{Name: "C", ImageURL: "c"},
 		{Name: "A", ImageURL: "a"},
 		{Name: "B", ImageURL: "b"},
@@ -145,10 +148,10 @@ func TestSaveMSList_Sort(t *testing.T) {
 
 func TestCheckUnknownMS(t *testing.T) {
 	// CheckUnknownMSはログ出力のみなので、パニックしないことを確認
-	ds := DatedScores{
-		{PlayerScore: PlayerScore{MsImage: "https://example.com/unknown.png", MsName: ""}},
-		{PlayerScore: PlayerScore{MsImage: "https://example.com/gundam.png", MsName: "ガンダム"}},
-		{PlayerScore: PlayerScore{MsImage: "", MsName: ""}},
+	ds := model.DatedScores{
+		{PlayerScore: model.PlayerScore{MsImage: "https://example.com/unknown.png", MsName: ""}},
+		{PlayerScore: model.PlayerScore{MsImage: "https://example.com/gundam.png", MsName: "ガンダム"}},
+		{PlayerScore: model.PlayerScore{MsImage: "", MsName: ""}},
 	}
-	ds.CheckUnknownMS()
+	CheckUnknownMS(ds)
 }

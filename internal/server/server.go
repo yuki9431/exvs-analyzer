@@ -7,156 +7,16 @@ import (
 	"net/http"
 	"net/mail"
 	"os"
-	"os/exec"
-	"path/filepath"
 	"strconv"
-	"sync"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/yuki9431/exvs-analyzer/internal/model"
-	"github.com/yuki9431/exvs-analyzer/internal/scraper"
-	"github.com/yuki9431/exvs-analyzer/internal/storage"
+	"github.com/yuki9431/exvs-analyzer/internal/pipeline"
 	"golang.org/x/time/rate"
-)
-
-// DefaultMSListPath はデフォルトのMSリストパス
-const DefaultMSListPath = "data/ms_list.json"
-
-// ジョブの状態
-type jobStatus string
-
-const (
-	statusPending   jobStatus = "pending"
-	statusScraping  jobStatus = "scraping"
-	statusAnalyzing jobStatus = "analyzing"
-	statusDone      jobStatus = "done"
-	statusError     jobStatus = "error"
-)
-
-// job はバックグラウンドジョブの情報
-type job struct {
-	ID          string    `json:"id"`
-	Status      jobStatus `json:"status"`
-	Message     string    `json:"message,omitempty"`
-	Report      string    `json:"report,omitempty"`
-	Error       string    `json:"error,omitempty"`
-	completedAt time.Time
-}
-
-// ジョブストア（インメモリ）
-var (
-	jobs   = make(map[string]*job)
-	jobsMu sync.RWMutex
 )
 
 type analyzeRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
-}
-
-// runPipeline はスクレイピング→分析を実行し、レポートを返す
-func runPipeline(j *job, username, password string) {
-	updateStatus(j, statusScraping)
-
-	tmpDir, err := os.MkdirTemp("", "exvs-*")
-	if err != nil {
-		setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to create temp dir: %v", err))
-		return
-	}
-	defer os.RemoveAll(tmpDir)
-
-	csvPath := filepath.Join(tmpDir, "scores.csv")
-
-	// Cloud Storageから既存CSVをダウンロード
-	var since time.Time
-	exists, err := storage.DownloadCSV(username, csvPath)
-	if err != nil {
-		log.Printf("[WARN] Failed to download existing CSV: %v", err)
-	}
-	if exists {
-		since, err = storage.GetLatestDatetime(csvPath)
-		if err != nil {
-			log.Printf("[WARN] Failed to read latest datetime: %v", err)
-		}
-		if !since.IsZero() {
-			log.Printf("[INFO] Fetching scores after %s", since.Format("2006-01-02 15:04"))
-		}
-	}
-
-	// スクレイピング
-	log.Printf("[INFO] Scraping for user (hash: %s)", storage.UserKey(username))
-	onProgress := func(msg string) {
-		jobsMu.Lock()
-		j.Message = msg
-		jobsMu.Unlock()
-	}
-	datedScores := scraper.Scraping(username, password, since, onProgress)
-	if len(datedScores) == 0 && !exists {
-		setError(j, "戦績データが見つかりませんでした", "no scores found")
-		return
-	}
-
-	// 同梱のMSリストから機体名マッピングを読み込み
-	msList, err := model.LoadMSList(DefaultMSListPath)
-	if err != nil {
-		log.Printf("[WARN] MS list not found, MS names will be empty")
-	}
-
-	msMap := model.BuildMSNameMap(msList)
-	datedScores.FillMsNames(msMap)
-	datedScores.CheckUnknownMS()
-
-	// CSV保存（既存データに追記）
-	if err := storage.SaveAllScoresCSV(datedScores, csvPath); err != nil {
-		setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to save CSV: %v", err))
-		return
-	}
-
-	// Cloud Storageにアップロード
-	if err := storage.UploadCSV(username, csvPath); err != nil {
-		log.Printf("[WARN] Failed to upload CSV to Cloud Storage: %v", err)
-	}
-
-	// Python分析実行
-	updateStatus(j, statusAnalyzing)
-	cmd := exec.Command("python3", "scripts/analyze.py", csvPath)
-	cmd.Dir = "/app"
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		setError(j, "分析処理に失敗しました", fmt.Sprintf("analysis failed: %v\n%s", err, string(output)))
-		return
-	}
-
-	// レポート読み込み
-	reportPath := filepath.Join(tmpDir, "report.md")
-	report, err := os.ReadFile(reportPath)
-	if err != nil {
-		setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to read report: %v", err))
-		return
-	}
-
-	jobsMu.Lock()
-	j.Status = statusDone
-	j.Report = string(report)
-	j.completedAt = time.Now()
-	jobsMu.Unlock()
-	log.Printf("[INFO] Job %s completed", j.ID)
-}
-
-func updateStatus(j *job, s jobStatus) {
-	jobsMu.Lock()
-	j.Status = s
-	jobsMu.Unlock()
-}
-
-func setError(j *job, clientMsg, detail string) {
-	jobsMu.Lock()
-	j.Status = statusError
-	j.Error = clientMsg
-	j.completedAt = time.Now()
-	jobsMu.Unlock()
-	log.Printf("[ERROR] Job %s failed: %s", j.ID, detail)
 }
 
 var requestLimiter = make(chan struct{}, 3)
@@ -169,7 +29,7 @@ func StartServer() {
 	}
 
 	// 完了済みジョブの定期クリーンアップ（1時間経過したジョブを削除）
-	go cleanupJobs(1 * time.Hour)
+	go pipeline.CleanupJobs(1 * time.Hour)
 
 	// レート制限の設定（RATE_LIMIT環境変数: 1時間あたりの最大リクエスト数、0または未設定で無制限）
 	var rl *rateLimiter
@@ -237,18 +97,12 @@ func StartServer() {
 		}
 
 		// ジョブ作成
-		j := &job{
-			ID:     uuid.New().String(),
-			Status: statusPending,
-		}
-		jobsMu.Lock()
-		jobs[j.ID] = j
-		jobsMu.Unlock()
+		j := pipeline.NewJob()
 
 		// バックグラウンドで実行
 		go func() {
 			defer func() { <-requestLimiter }()
-			runPipeline(j, req.Username, req.Password)
+			pipeline.Run(j, req.Username, req.Password)
 		}()
 
 		sendJSON(w, http.StatusAccepted, map[string]string{"id": j.ID})
@@ -258,27 +112,23 @@ func StartServer() {
 	http.HandleFunc("/status/", func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Path[len("/status/"):]
 
-		jobsMu.RLock()
-		j, ok := jobs[id]
-		jobsMu.RUnlock()
-
+		j, ok := pipeline.GetJob(id)
 		if !ok {
 			sendJSON(w, http.StatusNotFound, map[string]string{"error": "Job not found"})
 			return
 		}
 
-		jobsMu.RLock()
+		snap := j.Snapshot()
 		resp := map[string]string{
-			"id":     j.ID,
-			"status": string(j.Status),
+			"id":     snap.ID,
+			"status": string(snap.Status),
 		}
-		if j.Message != "" {
-			resp["message"] = j.Message
+		if snap.Message != "" {
+			resp["message"] = snap.Message
 		}
-		if j.Error != "" {
-			resp["error"] = j.Error
+		if snap.Error != "" {
+			resp["error"] = snap.Error
 		}
-		jobsMu.RUnlock()
 
 		sendJSON(w, http.StatusOK, resp)
 	})
@@ -287,32 +137,25 @@ func StartServer() {
 	http.HandleFunc("/result/", func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Path[len("/result/"):]
 
-		jobsMu.RLock()
-		j, ok := jobs[id]
-		jobsMu.RUnlock()
-
+		j, ok := pipeline.GetJob(id)
 		if !ok {
 			sendJSON(w, http.StatusNotFound, map[string]string{"error": "Job not found"})
 			return
 		}
 
-		jobsMu.RLock()
-		status := j.Status
-		report := j.Report
-		errMsg := j.Error
-		jobsMu.RUnlock()
+		snap := j.Snapshot()
 
-		if status != statusDone && status != statusError {
-			sendJSON(w, http.StatusAccepted, map[string]string{"status": string(status)})
+		if snap.Status != pipeline.StatusDone && snap.Status != pipeline.StatusError {
+			sendJSON(w, http.StatusAccepted, map[string]string{"status": string(snap.Status)})
 			return
 		}
 
-		if status == statusError {
-			sendJSON(w, http.StatusInternalServerError, map[string]string{"error": errMsg})
+		if snap.Status == pipeline.StatusError {
+			sendJSON(w, http.StatusInternalServerError, map[string]string{"error": snap.Error})
 			return
 		}
 
-		sendJSON(w, http.StatusOK, map[string]string{"report": report})
+		sendJSON(w, http.StatusOK, map[string]string{"report": snap.Report})
 	})
 
 	// 静的ファイル（フロントエンド）
@@ -335,26 +178,6 @@ func securityHeaders(next http.Handler) http.Handler {
 		w.Header().Set("Strict-Transport-Security", "max-age=31536000")
 		next.ServeHTTP(w, r)
 	})
-}
-
-// cleanupJobs は完了済みジョブを定期的に削除する
-func cleanupJobs(ttl time.Duration) {
-	ticker := time.NewTicker(ttl)
-	defer ticker.Stop()
-	for range ticker.C {
-		jobsMu.Lock()
-		before := len(jobs)
-		for id, j := range jobs {
-			if !j.completedAt.IsZero() && time.Since(j.completedAt) > ttl {
-				delete(jobs, id)
-			}
-		}
-		after := len(jobs)
-		jobsMu.Unlock()
-		if before != after {
-			log.Printf("[INFO] Job cleanup: %d -> %d jobs", before, after)
-		}
-	}
 }
 
 func sendJSON(w http.ResponseWriter, code int, data interface{}) {
