@@ -140,7 +140,7 @@ func StartServer() {
 		sendJSON(w, http.StatusOK, resp)
 	})
 
-	// GET /result/{id} → レポートを返す
+	// GET /result/{id} → 分析結果(JSON)を返す
 	http.HandleFunc("/result/", func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Path[len("/result/"):]
 
@@ -154,11 +154,7 @@ func StartServer() {
 
 		if snap.Status != pipeline.StatusDone && snap.Status != pipeline.StatusError {
 			if snap.PreliminaryReport != "" {
-				sendJSON(w, http.StatusOK, map[string]interface{}{
-					"status":      string(snap.Status),
-					"report":      snap.PreliminaryReport,
-					"preliminary": true,
-				})
+				sendRawReport(w, http.StatusOK, snap.PreliminaryReport, string(snap.Status), true)
 				return
 			}
 			sendJSON(w, http.StatusAccepted, map[string]string{"status": string(snap.Status)})
@@ -170,7 +166,7 @@ func StartServer() {
 			return
 		}
 
-		sendJSON(w, http.StatusOK, map[string]string{"report": snap.Report})
+		sendRawReport(w, http.StatusOK, snap.Report, "", false)
 	})
 
 	// 静的ファイル（フロントエンド）
@@ -199,4 +195,22 @@ func sendJSON(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	json.NewEncoder(w).Encode(data)
+}
+
+// sendRawReport はJSON形式のレポートをレスポンスとして返す。
+// reportJSONはanalyze.pyが生成したJSON文字列。json.RawMessageで二重エンコードを防ぐ。
+func sendRawReport(w http.ResponseWriter, code int, reportJSON, status string, preliminary bool) {
+	type reportResponse struct {
+		Report      json.RawMessage `json:"report"`
+		Status      string          `json:"status,omitempty"`
+		Preliminary bool            `json:"preliminary,omitempty"`
+	}
+	resp := reportResponse{
+		Report:      json.RawMessage(reportJSON),
+		Status:      status,
+		Preliminary: preliminary,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(resp)
 }
