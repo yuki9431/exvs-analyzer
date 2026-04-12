@@ -28,6 +28,10 @@ async function analyze() {
   report.style.display = 'none';
   document.querySelectorAll('.share-area').forEach(function(el) { el.remove(); });
 
+  // ログインフォームを非表示
+  document.getElementById('loginForm').style.display = 'none';
+  var preliminaryShown = false;
+
   try {
     // ジョブ作成
     const res = await fetch('/analyze', {
@@ -67,12 +71,23 @@ async function analyze() {
         progressWrap.style.display = 'none';
       }
 
+      // 速報レポートが利用可能なら表示
+      if (statusData.has_preliminary_report && !preliminaryShown) {
+        const prelimRes = await fetch(`/result/${jobId}`);
+        const prelimData = await prelimRes.json();
+        if (prelimData.report && prelimData.preliminary) {
+          renderReport(prelimData.report);
+          statusText.textContent = '最新データを取得中...';
+          preliminaryShown = true;
+        }
+      }
+
       if (statusData.status === 'error') {
         throw new Error(statusData.error || '分析に失敗しました');
       }
 
       if (statusData.status === 'done') {
-        // レポート取得
+        // 最終レポート取得
         const resultRes = await fetch(`/result/${jobId}`);
         const resultData = await resultRes.json();
 
@@ -80,25 +95,7 @@ async function analyze() {
           throw new Error(resultData.error);
         }
 
-        report.style.display = 'block';
-        report.innerHTML = DOMPurify.sanitize(marked.parse(resultData.report), {ADD_TAGS: ['details', 'summary']});
-        report.querySelectorAll('h2, h3, summary').forEach(function(h) {
-          h.id = h.textContent.replace(/\s+/g, '-');
-        });
-        report.querySelectorAll('a[href^="#"]').forEach(function(a) {
-          a.addEventListener('click', function(e) {
-            var target = document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));
-            if (!target) return;
-            var details = target.closest('details');
-            if (details && !details.open) details.open = true;
-          });
-        });
-        report.querySelectorAll('table').forEach(function(table) {
-          var wrap = document.createElement('div');
-          wrap.className = 'table-wrap';
-          table.parentNode.insertBefore(wrap, table);
-          wrap.appendChild(table);
-        });
+        renderReport(resultData.report);
         showShareButton(resultData.report);
         break;
       }
@@ -106,10 +103,35 @@ async function analyze() {
   } catch (e) {
     error.style.display = 'block';
     error.textContent = e.message;
+    document.getElementById('loginForm').style.display = 'block';
   } finally {
     btn.disabled = false;
     status.style.display = 'none';
   }
+}
+
+function renderReport(markdown) {
+  var report = document.getElementById('report');
+  report.style.display = 'block';
+  report.innerHTML = DOMPurify.sanitize(marked.parse(markdown), {ADD_TAGS: ['details', 'summary']});
+  report.querySelectorAll('h2, h3, summary').forEach(function(h) {
+    h.id = h.textContent.replace(/\s+/g, '-');
+  });
+  report.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    a.addEventListener('click', function(e) {
+      var target = document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));
+      if (!target) return;
+      var details = target.closest('details');
+      if (details && !details.open) details.open = true;
+    });
+  });
+  report.querySelectorAll('table').forEach(function(table) {
+    if (table.parentNode.classList.contains('table-wrap')) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'table-wrap';
+    table.parentNode.insertBefore(wrap, table);
+    wrap.appendChild(table);
+  });
 }
 
 function buildShareText(items) {
