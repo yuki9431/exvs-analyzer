@@ -1,4 +1,7 @@
-const STATUS_MESSAGES = {
+import { html, render, useState } from './htm-preact-standalone.js';
+
+// --- Constants ---
+var STATUS_MESSAGES = {
   pending: '準備中...',
   scraping: '戦績を取得中...（数分かかります）',
   analyzing: '分析中...',
@@ -6,133 +9,21 @@ const STATUS_MESSAGES = {
   error: 'エラーが発生しました',
 };
 
-async function analyze() {
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
-  const btn = document.getElementById('analyzeBtn');
-  const status = document.getElementById('status');
-  const statusText = document.getElementById('statusText');
-  const error = document.getElementById('error');
-  const report = document.getElementById('report');
-
-  if (!username || !password) {
-    error.style.display = 'block';
-    error.textContent = 'メールアドレスとパスワードを入力してください。';
-    return;
-  }
-
-  btn.disabled = true;
-  status.style.display = 'block';
-  statusText.textContent = STATUS_MESSAGES.pending;
-  error.style.display = 'none';
-  report.style.display = 'none';
-  document.querySelectorAll('.share-area').forEach(function(el) { el.remove(); });
-
-  // ログインフォームを非表示
-  document.getElementById('loginForm').style.display = 'none';
-  var preliminaryShown = false;
-
-  try {
-    // ジョブ作成
-    const res = await fetch('/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-
-    const data = await res.json();
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    const jobId = data.id;
-
-    // ポーリングで進捗確認
-    while (true) {
-      await new Promise(r => setTimeout(r, 3000));
-
-      const statusRes = await fetch(`/status/${jobId}`);
-      const statusData = await statusRes.json();
-
-      if (statusData.error && statusData.status !== 'error') {
-        throw new Error(statusData.error);
-      }
-
-      statusText.textContent = statusData.message || STATUS_MESSAGES[statusData.status] || statusData.status;
-
-      var progressWrap = document.getElementById('progressWrap');
-      if (statusData.progress_total > 0) {
-        var pct = Math.round(100 * statusData.progress / statusData.progress_total);
-        document.getElementById('progressFill').style.width = pct + '%';
-        document.getElementById('progressPct').textContent = pct + '%';
-        document.getElementById('progressCount').textContent = statusData.progress + '/' + statusData.progress_total + '件';
-        progressWrap.style.display = 'block';
-      } else {
-        progressWrap.style.display = 'none';
-      }
-
-      // 速報レポートが利用可能なら表示
-      if (statusData.has_preliminary_report && !preliminaryShown) {
-        const prelimRes = await fetch(`/result/${jobId}`);
-        const prelimData = await prelimRes.json();
-        if (prelimData.report && prelimData.preliminary) {
-          renderReport(prelimData.report);
-          statusText.textContent = '最新データを取得中...';
-          preliminaryShown = true;
-        }
-      }
-
-      if (statusData.status === 'error') {
-        throw new Error(statusData.error || '分析に失敗しました');
-      }
-
-      if (statusData.status === 'done') {
-        // 最終レポート取得
-        const resultRes = await fetch(`/result/${jobId}`);
-        const resultData = await resultRes.json();
-
-        if (resultData.error) {
-          throw new Error(resultData.error);
-        }
-
-        renderReport(resultData.report);
-        showShareButton(resultData.report);
-        break;
-      }
-    }
-  } catch (e) {
-    error.style.display = 'block';
-    error.textContent = e.message;
-    document.getElementById('loginForm').style.display = 'block';
-  } finally {
-    btn.disabled = false;
-    status.style.display = 'none';
-  }
+// --- Utility ---
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-function renderReport(markdown) {
-  var report = document.getElementById('report');
-  report.style.display = 'block';
-  report.innerHTML = DOMPurify.sanitize(marked.parse(markdown), {ADD_TAGS: ['details', 'summary']});
-  report.querySelectorAll('h2, h3, summary').forEach(function(h) {
-    h.id = h.textContent.replace(/\s+/g, '-');
-  });
-  report.querySelectorAll('a[href^="#"]').forEach(function(a) {
-    a.addEventListener('click', function(e) {
-      var target = document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));
-      if (!target) return;
-      var details = target.closest('details');
-      if (details && !details.open) details.open = true;
-    });
-  });
-  report.querySelectorAll('table').forEach(function(table) {
-    if (table.parentNode.classList.contains('table-wrap')) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'table-wrap';
-    table.parentNode.insertBefore(wrap, table);
-    wrap.appendChild(table);
-  });
-}
+function pct(n) { return n != null ? n.toFixed(1) + '%' : '-'; }
+function num(n, d) { return n != null ? n.toFixed(d != null ? d : 0) : '-'; }
+
+// --- Share helpers ---
+var SVG_X = '<svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
+var SVG_BSKY = '<svg viewBox="0 0 568 501"><path d="M123.121 33.664C188.241 82.553 258.281 181.68 284 234.873c25.719-53.192 95.759-152.32 160.879-201.21C491.866-1.611 568-28.906 568 57.947c0 17.346-9.945 145.713-15.778 166.555-20.275 72.453-94.155 90.933-159.875 79.748C507.222 323.8 536.444 388.56 473.333 453.32c-119.86 122.992-172.272-30.859-185.702-70.281-2.462-7.227-3.614-10.608-3.631-7.733-.017-2.875-1.169.506-3.631 7.733-13.43 39.422-65.842 193.273-185.702 70.281-63.111-64.76-33.889-129.52 80.986-149.071-65.72 11.185-139.6-7.295-159.875-79.748C9.945 203.659 0 75.291 0 57.946 0-28.906 76.135-1.612 123.121 33.664z"/></svg>';
+var SVG_LINE = '<svg viewBox="0 0 24 24"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>';
+var SVG_COPY = '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+var SVG_CHECK = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
 
 function buildShareText(items) {
   var lines = ['【EXVS2XB 戦績診断】'];
@@ -156,63 +47,436 @@ function buildShareText(items) {
   return lines.join('\n');
 }
 
-var SVG_X = '<svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
-var SVG_BSKY = '<svg viewBox="0 0 568 501"><path d="M123.121 33.664C188.241 82.553 258.281 181.68 284 234.873c25.719-53.192 95.759-152.32 160.879-201.21C491.866-1.611 568-28.906 568 57.947c0 17.346-9.945 145.713-15.778 166.555-20.275 72.453-94.155 90.933-159.875 79.748C507.222 323.8 536.444 388.56 473.333 453.32c-119.86 122.992-172.272-30.859-185.702-70.281-2.462-7.227-3.614-10.608-3.631-7.733-.017-2.875-1.169.506-3.631 7.733-13.43 39.422-65.842 193.273-185.702 70.281-63.111-64.76-33.889-129.52 80.986-149.071-65.72 11.185-139.6-7.295-159.875-79.748C9.945 203.659 0 75.291 0 57.946 0-28.906 76.135-1.612 123.121 33.664z"/></svg>';
-var SVG_LINE = '<svg viewBox="0 0 24 24"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>';
-var SVG_COPY = '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
-var SVG_CHECK = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+// --- Generic components ---
 
-function createShareArea(id, text) {
+function Tips({ tips }) {
+  if (!tips || !tips.length) return null;
+  return html`<blockquote><strong>💡 アドバイス:</strong><br />${tips.map(function (t, i) {
+    return html`${i > 0 && html`<br />`}${t}`;
+  })}</blockquote>`;
+}
+
+function Table({ headers, rows }) {
+  if (!rows || !rows.length) return null;
+  return html`<div class="table-wrap"><table>
+    <thead><tr>${headers.map(function (h) { return html`<th>${h}</th>`; })}</tr></thead>
+    <tbody>${rows.map(function (row) {
+      return html`<tr>${row.map(function (cell) { return html`<td>${cell}</td>`; })}</tr>`;
+    })}</tbody>
+  </table></div>`;
+}
+
+function Section({ title, open, children }) {
+  return html`<details ...${{ open: open || false }}>
+    <summary><strong>${title}</strong></summary>
+    ${children}
+  </details><hr />`;
+}
+
+// --- Report sections ---
+
+function SummarySection({ summary }) {
+  if (!summary || !summary.categories || !summary.categories.length) return null;
+  return html`<${Section} title="総合アドバイス" open>
+    ${summary.categories.map(function (cat) {
+      return html`<div>
+        <strong>${esc(cat.title)}</strong>
+        <ul>${cat.items.map(function (item) { return html`<li>${item}</li>`; })}</ul>
+      </div>`;
+    })}
+  <//>`;
+}
+
+function BasicStatsSection({ stats }) {
+  if (!stats) return null;
+  var rows = [
+    ['試合数', stats.matches + '戦 (' + stats.wins + '勝' + stats.losses + '敗)'],
+    ['勝率', pct(stats.win_rate)],
+    ['平均与ダメージ', num(stats.avg_dmg_given)],
+    ['平均被ダメージ', num(stats.avg_dmg_taken)],
+    ['与被ダメ比', num(stats.dmg_efficiency, 3)],
+    ['平均撃墜', num(stats.avg_kills, 2)],
+    ['平均被撃墜', num(stats.avg_deaths, 2)],
+    ['K/D比', num(stats.kd_ratio, 2)],
+    ['平均EXダメージ', num(stats.avg_ex_dmg)],
+  ];
+  return html`<div>
+    <h3>基本データ</h3>
+    <${Table} headers=${['項目', '値']} rows=${rows} />
+    <${Tips} tips=${stats.tips} />
+  </div>`;
+}
+
+function WinLossPatternSection({ pattern }) {
+  if (!pattern) return null;
+  var rows = (pattern.metrics || []).map(function (m) {
+    var diff = m.diff >= 0 ? '+' + num(m.diff, 1) : num(m.diff, 1);
+    return [m.label, num(m.win_avg, 1), num(m.loss_avg, 1), diff];
+  });
+  return html`<div>
+    <h3>勝ち/負け時のダメージ傾向</h3>
+    <${Table} headers=${['項目', '勝ち', '負け', '差']} rows=${rows} />
+    <${Tips} tips=${pattern.tips} />
+    ${(pattern.cost_patterns || []).map(function (cp) {
+      var bRows = (cp.buckets || []).map(function (b) {
+        return [b.bucket + '落ち', b.matches + '戦', pct(b.loss_rate)];
+      });
+      return html`<div>
+        <h3>${esc(cp.cost_label)}コスト (${cp.cost}) - 被撃墜パターン</h3>
+        <p>${cp.matches}戦 / 致命的落ち: ${cp.fatal_deaths}回 (コスト${cp.fatal_cost})</p>
+        <${Table} headers=${['被撃墜数', '試合数', '敗北率']} rows=${bRows} />
+        <${Tips} tips=${cp.tips} />
+      </div>`;
+    })}
+  </div>`;
+}
+
+function EnemyMatchupSection({ matchup, msName }) {
+  if (!matchup) return null;
+  var headers = ['機体名', '試合', '勝率', '与被ダメ比', '与ダメ', '被ダメ'];
+  function matchupRows(list) {
+    return (list || []).map(function (e) {
+      return [esc(e.ms), e.matches, pct(e.win_rate), num(e.dmg_efficiency, 3), num(e.avg_dmg_given, 1), num(e.avg_dmg_taken, 1)];
+    });
+  }
+  return html`<div>
+    <h3>敵機体との相性（${esc(msName)}）</h3>
+    ${matchup.strong && matchup.strong.length > 0 && html`<p><strong>得意な相手:</strong></p><${Table} headers=${headers} rows=${matchupRows(matchup.strong)} />`}
+    ${matchup.weak && matchup.weak.length > 0 && html`<p><strong>苦手な相手:</strong></p><${Table} headers=${headers} rows=${matchupRows(matchup.weak)} />`}
+    ${matchup.even && matchup.even.length > 0 && html`<p><strong>互角の相手:</strong></p><${Table} headers=${headers} rows=${matchupRows(matchup.even)} />`}
+    <${Tips} tips=${matchup.tips} />
+  </div>`;
+}
+
+function PartnerSection({ partners, msName }) {
+  if (!partners || !partners.length) return null;
+  var rows = partners.map(function (p) {
+    return [esc(p.ms), p.matches, pct(p.win_rate), num(p.dmg_efficiency, 3)];
+  });
+  return html`<div>
+    <h3>相方機体との相性（${esc(msName)}）</h3>
+    <${Table} headers=${['機体名', '試合', '勝率', '与被ダメ比']} rows=${rows} />
+  </div>`;
+}
+
+function MsStatsSection({ msStats }) {
+  if (!msStats) return null;
+  var entries = Object.keys(msStats).sort(function (a, b) {
+    return msStats[b].matches - msStats[a].matches;
+  });
+  if (!entries.length) return null;
+  return entries.map(function (msName) {
+    var ms = msStats[msName];
+    return html`<${Section} title=${'機体別分析: ' + msName + ' (' + ms.matches + '戦)'}>
+      <${BasicStatsSection} stats=${ms.basic_stats} />
+      <${WinLossPatternSection} pattern=${ms.win_loss_pattern} />
+      <${EnemyMatchupSection} matchup=${ms.enemy_matchup} msName=${msName} />
+      <${PartnerSection} partners=${ms.partner} msName=${msName} />
+    <//>`;
+  });
+}
+
+function MsPairSection({ msPair }) {
+  if (!msPair) return null;
+  var headers = ['ペア', '試合', '勝', '敗', '勝率', '与被ダメ比'];
+  function pairRows(list) {
+    return (list || []).map(function (p) {
+      return [esc(p.pair), p.matches, p.wins, p.losses, pct(p.win_rate), num(p.dmg_efficiency, 3)];
+    });
+  }
+  return html`<${Section} title="機体編成別勝率">
+    ${msPair.by_win_rate && msPair.by_win_rate.length > 0 && html`<h3>勝率順</h3><${Table} headers=${headers} rows=${pairRows(msPair.by_win_rate)} />`}
+    ${msPair.by_matches && msPair.by_matches.length > 0 && html`<h3>試合数順</h3><${Table} headers=${headers} rows=${pairRows(msPair.by_matches)} />`}
+  <//>`;
+}
+
+function CostPairSection({ costPair }) {
+  if (!costPair || !costPair.length) return null;
+  var rows = costPair.map(function (p) {
+    return [esc(p.pair), p.matches, pct(p.win_rate), num(p.dmg_efficiency, 3)];
+  });
+  return html`<${Section} title="コスト編成別勝率">
+    <${Table} headers=${['コスト編成', '試合', '勝率', '与被ダメ比']} rows=${rows} />
+  <//>`;
+}
+
+function DmgContributionSection({ dmg }) {
+  if (!dmg) return null;
+  var rows = [
+    ['全体', '-', pct(dmg.avg_contribution), pct(dmg.avg_win_contribution), pct(dmg.avg_lose_contribution)],
+  ];
+  (dmg.by_cost || []).forEach(function (c) {
+    rows.push([c.cost_label + 'コスト (' + c.cost + ')', c.matches, pct(c.avg_contribution), pct(c.avg_win_contribution), pct(c.avg_lose_contribution)]);
+  });
+  return html`<${Section} title="ダメージ貢献率">
+    <${Table} headers=${['区分', '試合', '平均貢献率', '勝ち時', '負け時']} rows=${rows} />
+  <//>`;
+}
+
+function FixedPartnersSection({ partners }) {
+  if (!partners || !partners.length) return null;
+  return html`<${Section} title="固定相方分析（連続10戦以上）">
+    ${partners.map(function (p) {
+      var statsRows = [
+        ['平均与ダメージ', num(p.my_stats.avg_dmg_given), num(p.partner_stats.avg_dmg_given)],
+        ['平均被ダメージ', num(p.my_stats.avg_dmg_taken), num(p.partner_stats.avg_dmg_taken)],
+        ['与被ダメ比', num(p.my_stats.dmg_efficiency, 3), num(p.partner_stats.dmg_efficiency, 3)],
+        ['平均撃墜', num(p.my_stats.avg_kills, 2), num(p.partner_stats.avg_kills, 2)],
+        ['平均被撃墜', num(p.my_stats.avg_deaths, 2), num(p.partner_stats.avg_deaths, 2)],
+      ];
+      var msRows = (p.partner_ms_breakdown || []).map(function (m) {
+        return [esc(m.ms), m.matches, pct(m.win_rate)];
+      });
+      return html`<div>
+        <h3>${esc(p.partner_name)} (${p.matches}戦)</h3>
+        <p>${p.wins}勝${p.losses}敗 (勝率 ${pct(p.win_rate)})</p>
+        <${Table} headers=${['項目', '自分', '相方']} rows=${statsRows} />
+        ${msRows.length > 0 && html`<p><strong>相方の使用機体:</strong></p><${Table} headers=${['機体', '試合', '勝率']} rows=${msRows} />`}
+        <${Tips} tips=${p.tips} />
+      </div>`;
+    })}
+  <//>`;
+}
+
+function DeathsImpactSection({ deaths }) {
+  if (!deaths || !deaths.length) return null;
+  return html`<${Section} title="被撃墜数と勝率の関係">
+    ${deaths.map(function (d) {
+      var rows = (d.buckets || []).map(function (b) {
+        return [b.bucket + '落ち', b.matches + '戦', pct(b.loss_rate)];
+      });
+      return html`<div>
+        <h3>${esc(d.cost_label)}コスト (${d.cost})</h3>
+        <p>${d.matches}戦 / 致命的落ち: ${d.fatal_deaths}回 (コスト${d.fatal_cost})</p>
+        <${Table} headers=${['被撃墜数', '試合数', '敗北率']} rows=${rows} />
+        <${Tips} tips=${d.tips} />
+      </div>`;
+    })}
+  <//>`;
+}
+
+function TimeOfDaySection({ time }) {
+  if (!time || !time.hours || !time.hours.length) return null;
+  var rows = time.hours.map(function (h) {
+    var mark = h.mark === 'good' ? '◎' : h.mark === 'bad' ? '△' : '';
+    return [h.hour + '時', h.matches, pct(h.win_rate), num(h.dmg_efficiency, 3), mark];
+  });
+  return html`<${Section} title="時間帯別の勝率">
+    <${Table} headers=${['時間帯', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
+    <${Tips} tips=${time.tips} />
+  <//>`;
+}
+
+function DayOfWeekSection({ dow }) {
+  if (!dow) return null;
+  var rows = [];
+  if (dow.weekday) rows.push(['平日', dow.weekday.matches, pct(dow.weekday.win_rate), num(dow.weekday.dmg_efficiency, 3)]);
+  if (dow.weekend) rows.push(['土日', dow.weekend.matches, pct(dow.weekend.win_rate), num(dow.weekend.dmg_efficiency, 3)]);
+  (dow.days || []).forEach(function (d) {
+    rows.push([d.name + '曜', d.matches, pct(d.win_rate), num(d.dmg_efficiency, 3)]);
+  });
+  return html`<${Section} title="曜日別の勝率（平日 vs 土日）">
+    <${Table} headers=${['曜日', '試合', '勝率', '与被ダメ比']} rows=${rows} />
+    <${Tips} tips=${dow.tips} />
+  <//>`;
+}
+
+function DailyTrendSection({ daily }) {
+  if (!daily || !daily.days || !daily.days.length) return null;
+  var rows = daily.days.map(function (d) {
+    var mark = d.mark === 'good' ? '◎' : d.mark === 'bad' ? '△' : '';
+    return [d.date + ' (' + d.dow_name + ')', d.matches, pct(d.win_rate), num(d.dmg_efficiency, 3), mark];
+  });
+  return html`<${Section} title="日別勝率推移">
+    ${daily.max_lose_streak > 0 && html`<p>最大連敗: <strong>${daily.max_lose_streak}</strong>連敗</p>`}
+    <${Table} headers=${['日付', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
+    <${Tips} tips=${daily.tips} />
+  <//>`;
+}
+
+function SeasonSection({ seasons }) {
+  if (!seasons || !seasons.length) return null;
+  return html`<${Section} title="シーズン別分析">
+    ${seasons.map(function (s) {
+      var rows = [['全体', s.matches, pct(s.win_rate), num(s.dmg_efficiency, 3)]];
+      if (s.first_half) rows.push(['前半', s.first_half.matches, pct(s.first_half.win_rate), num(s.first_half.dmg_efficiency, 3)]);
+      if (s.second_half) rows.push(['後半', s.second_half.matches, pct(s.second_half.win_rate), num(s.second_half.dmg_efficiency, 3)]);
+      return html`<div>
+        <h3>${esc(s.name)}</h3>
+        <${Table} headers=${['期間', '試合', '勝率', '与被ダメ比']} rows=${rows} />
+        <${Tips} tips=${s.tips} />
+      </div>`;
+    })}
+  <//>`;
+}
+
+// --- Share area ---
+
+function ShareArea({ shareData }) {
+  if (!shareData || !shareData.length) return null;
+  var text = buildShareText(shareData);
   var encoded = encodeURIComponent(text);
   var xUrl = 'https://x.com/intent/tweet?text=' + encoded;
   var bskyUrl = 'https://bsky.app/intent/compose?text=' + encoded;
   var lineUrl = 'https://line.me/R/share?text=' + encoded;
 
-  var area = document.createElement('div');
-  area.id = id;
-  area.className = 'share-area';
-  area.innerHTML =
-    '<span class="share-label">共有</span>' +
-    '<a href="' + xUrl + '" target="_blank" rel="noopener noreferrer" class="share-btn share-x" aria-label="Xで共有">' + SVG_X + '</a>' +
-    '<a href="' + bskyUrl + '" target="_blank" rel="noopener noreferrer" class="share-btn share-bsky" aria-label="Blueskyで共有">' + SVG_BSKY + '</a>' +
-    '<a href="' + lineUrl + '" target="_blank" rel="noopener noreferrer" class="share-btn share-line" aria-label="LINEで共有">' + SVG_LINE + '</a>' +
-    '<button class="share-btn share-copy" onclick="copyShareText(this)" aria-label="テキストをコピー">' + SVG_COPY + '</button>';
-  area.dataset.shareText = text;
-  return area;
+  function CopyButton() {
+    var ref = useState(false);
+    var copied = ref[0], setCopied = ref[1];
+    function handleCopy() {
+      navigator.clipboard.writeText(text).then(function () {
+        setCopied(true);
+        setTimeout(function () { setCopied(false); }, 2000);
+      });
+    }
+    return html`<button class=${'share-btn share-copy' + (copied ? ' copied' : '')} onClick=${handleCopy} aria-label="テキストをコピー"
+      dangerouslySetInnerHTML=${{ __html: copied ? SVG_CHECK : SVG_COPY }} />`;
+  }
+
+  return html`<div class="share-area">
+    <span class="share-label">共有</span>
+    <a href=${xUrl} target="_blank" rel="noopener noreferrer" class="share-btn share-x" aria-label="Xで共有" dangerouslySetInnerHTML=${{ __html: SVG_X }} />
+    <a href=${bskyUrl} target="_blank" rel="noopener noreferrer" class="share-btn share-bsky" aria-label="Blueskyで共有" dangerouslySetInnerHTML=${{ __html: SVG_BSKY }} />
+    <a href=${lineUrl} target="_blank" rel="noopener noreferrer" class="share-btn share-line" aria-label="LINEで共有" dangerouslySetInnerHTML=${{ __html: SVG_LINE }} />
+    <${CopyButton} />
+  </div>`;
 }
 
-function showShareButton(markdown) {
-  document.querySelectorAll('.share-area').forEach(function(el) { el.remove(); });
+// --- Main report ---
 
-  var match = markdown.match(/<!-- SHARE_DATA:(.*?) -->/);
-  if (!match) return;
-
-  var items;
-  try { items = JSON.parse(match[1]); } catch (e) { return; }
-  if (!items.length) return;
-
-  var text = buildShareText(items);
-  var report = document.getElementById('report');
-  report.before(createShareArea('shareAreaTop', text));
-  report.after(createShareArea('shareAreaBottom', text));
+function Report({ data }) {
+  if (!data) return null;
+  return html`
+    <h1>${esc(data.player_name)} - 戦績分析レポート</h1>
+    <${ShareArea} shareData=${data.share_data} />
+    <${SummarySection} summary=${data.summary} />
+    <${Section} title="基本データ">
+      <${BasicStatsSection} stats=${data.basic_stats} />
+      <${WinLossPatternSection} pattern=${data.win_loss_pattern} />
+    <//>
+    <${MsStatsSection} msStats=${data.ms_stats} />
+    <${MsPairSection} msPair=${data.ms_pair} />
+    <${CostPairSection} costPair=${data.cost_pair} />
+    <${DmgContributionSection} dmg=${data.dmg_contribution} />
+    <${FixedPartnersSection} partners=${data.fixed_partners} />
+    <${DeathsImpactSection} deaths=${data.deaths_impact} />
+    <${TimeOfDaySection} time=${data.time_of_day} />
+    <${DayOfWeekSection} dow=${data.day_of_week} />
+    <${DailyTrendSection} daily=${data.daily_trend} />
+    <${SeasonSection} seasons=${data.season} />
+    <${ShareArea} shareData=${data.share_data} />
+  `;
 }
 
-function copyShareText(btn) {
-  var area = btn.closest('.share-area');
-  if (!area) return;
-  navigator.clipboard.writeText(area.dataset.shareText).then(function() {
-    btn.classList.add('copied');
-    btn.innerHTML = SVG_CHECK;
-    setTimeout(function() {
-      btn.classList.remove('copied');
-      btn.innerHTML = SVG_COPY;
-    }, 2000);
-  });
+// --- Main app logic ---
+
+function renderReport(data) {
+  var reportEl = document.getElementById('report');
+  reportEl.style.display = 'block';
+  render(html`<${Report} data=${data} />`, reportEl);
+}
+
+async function analyze() {
+  var username = document.getElementById('username').value;
+  var password = document.getElementById('password').value;
+  var btn = document.getElementById('analyzeBtn');
+  var status = document.getElementById('status');
+  var statusText = document.getElementById('statusText');
+  var error = document.getElementById('error');
+  var reportEl = document.getElementById('report');
+
+  if (!username || !password) {
+    error.style.display = 'block';
+    error.textContent = 'メールアドレスとパスワードを入力してください。';
+    return;
+  }
+
+  btn.disabled = true;
+  status.style.display = 'block';
+  statusText.textContent = STATUS_MESSAGES.pending;
+  error.style.display = 'none';
+  reportEl.style.display = 'none';
+  render(null, reportEl);
+
+  document.getElementById('loginForm').style.display = 'none';
+  var preliminaryShown = false;
+
+  try {
+    var res = await fetch('/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: username, password: password }),
+    });
+
+    var data = await res.json();
+    if (data.error) {
+      throw new Error(data.error);
+    }
+
+    var jobId = data.id;
+
+    while (true) {
+      await new Promise(function (r) { setTimeout(r, 3000); });
+
+      var statusRes = await fetch('/status/' + jobId);
+      var statusData = await statusRes.json();
+
+      if (statusData.error && statusData.status !== 'error') {
+        throw new Error(statusData.error);
+      }
+
+      statusText.textContent = statusData.message || STATUS_MESSAGES[statusData.status] || statusData.status;
+
+      var progressWrap = document.getElementById('progressWrap');
+      if (statusData.progress_total > 0) {
+        var p = Math.round(100 * statusData.progress / statusData.progress_total);
+        document.getElementById('progressFill').style.width = p + '%';
+        document.getElementById('progressPct').textContent = p + '%';
+        document.getElementById('progressCount').textContent = statusData.progress + '/' + statusData.progress_total + '件';
+        progressWrap.style.display = 'block';
+      } else {
+        progressWrap.style.display = 'none';
+      }
+
+      if (statusData.has_preliminary_report && !preliminaryShown) {
+        var prelimRes = await fetch('/result/' + jobId);
+        var prelimData = await prelimRes.json();
+        if (prelimData.report && prelimData.preliminary) {
+          renderReport(prelimData.report);
+          statusText.textContent = '最新データを取得中...';
+          preliminaryShown = true;
+        }
+      }
+
+      if (statusData.status === 'error') {
+        throw new Error(statusData.error || '分析に失敗しました');
+      }
+
+      if (statusData.status === 'done') {
+        var resultRes = await fetch('/result/' + jobId);
+        var resultData = await resultRes.json();
+
+        if (resultData.error) {
+          throw new Error(resultData.error);
+        }
+
+        renderReport(resultData.report);
+        break;
+      }
+    }
+  } catch (e) {
+    error.style.display = 'block';
+    error.textContent = e.message;
+    document.getElementById('loginForm').style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    status.style.display = 'none';
+  }
 }
 
 if (document.getElementById('analyzeBtn')) {
   document.getElementById('analyzeBtn').addEventListener('click', analyze);
-  document.getElementById('password').addEventListener('keypress', function(e) {
+  document.getElementById('password').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') analyze();
   });
 }
