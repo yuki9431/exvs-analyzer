@@ -82,8 +82,16 @@ async function analyze() {
 
         report.style.display = 'block';
         report.innerHTML = DOMPurify.sanitize(marked.parse(resultData.report), {ADD_TAGS: ['details', 'summary']});
-        report.querySelectorAll('h2, h3').forEach(function(h) {
+        report.querySelectorAll('h2, h3, summary').forEach(function(h) {
           h.id = h.textContent.replace(/\s+/g, '-');
+        });
+        report.querySelectorAll('a[href^="#"]').forEach(function(a) {
+          a.addEventListener('click', function(e) {
+            var target = document.getElementById(decodeURIComponent(this.getAttribute('href').slice(1)));
+            if (!target) return;
+            var details = target.closest('details');
+            if (details && !details.open) details.open = true;
+          });
         });
         report.querySelectorAll('table').forEach(function(table) {
           var wrap = document.createElement('div');
