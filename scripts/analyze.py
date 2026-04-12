@@ -226,6 +226,44 @@ def md_cost_pair(data_list, min_matches=3):
     return "\n".join(lines)
 
 
+def md_ms_pair(data_list, min_matches=3, top_n=10):
+    """自機+相方機体の組み合わせ別勝率（TOP N）"""
+    pairs = defaultdict(list)
+    for d in data_list:
+        key = f"{d['ms']} + {d['partner_ms']}"
+        pairs[key].append(d)
+
+    results = []
+    for pair, matches in pairs.items():
+        if len(matches) >= min_matches:
+            wr = win_rate(matches)
+            eff = dmg_efficiency(matches)
+            w, l = wins_losses(matches)
+            results.append((pair, len(matches), wr, eff, w, l))
+
+    if not results:
+        return "3戦以上の機体編成がありませんでした。"
+
+    # 勝率が高い編成 TOP N
+    by_wr = sorted(results, key=lambda x: (-x[2], -x[1]))[:top_n]
+    lines = [f"**勝率が高い編成 TOP{min(top_n, len(by_wr))}**（{min_matches}戦以上）\n"]
+    lines.append("| 編成 | 試合 | 勝敗 | 勝率 | 与被ダメ比 |")
+    lines.append("|------|------|------|------|----------|")
+    for pair, n, wr, eff, w, l in by_wr:
+        lines.append(f"| {pair} | {n} | {w}勝{l}敗 | {wr:.1f}% | {eff:.3f} |")
+
+    # 試合数が多い編成 TOP N（勝率順と異なる場合のみ）
+    by_count = sorted(results, key=lambda x: (-x[1], -x[2]))[:top_n]
+    if by_count != by_wr:
+        lines.append(f"\n**試合数が多い編成 TOP{min(top_n, len(by_count))}**\n")
+        lines.append("| 編成 | 試合 | 勝敗 | 勝率 | 与被ダメ比 |")
+        lines.append("|------|------|------|------|----------|")
+        for pair, n, wr, eff, w, l in by_count:
+            lines.append(f"| {pair} | {n} | {w}勝{l}敗 | {wr:.1f}% | {eff:.3f} |")
+
+    return "\n".join(lines)
+
+
 def md_dmg_contribution(data_list, min_matches=3):
     """ダメージ貢献率（自分の与ダメ / チーム合計与ダメ）"""
     # 全体の貢献率
@@ -257,36 +295,38 @@ def md_dmg_contribution(data_list, min_matches=3):
         "",
     ]
 
-    # コスト帯別
-    cost_groups = defaultdict(list)
+    # 機体別
+    ms_groups = defaultdict(list)
     for d in data_list:
-        cost = d.get("ms_cost", 0)
-        if cost in COST_LABEL:
-            cost_groups[cost].append(d)
+        ms_groups[d["ms"]].append(d)
 
-    if len(cost_groups) > 1 or any(len(v) >= min_matches for v in cost_groups.values()):
-        lines.append("| コスト | 試合 | 貢献率 | 勝ち時 | 負け時 |")
-        lines.append("|--------|------|--------|--------|--------|")
-        for cost in sorted(cost_groups.keys(), reverse=True):
-            data = cost_groups[cost]
-            if len(data) < min_matches:
-                continue
-            c_all = []
-            c_win = []
-            c_lose = []
-            for d in data:
-                team_total = d["dmg_given"] + d["partner_dmg_given"]
-                if team_total > 0:
-                    c = d["dmg_given"] / team_total * 100
-                    c_all.append(c)
-                    if d["win"]:
-                        c_win.append(c)
-                    else:
-                        c_lose.append(c)
-            a = sum(c_all) / len(c_all) if c_all else 0
-            w = sum(c_win) / len(c_win) if c_win else 0
-            l = sum(c_lose) / len(c_lose) if c_lose else 0
-            lines.append(f"| {COST_LABEL[cost]} | {len(data)} | {a:.1f}% | {w:.1f}% | {l:.1f}% |")
+    ms_results = []
+    for ms_name, data in ms_groups.items():
+        if len(data) < min_matches:
+            continue
+        c_all = []
+        c_win = []
+        c_lose = []
+        for d in data:
+            team_total = d["dmg_given"] + d["partner_dmg_given"]
+            if team_total > 0:
+                c = d["dmg_given"] / team_total * 100
+                c_all.append(c)
+                if d["win"]:
+                    c_win.append(c)
+                else:
+                    c_lose.append(c)
+        a = sum(c_all) / len(c_all) if c_all else 0
+        w = sum(c_win) / len(c_win) if c_win else 0
+        l = sum(c_lose) / len(c_lose) if c_lose else 0
+        ms_results.append((ms_name, len(data), a, w, l))
+
+    if ms_results:
+        ms_results.sort(key=lambda x: -x[1])
+        lines.append("| 機体 | 試合 | 貢献率 | 勝ち時 | 負け時 |")
+        lines.append("|------|------|--------|--------|--------|")
+        for ms_name, n, a, w, l in ms_results:
+            lines.append(f"| {ms_name} | {n} | {a:.1f}% | {w:.1f}% | {l:.1f}% |")
 
     return "\n".join(lines)
 
@@ -1049,14 +1089,15 @@ def main():
         toc.append(f"   - {toc_link('敵機体との相性', '敵機体との相性（' + ms_name + '）')}")
         toc.append(f"   - {toc_link('相方機体との相性', '相方機体との相性（' + ms_name + '）')}")
     n += len(ms_names_for_toc)
-    toc.append(f"{n}. {toc_link('コスト編成別勝率', 'コスト編成別勝率')}")
-    toc.append(f"{n+1}. {toc_link('ダメージ貢献率', 'ダメージ貢献率')}")
-    toc.append(f"{n+2}. {toc_link('固定相方分析', '固定相方分析（連続10戦以上）')}")
-    toc.append(f"{n+3}. {toc_link('被撃墜数と勝率', '被撃墜数と勝率の関係')}")
-    toc.append(f"{n+4}. {toc_link('時間帯別', '時間帯別の勝率')}")
-    toc.append(f"{n+5}. {toc_link('曜日別', '曜日別の勝率（平日-vs-土日）')}")
-    toc.append(f"{n+6}. {toc_link('日別推移', '日別勝率推移')}")
-    toc.append(f"{n+7}. {toc_link('シーズン別', 'シーズン別分析')}")
+    toc.append(f"{n}. {toc_link('機体編成別勝率', '機体編成別勝率')}")
+    toc.append(f"{n+1}. {toc_link('コスト編成別勝率', 'コスト編成別勝率')}")
+    toc.append(f"{n+2}. {toc_link('ダメージ貢献率', 'ダメージ貢献率')}")
+    toc.append(f"{n+3}. {toc_link('固定相方分析', '固定相方分析（連続10戦以上）')}")
+    toc.append(f"{n+4}. {toc_link('被撃墜数と勝率', '被撃墜数と勝率の関係')}")
+    toc.append(f"{n+5}. {toc_link('時間帯別', '時間帯別の勝率')}")
+    toc.append(f"{n+6}. {toc_link('曜日別', '曜日別の勝率（平日-vs-土日）')}")
+    toc.append(f"{n+7}. {toc_link('日別推移', '日別勝率推移')}")
+    toc.append(f"{n+8}. {toc_link('シーズン別', 'シーズン別分析')}")
     toc.append("\n</details>")
     report.append("\n".join(toc))
 
@@ -1084,6 +1125,10 @@ def main():
         report.append(f"\n### 相方機体との相性（{ms_name}）\n")
         report.append(md_partner(data))
         report.append("\n</details>")
+
+    # 機体編成別勝率
+    report.append("\n---\n\n## 機体編成別勝率\n")
+    report.append(md_ms_pair(all_data))
 
     # コスト編成別勝率
     report.append("\n---\n\n## コスト編成別勝率\n")
