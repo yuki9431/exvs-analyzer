@@ -1129,8 +1129,9 @@ def main():
         report.append("\n</details>")
 
     # 機体編成別勝率
-    report.append("\n---\n\n## 機体編成別勝率\n")
+    report.append("\n---\n\n<details><summary><strong>機体編成別勝率</strong></summary>\n")
     report.append(md_ms_pair(all_data))
+    report.append("\n</details>")
 
     # コスト編成別勝率
     report.append("\n---\n\n<details><summary><strong>コスト編成別勝率</strong></summary>\n")
