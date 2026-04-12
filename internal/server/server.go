@@ -133,6 +133,9 @@ func StartServer() {
 		if snap.Error != "" {
 			resp["error"] = snap.Error
 		}
+		if snap.PreliminaryReport != "" {
+			resp["has_preliminary_report"] = true
+		}
 
 		sendJSON(w, http.StatusOK, resp)
 	})
@@ -150,6 +153,14 @@ func StartServer() {
 		snap := j.Snapshot()
 
 		if snap.Status != pipeline.StatusDone && snap.Status != pipeline.StatusError {
+			if snap.PreliminaryReport != "" {
+				sendJSON(w, http.StatusOK, map[string]interface{}{
+					"status":      string(snap.Status),
+					"report":      snap.PreliminaryReport,
+					"preliminary": true,
+				})
+				return
+			}
 			sendJSON(w, http.StatusAccepted, map[string]string{"status": string(snap.Status)})
 			return
 		}

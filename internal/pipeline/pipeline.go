@@ -31,25 +31,27 @@ const (
 
 // Job はバックグラウンドジョブの情報
 type Job struct {
-	ID            string    `json:"id"`
-	Status        JobStatus `json:"status"`
-	Message       string    `json:"message,omitempty"`
-	Progress      int       `json:"progress,omitempty"`
-	ProgressTotal int       `json:"progress_total,omitempty"`
-	Report        string    `json:"report,omitempty"`
-	Error         string    `json:"error,omitempty"`
-	completedAt   time.Time
+	ID                 string    `json:"id"`
+	Status             JobStatus `json:"status"`
+	Message            string    `json:"message,omitempty"`
+	Progress           int       `json:"progress,omitempty"`
+	ProgressTotal      int       `json:"progress_total,omitempty"`
+	Report             string    `json:"report,omitempty"`
+	PreliminaryReport  string    `json:"preliminary_report,omitempty"`
+	Error              string    `json:"error,omitempty"`
+	completedAt        time.Time
 }
 
 // JobSnapshot はジョブ状態のスナップショット
 type JobSnapshot struct {
-	ID            string
-	Status        JobStatus
-	Message       string
-	Progress      int
-	ProgressTotal int
-	Report        string
-	Error         string
+	ID                string
+	Status            JobStatus
+	Message           string
+	Progress          int
+	ProgressTotal     int
+	Report            string
+	PreliminaryReport string
+	Error             string
 }
 
 // ジョブストア（インメモリ）
@@ -83,13 +85,14 @@ func (j *Job) Snapshot() JobSnapshot {
 	jobsMu.RLock()
 	defer jobsMu.RUnlock()
 	return JobSnapshot{
-		ID:            j.ID,
-		Status:        j.Status,
-		Message:       j.Message,
-		Progress:      j.Progress,
-		ProgressTotal: j.ProgressTotal,
-		Report:        j.Report,
-		Error:         j.Error,
+		ID:                j.ID,
+		Status:            j.Status,
+		Message:           j.Message,
+		Progress:          j.Progress,
+		ProgressTotal:     j.ProgressTotal,
+		Report:            j.Report,
+		PreliminaryReport: j.PreliminaryReport,
+		Error:             j.Error,
 	}
 }
 
@@ -120,6 +123,15 @@ func Run(j *Job, username, password string) {
 		if !since.IsZero() {
 			log.Printf("[INFO] Fetching scores after %s", since.Format("2006-01-02 15:04"))
 		}
+
+		// 前回データで即座に分析（速報レポート）
+		prelimReport := runAnalysis(csvPath, tmpDir)
+		if prelimReport != "" {
+			jobsMu.Lock()
+			j.PreliminaryReport = prelimReport
+			jobsMu.Unlock()
+			log.Printf("[INFO] Job %s: preliminary report ready", j.ID)
+		}
 	}
 
 	// スクレイピング
@@ -134,6 +146,17 @@ func Run(j *Job, username, password string) {
 	datedScores := scraper.Scraping(username, password, since, onProgress)
 	if len(datedScores) == 0 && !exists {
 		setError(j, "戦績データが見つかりませんでした", "no scores found")
+		return
+	}
+
+	// 新規データがない場合は速報レポートをそのまま最終結果にする
+	if len(datedScores) == 0 && j.PreliminaryReport != "" {
+		jobsMu.Lock()
+		j.Status = StatusDone
+		j.Report = j.PreliminaryReport
+		j.completedAt = time.Now()
+		jobsMu.Unlock()
+		log.Printf("[INFO] Job %s completed (no new data, using preliminary report)", j.ID)
 		return
 	}
 
@@ -160,28 +183,37 @@ func Run(j *Job, username, password string) {
 
 	// Python分析実行
 	updateStatus(j, StatusAnalyzing)
-	cmd := exec.Command("python3", "scripts/analyze.py", csvPath)
-	cmd.Dir = "/app"
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		setError(j, "分析処理に失敗しました", fmt.Sprintf("analysis failed: %v\n%s", err, string(output)))
-		return
-	}
-
-	// レポート読み込み
-	reportPath := filepath.Join(tmpDir, "report.md")
-	report, err := os.ReadFile(reportPath)
-	if err != nil {
-		setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to read report: %v", err))
+	report := runAnalysis(csvPath, tmpDir)
+	if report == "" {
+		setError(j, "分析処理に失敗しました", "analysis returned empty report")
 		return
 	}
 
 	jobsMu.Lock()
 	j.Status = StatusDone
-	j.Report = string(report)
+	j.Report = report
 	j.completedAt = time.Now()
 	jobsMu.Unlock()
 	log.Printf("[INFO] Job %s completed", j.ID)
+}
+
+// runAnalysis はPython分析を実行してレポートを返す。失敗時は空文字を返す。
+func runAnalysis(csvPath, tmpDir string) string {
+	cmd := exec.Command("python3", "scripts/analyze.py", csvPath)
+	cmd.Dir = "/app"
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("[WARN] Analysis failed: %v\n%s", err, string(output))
+		return ""
+	}
+
+	reportPath := filepath.Join(tmpDir, "report.md")
+	report, err := os.ReadFile(reportPath)
+	if err != nil {
+		log.Printf("[WARN] Failed to read report: %v", err)
+		return ""
+	}
+	return string(report)
 }
 
 func updateStatus(j *Job, s JobStatus) {
