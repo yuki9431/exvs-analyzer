@@ -197,9 +197,9 @@ func Run(j *Job, username, password string) {
 	log.Printf("[INFO] Job %s completed", j.ID)
 }
 
-// runAnalysis はPython分析を実行してレポートを返す。失敗時は空文字を返す。
+// runAnalysis はPython分析を実行してJSON形式のレポートを返す。失敗時は空文字を返す。
 func runAnalysis(csvPath, tmpDir string) string {
-	cmd := exec.Command("python3", "scripts/analyze.py", csvPath)
+	cmd := exec.Command("python3", "scripts/analyze.py", csvPath, "--format", "json")
 	cmd.Dir = "/app"
 	output, err := cmd.CombinedOutput()
 	if err != nil {
@@ -207,7 +207,7 @@ func runAnalysis(csvPath, tmpDir string) string {
 		return ""
 	}
 
-	reportPath := filepath.Join(tmpDir, "report.md")
+	reportPath := filepath.Join(tmpDir, "report.json")
 	report, err := os.ReadFile(reportPath)
 	if err != nil {
 		log.Printf("[WARN] Failed to read report: %v", err)
