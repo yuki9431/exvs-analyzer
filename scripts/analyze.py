@@ -1061,9 +1061,11 @@ def main():
         ms_count = len(ms_data[ms_name])
         heading = f"機体別分析:-{ms_name}-({ms_count}戦)"
         toc.append(f"{n+i}. {toc_link(ms_name + ' (' + str(ms_count) + '戦)', heading)}")
+        toc.append(f"   <details><summary>詳細</summary>\n")
         toc.append(f"   - {toc_link('基本データ', '基本データ（' + ms_name + '）')}")
         toc.append(f"   - {toc_link('敵機体との相性', '敵機体との相性（' + ms_name + '）')}")
         toc.append(f"   - {toc_link('相方機体との相性', '相方機体との相性（' + ms_name + '）')}")
+        toc.append(f"   </details>")
     n += len(ms_names_for_toc)
     toc.append(f"{n}. {toc_link('コスト編成別勝率', 'コスト編成別勝率')}")
     toc.append(f"{n+1}. {toc_link('ダメージ貢献率', 'ダメージ貢献率')}")
