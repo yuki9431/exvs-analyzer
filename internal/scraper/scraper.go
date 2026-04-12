@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/gocolly/colly/v2"
@@ -193,19 +192,27 @@ func collectMatchEntries(jar http.CookieJar, dl dailyLink, since time.Time) []ma
 
 // fetchDetailPagesStreaming はチャネルから試合エントリを受信しつつ詳細ページを並列取得する
 func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, notify func(int, int)) model.DatedScores {
+	// まず全エントリを収集してtotalを確定させる
+	var entries []matchEntry
+	for entry := range entryCh {
+		entries = append(entries, entry)
+	}
+
+	total := len(entries)
+	if total == 0 {
+		return nil
+	}
+
 	var (
 		scores    model.DatedScores
 		mu        sync.Mutex
 		wg        sync.WaitGroup
 		processed int
-		found     int64 // atomic: 発見済みエントリ数
 	)
 
 	sem := make(chan struct{}, maxParallelism)
 
-	for entry := range entryCh {
-		atomic.AddInt64(&found, 1)
-
+	for _, entry := range entries {
 		sem <- struct{}{}
 		wg.Add(1)
 		go func(e matchEntry) {
@@ -219,7 +226,6 @@ func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, no
 			current := processed
 			mu.Unlock()
 
-			total := int(atomic.LoadInt64(&found))
 			notify(current, total)
 		}(entry)
 	}
