@@ -1177,10 +1177,10 @@ def data_partner(data_list, min_matches=3):
 def data_cost_pair(data_list, min_matches=3):
     pairs = defaultdict(list)
     for d in data_list:
-        my_cost = d.get("ms_cost", 0)
+        ms_name = d.get("ms", "(不明)")
         partner_cost = d.get("partner_cost", 0)
-        if my_cost and partner_cost:
-            key = f"{my_cost}+{partner_cost}"
+        if ms_name and partner_cost:
+            key = f"{ms_name} + {partner_cost}"
             pairs[key].append(d)
 
     results = []
