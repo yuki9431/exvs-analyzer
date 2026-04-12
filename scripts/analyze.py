@@ -1101,15 +1101,17 @@ def main():
     toc.append("\n</details>")
     report.append("\n".join(toc))
 
-    # 総合アドバイス（冒頭に配置）
-    report.append("\n\n---\n\n## 総合アドバイス\n")
+    # 総合アドバイス（冒頭に配置、デフォルト展開）
+    report.append("\n\n---\n\n<details open><summary><strong>総合アドバイス</strong></summary>\n")
     report.append(md_advice(all_data, ms_data))
+    report.append("\n</details>")
 
     # 基本データ
-    report.append("\n---\n\n## 基本データ\n")
+    report.append("\n---\n\n<details><summary><strong>基本データ</strong></summary>\n")
     report.append(md_basic_stats(all_data))
     report.append("\n### 勝ち/負け時のダメージ傾向\n")
     report.append(md_win_loss_pattern(all_data))
+    report.append("\n</details>")
 
     # 機体別分析
     for ms_name in ms_names_for_toc:
@@ -1131,36 +1133,44 @@ def main():
     report.append(md_ms_pair(all_data))
 
     # コスト編成別勝率
-    report.append("\n---\n\n## コスト編成別勝率\n")
+    report.append("\n---\n\n<details><summary><strong>コスト編成別勝率</strong></summary>\n")
     report.append(md_cost_pair(all_data))
+    report.append("\n</details>")
 
     # ダメージ貢献率
-    report.append("\n## ダメージ貢献率\n")
+    report.append("\n<details><summary><strong>ダメージ貢献率</strong></summary>\n")
     report.append(md_dmg_contribution(all_data))
+    report.append("\n</details>")
 
     # 固定相方分析
-    report.append("\n---\n\n## 固定相方分析（連続10戦以上）\n")
+    report.append("\n---\n\n<details><summary><strong>固定相方分析（連続10戦以上）</strong></summary>\n")
     report.append(md_fixed_partners(all_data))
+    report.append("\n</details>")
 
     # 被撃墜数と勝率
-    report.append("\n---\n\n## 被撃墜数と勝率の関係\n")
+    report.append("\n---\n\n<details><summary><strong>被撃墜数と勝率の関係</strong></summary>\n")
     report.append(md_deaths_impact(all_data))
+    report.append("\n</details>")
 
     # 時間帯別
-    report.append("\n## 時間帯別の勝率\n")
+    report.append("\n<details><summary><strong>時間帯別の勝率</strong></summary>\n")
     report.append(md_time_of_day(all_data))
+    report.append("\n</details>")
 
     # 曜日別
-    report.append("\n## 曜日別の勝率（平日 vs 土日）\n")
+    report.append("\n<details><summary><strong>曜日別の勝率（平日 vs 土日）</strong></summary>\n")
     report.append(md_day_of_week(all_data))
+    report.append("\n</details>")
 
     # 日別推移
-    report.append("\n## 日別勝率推移\n")
+    report.append("\n<details><summary><strong>日別勝率推移</strong></summary>\n")
     report.append(md_daily_trend(all_data))
+    report.append("\n</details>")
 
     # シーズン分析
-    report.append("\n## シーズン別分析\n")
+    report.append("\n<details><summary><strong>シーズン別分析</strong></summary>\n")
     report.append(md_season(all_data))
+    report.append("\n</details>")
 
     # SNS共有用データ
     share_data = build_share_data(all_data, ms_data)
