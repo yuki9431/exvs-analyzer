@@ -1871,6 +1871,9 @@ def build_json_report(player_name, all_data, ms_data):
             "win_loss_pattern": data_win_loss_pattern(data),
             "enemy_matchup": data_enemy_matchup(data),
             "partner": data_partner(data),
+            "ms_pair": data_ms_pair(data),
+            "cost_pair": data_cost_pair(data),
+            "dmg_contribution": data_dmg_contribution(data),
         }
 
     return {
@@ -1880,9 +1883,6 @@ def build_json_report(player_name, all_data, ms_data):
         "basic_stats": data_basic_stats(all_data),
         "win_loss_pattern": data_win_loss_pattern(all_data),
         "ms_stats": ms_stats,
-        "ms_pair": data_ms_pair(all_data),
-        "cost_pair": data_cost_pair(all_data),
-        "dmg_contribution": data_dmg_contribution(all_data),
         "fixed_partners": data_fixed_partners(all_data),
         "deaths_impact": data_deaths_impact(all_data),
         "time_of_day": data_time_of_day(all_data),

@@ -117,17 +117,6 @@ function WinLossPatternSection({ pattern }) {
     <h3>勝ち/負け時のダメージ傾向</h3>
     <${Table} headers=${['項目', '勝ち', '負け', '差']} rows=${rows} />
     <${Tips} tips=${pattern.tips} />
-    ${(pattern.cost_patterns || []).map(function (cp) {
-      var bRows = (cp.buckets || []).map(function (b) {
-        return [b.bucket + '落ち', b.matches + '戦', pct(b.loss_rate)];
-      });
-      return html`<div>
-        <h3>${esc(cp.cost_label)}コスト (${cp.cost}) - 被撃墜パターン</h3>
-        <p>${cp.matches}戦 / 致命的落ち: ${cp.fatal_deaths}回 (コスト${cp.fatal_cost})</p>
-        <${Table} headers=${['被撃墜数', '試合数', '敗北率']} rows=${bRows} />
-        <${Tips} tips=${cp.tips} />
-      </div>`;
-    })}
   </div>`;
 }
 
@@ -172,35 +161,38 @@ function MsStatsSection({ msStats }) {
       <${WinLossPatternSection} pattern=${ms.win_loss_pattern} />
       <${EnemyMatchupSection} matchup=${ms.enemy_matchup} msName=${msName} />
       <${PartnerSection} partners=${ms.partner} msName=${msName} />
+      <${MsPairSubSection} msPair=${ms.ms_pair} />
+      <${CostPairSubSection} costPair=${ms.cost_pair} />
+      <${DmgContributionSubSection} dmg=${ms.dmg_contribution} />
     <//>`;
   });
 }
 
-function MsPairSection({ msPair }) {
+function MsPairSubSection({ msPair }) {
   if (!msPair) return null;
-  var headers = ['ペア', '試合', '勝', '敗', '勝率', '与被ダメ比'];
-  function pairRows(list) {
-    return (list || []).map(function (p) {
-      return [esc(p.pair), p.matches, p.wins, p.losses, pct(p.win_rate), num(p.dmg_efficiency, 3)];
-    });
-  }
-  return html`<${Section} title="機体編成別勝率">
-    ${msPair.by_win_rate && msPair.by_win_rate.length > 0 && html`<h3>勝率順</h3><${Table} headers=${headers} rows=${pairRows(msPair.by_win_rate)} />`}
-    ${msPair.by_matches && msPair.by_matches.length > 0 && html`<h3>試合数順</h3><${Table} headers=${headers} rows=${pairRows(msPair.by_matches)} />`}
-  <//>`;
+  var list = msPair.by_matches || [];
+  if (!list.length) return null;
+  var rows = list.map(function (p) {
+    return [esc(p.pair), p.matches, pct(p.win_rate), num(p.dmg_efficiency, 3)];
+  });
+  return html`<div>
+    <h3>編成別勝率</h3>
+    <${Table} headers=${['編成', '試合数', '勝率', '与被ダメ比']} rows=${rows} />
+  </div>`;
 }
 
-function CostPairSection({ costPair }) {
+function CostPairSubSection({ costPair }) {
   if (!costPair || !costPair.length) return null;
   var rows = costPair.map(function (p) {
     return [esc(p.pair), p.matches, pct(p.win_rate), num(p.dmg_efficiency, 3)];
   });
-  return html`<${Section} title="コスト編成別勝率">
-    <${Table} headers=${['コスト編成', '試合', '勝率', '与被ダメ比']} rows=${rows} />
-  <//>`;
+  return html`<div>
+    <h3>コスト編成別勝率</h3>
+    <${Table} headers=${['コスト編成', '試合数', '勝率', '与被ダメ比']} rows=${rows} />
+  </div>`;
 }
 
-function DmgContributionSection({ dmg }) {
+function DmgContributionSubSection({ dmg }) {
   if (!dmg) return null;
   var rows = [
     ['全体', '-', pct(dmg.avg_contribution), pct(dmg.avg_win_contribution), pct(dmg.avg_lose_contribution)],
@@ -208,9 +200,10 @@ function DmgContributionSection({ dmg }) {
   (dmg.by_cost || []).forEach(function (c) {
     rows.push([c.cost_label + 'コスト (' + c.cost + ')', c.matches, pct(c.avg_contribution), pct(c.avg_win_contribution), pct(c.avg_lose_contribution)]);
   });
-  return html`<${Section} title="ダメージ貢献率">
-    <${Table} headers=${['区分', '試合', '平均貢献率', '勝ち時', '負け時']} rows=${rows} />
-  <//>`;
+  return html`<div>
+    <h3>ダメージ貢献率</h3>
+    <${Table} headers=${['区分', '試合数', '平均貢献率', '勝ち時', '負け時']} rows=${rows} />
+  </div>`;
 }
 
 function FixedPartnersSection({ partners }) {
@@ -355,9 +348,6 @@ function Report({ data }) {
       <${WinLossPatternSection} pattern=${data.win_loss_pattern} />
     <//>
     <${MsStatsSection} msStats=${data.ms_stats} />
-    <${MsPairSection} msPair=${data.ms_pair} />
-    <${CostPairSection} costPair=${data.cost_pair} />
-    <${DmgContributionSection} dmg=${data.dmg_contribution} />
     <${FixedPartnersSection} partners=${data.fixed_partners} />
     <${DeathsImpactSection} deaths=${data.deaths_impact} />
     <${TimeOfDaySection} time=${data.time_of_day} />
