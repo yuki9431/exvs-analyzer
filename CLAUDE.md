@@ -4,7 +4,7 @@
 
 ## プロジェクト概要
 
-EXVS Analyzer は、EXVS2XB（機動戦士ガンダム エクストリームバーサス2 クロスブースト）の戦績分析Webアプリ。公式サイトから対戦データをスクレイピングし、GCSにCSVとして保存、Python分析を実行してJSONレポートを返す。
+EXVS Analyzer は、EXVS2IB（機動戦士ガンダム エクストリームバーサス2 インフィニットブースト）の戦績分析Webアプリ。公式サイトから対戦データをスクレイピングし、GCSにCSVとして保存、Python分析を実行してJSONレポートを返す。
 
 ## ビルド・開発コマンド
 
@@ -71,14 +71,15 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 - `internal/mslist/` — MSリストの読み書き・マージ（`LoadMSList`, `SaveMSList`, `MergeMSList`, `BuildMSNameMap`, `FillMsNames`, `CheckUnknownMS`）
 - `internal/scraper/` — Collyベースのスクレイパー（`scraper.go`）+ バンダイナムコID認証（`login.go`）
 - `internal/pipeline/` — 分析パイプライン（`Job`型、ジョブストア、`Run`関数）
-- `internal/server/` — HTTPハンドラ、レート制限
+- `internal/server/` — HTTPハンドラ（`server.go`）+ IPベースレート制限（`ratelimit.go`）
 - `internal/storage/` — CSV読み書き（`csv_export.go`）+ GCSアップロード/ダウンロード（`cloud_storage.go`）
 - `scripts/analyze.py` — Python分析: カテゴリ別アドバイス、勝率、与被ダメ比、固定相方検出、JSON構造化レポート生成
 - `static/index.html` — SPA フロントエンド（ダークテーマ、レスポンシブ対応）
-- `static/app.js` — フロントエンドJS（CSP対応で外部化。DOMPurify + marked.jsでレンダリング）
+- `static/app.js` — フロントエンドJS（CSP対応で外部化。htm/Preactでレンダリング）
+- `static/htm-preact-standalone.js` — htm + Preact ライブラリ（スタンドアロン版）
 - `static/preview.html` — フロントエンド開発用プレビュー（gitignore対象）
 - `data/ms_list.json` — MS画像URL→名前・コストのマッピング（コスト: 3000/2500/2000/1500）
-- `infra/` — Pulumi IaC（Cloud Run、Artifact Registry、予算アラート等）
+- `infra/` — Pulumi IaC（`apis.ts`, `artifact-registry.ts`, `cloudrun.ts`, `domain.ts`, `storage.ts`, `iam.ts`, `budget.ts`）
 
 ## GitHub Actions
 

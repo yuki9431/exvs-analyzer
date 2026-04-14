@@ -26,7 +26,7 @@ var SVG_COPY = '<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3
 var SVG_CHECK = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
 
 function buildShareText(items) {
-  var lines = ['【EXVS2XB 戦績診断】'];
+  var lines = ['【EXVS2IB 戦績診断】'];
   for (var i = 0; i < items.length; i++) {
     var item = items[i];
     if (item.type === 'top_ms') {
@@ -43,7 +43,6 @@ function buildShareText(items) {
   lines.push('');
   lines.push('▶ 自分も診断してみる');
   lines.push(location.origin);
-  lines.push('#EXVS2XB');
   return lines.join('\n');
 }
 
