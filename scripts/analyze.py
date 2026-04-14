@@ -885,7 +885,7 @@ def data_advice(all_data, ms_data):
         if eff < 1.0:
             advices.append({
                 "category": "ms",
-                "text": f"**{ms_name}** の与被ダメ比は{eff:.3f}で1.0未満です。被ダメージが与ダメージを上回っており、立ち回りの改善が必要です。",
+                "text": f"{ms_name} の与被ダメ比は{eff:.3f}で1.0未満です。被ダメージが与ダメージを上回っており、立ち回りの改善が必要です。",
             })
 
     hourly = defaultdict(list)
@@ -931,7 +931,7 @@ def data_advice(all_data, ms_data):
         if weak_enemies:
             advices.append({
                 "category": "ms",
-                "text": f"**{ms_name}** の苦手機体: {', '.join(weak_enemies)}。対策を練るか、別の機体での対応を検討しましょう。",
+                "text": f"{ms_name} の苦手機体: {', '.join(weak_enemies)}。対策を練るか、別の機体での対応を検討しましょう。",
             })
 
     weekday_data = [d for d in all_data if d["datetime"].weekday() < 5]
