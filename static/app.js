@@ -200,9 +200,7 @@ function DmgContributionSubSection({ dmg }) {
     var s = d >= 0 ? '+' : '';
     return s + d.toFixed(1) + '%';
   }
-  var rows = [
-    ['-', pct(dmg.avg_contribution), pct(dmg.avg_win_contribution), pct(dmg.avg_lose_contribution), diffPct(dmg.avg_win_contribution, dmg.avg_lose_contribution)],
-  ];
+  var rows = [];
   (dmg.by_cost || []).forEach(function (c) {
     rows.push([c.matches, pct(c.avg_contribution), pct(c.avg_win_contribution), pct(c.avg_lose_contribution), diffPct(c.avg_win_contribution, c.avg_lose_contribution)]);
   });
@@ -247,7 +245,6 @@ function DeathsImpactSection({ deaths }) {
       });
       return html`<div>
         <h3>${esc(d.cost_label)}</h3>
-        <p>${d.matches}戦</p>
         <${Table} headers=${['被撃墜数', '試合数', '敗北率']} rows=${rows} />
         <${Tips} tips=${d.tips} />
       </div>`;
