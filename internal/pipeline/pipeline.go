@@ -199,7 +199,7 @@ func Run(j *Job, username, password string) {
 
 // runAnalysis はPython分析を実行してJSON形式のレポートを返す。失敗時は空文字を返す。
 func runAnalysis(csvPath, tmpDir string) string {
-	cmd := exec.Command("python3", "scripts/analyze.py", csvPath, "--format", "json")
+	cmd := exec.Command("python3", "scripts/analyze.py", csvPath)
 	cmd.Dir = "/app"
 	output, err := cmd.CombinedOutput()
 	if err != nil {

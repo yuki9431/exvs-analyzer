@@ -198,7 +198,7 @@ function DmgContributionSubSection({ dmg }) {
     ['全体', '-', pct(dmg.avg_contribution), pct(dmg.avg_win_contribution), pct(dmg.avg_lose_contribution)],
   ];
   (dmg.by_cost || []).forEach(function (c) {
-    rows.push([c.cost_label + 'コスト (' + c.cost + ')', c.matches, pct(c.avg_contribution), pct(c.avg_win_contribution), pct(c.avg_lose_contribution)]);
+    rows.push([c.cost_label, c.matches, pct(c.avg_contribution), pct(c.avg_win_contribution), pct(c.avg_lose_contribution)]);
   });
   return html`<div>
     <h3>ダメージ貢献率</h3>
@@ -236,11 +236,12 @@ function DeathsImpactSection({ deaths }) {
   return html`<${Section} title="被撃墜数と勝率の関係">
     ${deaths.map(function (d) {
       var rows = (d.buckets || []).map(function (b) {
-        return [b.bucket + '落ち', b.matches + '戦', pct(b.loss_rate)];
+        var lossRate = 100 - b.win_rate;
+        return [b.label, b.matches + '戦', pct(lossRate)];
       });
       return html`<div>
-        <h3>${esc(d.cost_label)}コスト (${d.cost})</h3>
-        <p>${d.matches}戦 / 致命的落ち: ${d.fatal_deaths}回 (コスト${d.fatal_cost})</p>
+        <h3>${esc(d.cost_label)}</h3>
+        <p>${d.matches}戦</p>
         <${Table} headers=${['被撃墜数', '試合数', '敗北率']} rows=${rows} />
         <${Tips} tips=${d.tips} />
       </div>`;
@@ -335,15 +336,54 @@ function ShareArea({ shareData }) {
   </div>`;
 }
 
+// --- Table of Contents ---
+
+function TableOfContents({ data }) {
+  var msEntries = [];
+  if (data.ms_stats) {
+    msEntries = Object.keys(data.ms_stats).sort(function (a, b) {
+      return data.ms_stats[b].matches - data.ms_stats[a].matches;
+    });
+  }
+  var n = 3;
+  return html`<details open>
+    <summary><strong>目次</strong></summary>
+    <ol>
+      <li><a href="#sec-summary">総合アドバイス</a></li>
+      <li><a href="#sec-basic">基本データ</a></li>
+      ${msEntries.map(function (ms, i) {
+        var count = data.ms_stats[ms].matches;
+        return html`<li><a href=${'#sec-ms-' + i}>${esc(ms)} (${count}戦)</a></li>`;
+      })}
+      <li><a href="#sec-mspair">機体編成別勝率</a></li>
+      <li><a href="#sec-costpair">コスト編成別勝率</a></li>
+      <li><a href="#sec-dmg">ダメージ貢献率</a></li>
+      <li><a href="#sec-fixed">固定相方分析</a></li>
+      <li><a href="#sec-deaths">被撃墜数と勝率</a></li>
+      <li><a href="#sec-time">時間帯別の勝率</a></li>
+      <li><a href="#sec-dow">曜日別の勝率</a></li>
+      <li><a href="#sec-daily">日別勝率推移</a></li>
+      <li><a href="#sec-season">シーズン別分析</a></li>
+    </ol>
+  </details><hr />`;
+}
+
 // --- Main report ---
 
 function Report({ data }) {
   if (!data) return null;
+  var msEntries = [];
+  if (data.ms_stats) {
+    msEntries = Object.keys(data.ms_stats).sort(function (a, b) {
+      return data.ms_stats[b].matches - data.ms_stats[a].matches;
+    });
+  }
   return html`
     <h1>${esc(data.player_name)} - 戦績分析レポート</h1>
     <${ShareArea} shareData=${data.share_data} />
-    <${SummarySection} summary=${data.summary} />
-    <${Section} title="基本データ">
+    <${TableOfContents} data=${data} />
+    <div id="sec-summary"><${SummarySection} summary=${data.summary} /></div>
+    <div id="sec-basic"><${Section} title="基本データ">
       <${BasicStatsSection} stats=${data.basic_stats} />
       <${WinLossPatternSection} pattern=${data.win_loss_pattern} />
     <//>

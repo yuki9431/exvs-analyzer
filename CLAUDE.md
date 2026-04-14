@@ -4,7 +4,7 @@
 
 ## プロジェクト概要
 
-EXVS Analyzer は、EXVS2XB（機動戦士ガンダム エクストリームバーサス2 クロスブースト）の戦績分析Webアプリ。公式サイトから対戦データをスクレイピングし、GCSにCSVとして保存、Python分析を実行してMarkdownレポートを返す。
+EXVS Analyzer は、EXVS2XB（機動戦士ガンダム エクストリームバーサス2 クロスブースト）の戦績分析Webアプリ。公式サイトから対戦データをスクレイピングし、GCSにCSVとして保存、Python分析を実行してJSONレポートを返す。
 
 ## ビルド・開発コマンド
 
@@ -32,9 +32,8 @@ PORT=3000 make run
 python3 -m http.server 8888 --directory static
 # → http://localhost:8888/preview.html
 
-# レポートプレビュー更新
+# レポート生成
 python3 scripts/analyze.py /tmp/scores.csv
-cp /tmp/report.md static/sample_report.md
 
 # Pulumiコマンド（Docker経由）
 PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-preview   # 変更プレビュー
@@ -58,7 +57,7 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
   → CSVをマージし、data/ms_list.jsonからMS名・コストを補完
   → CSVをGCSにアップロード
   → scripts/analyze.py でCSVを分析（状態: analyzing）
-  → Markdownレポートを返却（状態: done）
+  → JSONレポートを返却（状態: done）
 クライアントは GET /status/{id} でポーリング後、GET /result/{id} で結果取得
 ```
 
@@ -74,7 +73,7 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 - `internal/pipeline/` — 分析パイプライン（`Job`型、ジョブストア、`Run`関数）
 - `internal/server/` — HTTPハンドラ、レート制限
 - `internal/storage/` — CSV読み書き（`csv_export.go`）+ GCSアップロード/ダウンロード（`cloud_storage.go`）
-- `scripts/analyze.py` — Python分析: 目次、カテゴリ別アドバイス、勝率、与被ダメ比、固定相方検出、Markdownレポート生成
+- `scripts/analyze.py` — Python分析: カテゴリ別アドバイス、勝率、与被ダメ比、固定相方検出、JSON構造化レポート生成
 - `static/index.html` — SPA フロントエンド（ダークテーマ、レスポンシブ対応）
 - `static/app.js` — フロントエンドJS（CSP対応で外部化。DOMPurify + marked.jsでレンダリング）
 - `static/preview.html` — フロントエンド開発用プレビュー（gitignore対象）
