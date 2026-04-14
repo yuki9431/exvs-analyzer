@@ -201,7 +201,7 @@ function DmgContributionSubSection({ dmg }) {
     rows.push([c.cost_label, c.matches, pct(c.avg_contribution), pct(c.avg_win_contribution), pct(c.avg_lose_contribution)]);
   });
   return html`<div>
-    <h3>ダメージ貢献率</h3>
+    <h3>ダメージ貢献率（自分の与ダメ / チーム合計与ダメ）</h3>
     <${Table} headers=${['区分', '試合数', '平均貢献率', '勝ち時', '負け時']} rows=${rows} />
   </div>`;
 }
@@ -339,25 +339,11 @@ function ShareArea({ shareData }) {
 // --- Table of Contents ---
 
 function TableOfContents({ data }) {
-  var msEntries = [];
-  if (data.ms_stats) {
-    msEntries = Object.keys(data.ms_stats).sort(function (a, b) {
-      return data.ms_stats[b].matches - data.ms_stats[a].matches;
-    });
-  }
-  var n = 3;
   return html`<details open>
     <summary><strong>目次</strong></summary>
     <ol>
       <li><a href="#sec-summary">総合アドバイス</a></li>
       <li><a href="#sec-basic">基本データ</a></li>
-      ${msEntries.map(function (ms, i) {
-        var count = data.ms_stats[ms].matches;
-        return html`<li><a href=${'#sec-ms-' + i}>${esc(ms)} (${count}戦)</a></li>`;
-      })}
-      <li><a href="#sec-mspair">機体編成別勝率</a></li>
-      <li><a href="#sec-costpair">コスト編成別勝率</a></li>
-      <li><a href="#sec-dmg">ダメージ貢献率</a></li>
       <li><a href="#sec-fixed">固定相方分析</a></li>
       <li><a href="#sec-deaths">被撃墜数と勝率</a></li>
       <li><a href="#sec-time">時間帯別の勝率</a></li>
@@ -372,12 +358,6 @@ function TableOfContents({ data }) {
 
 function Report({ data }) {
   if (!data) return null;
-  var msEntries = [];
-  if (data.ms_stats) {
-    msEntries = Object.keys(data.ms_stats).sort(function (a, b) {
-      return data.ms_stats[b].matches - data.ms_stats[a].matches;
-    });
-  }
   return html`
     <h1>${esc(data.player_name)} - 戦績分析レポート</h1>
     <${ShareArea} shareData=${data.share_data} />
@@ -386,14 +366,14 @@ function Report({ data }) {
     <div id="sec-basic"><${Section} title="基本データ">
       <${BasicStatsSection} stats=${data.basic_stats} />
       <${WinLossPatternSection} pattern=${data.win_loss_pattern} />
-    <//>
+    <//></div>
     <${MsStatsSection} msStats=${data.ms_stats} />
-    <${FixedPartnersSection} partners=${data.fixed_partners} />
-    <${DeathsImpactSection} deaths=${data.deaths_impact} />
-    <${TimeOfDaySection} time=${data.time_of_day} />
-    <${DayOfWeekSection} dow=${data.day_of_week} />
-    <${DailyTrendSection} daily=${data.daily_trend} />
-    <${SeasonSection} seasons=${data.season} />
+    <div id="sec-fixed"><${FixedPartnersSection} partners=${data.fixed_partners} /></div>
+    <div id="sec-deaths"><${DeathsImpactSection} deaths=${data.deaths_impact} /></div>
+    <div id="sec-time"><${TimeOfDaySection} time=${data.time_of_day} /></div>
+    <div id="sec-dow"><${DayOfWeekSection} dow=${data.day_of_week} /></div>
+    <div id="sec-daily"><${DailyTrendSection} daily=${data.daily_trend} /></div>
+    <div id="sec-season"><${SeasonSection} seasons=${data.season} /></div>
     <${ShareArea} shareData=${data.share_data} />
   `;
 }
