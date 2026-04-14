@@ -114,8 +114,8 @@ function WinLossPatternSection({ pattern }) {
     return [m.label, num(m.win_avg, 1), num(m.loss_avg, 1), diff];
   });
   return html`<div>
-    <h3>勝ち/負け時のダメージ傾向</h3>
-    <${Table} headers=${['項目', '勝ち', '負け', '差']} rows=${rows} />
+    <h3>勝利時/敗北時のダメージ傾向</h3>
+    <${Table} headers=${['項目', '勝利時', '敗北時', '差分']} rows=${rows} />
     <${Tips} tips=${pattern.tips} />
   </div>`;
 }
@@ -194,15 +194,21 @@ function CostPairSubSection({ costPair }) {
 
 function DmgContributionSubSection({ dmg }) {
   if (!dmg) return null;
+  function diffPct(win, lose) {
+    if (win == null || lose == null) return '-';
+    var d = win - lose;
+    var s = d >= 0 ? '+' : '';
+    return s + d.toFixed(1) + '%';
+  }
   var rows = [
-    ['全体', '-', pct(dmg.avg_contribution), pct(dmg.avg_win_contribution), pct(dmg.avg_lose_contribution)],
+    ['-', pct(dmg.avg_contribution), pct(dmg.avg_win_contribution), pct(dmg.avg_lose_contribution), diffPct(dmg.avg_win_contribution, dmg.avg_lose_contribution)],
   ];
   (dmg.by_cost || []).forEach(function (c) {
-    rows.push([c.cost_label, c.matches, pct(c.avg_contribution), pct(c.avg_win_contribution), pct(c.avg_lose_contribution)]);
+    rows.push([c.matches, pct(c.avg_contribution), pct(c.avg_win_contribution), pct(c.avg_lose_contribution), diffPct(c.avg_win_contribution, c.avg_lose_contribution)]);
   });
   return html`<div>
-    <h3>ダメージ貢献率（自分の与ダメ / チーム合計与ダメ）</h3>
-    <${Table} headers=${['区分', '試合数', '平均貢献率', '勝ち時', '負け時']} rows=${rows} />
+    <h3>ダメージ貢献率</h3>
+    <${Table} headers=${['試合数', '平均貢献率', '勝利時', '敗北時', '差分']} rows=${rows} />
   </div>`;
 }
 
