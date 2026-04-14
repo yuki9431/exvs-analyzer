@@ -207,7 +207,7 @@ function DmgContributionSubSection({ dmg }) {
     rows.push([c.matches, pct(c.avg_contribution), pct(c.avg_win_contribution), pct(c.avg_lose_contribution), diffPct(c.avg_win_contribution, c.avg_lose_contribution)]);
   });
   return html`<div>
-    <h3>ダメージ貢献率</h3>
+    <h3>ダメージ貢献率（自分の与ダメ / チーム合計与ダメ）</h3>
     <${Table} headers=${['試合数', '平均貢献率', '勝利時', '敗北時', '差分']} rows=${rows} />
   </div>`;
 }
