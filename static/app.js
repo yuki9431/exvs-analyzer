@@ -1,4 +1,4 @@
-import { html, render, useState } from './htm-preact-standalone.js';
+import { html, render, useState, useMemo, useCallback } from './htm-preact-standalone.js';
 
 // --- Constants ---
 var STATUS_MESSAGES = {
@@ -8,6 +8,8 @@ var STATUS_MESSAGES = {
   done: '完了',
   error: 'エラーが発生しました',
 };
+
+var PERIOD_KEYS = ['all', '30d', '7d'];
 
 // --- Utility ---
 function esc(s) {
@@ -50,19 +52,71 @@ function buildShareText(items) {
 
 function Tips({ tips }) {
   if (!tips || !tips.length) return null;
-  return html`<blockquote><strong>💡 アドバイス:</strong><br />${tips.map(function (t, i) {
+  return html`<blockquote><strong>アドバイス:</strong><br />${tips.map(function (t, i) {
     return html`${i > 0 && html`<br />`}${t}`;
   })}</blockquote>`;
 }
 
+function SortableTable({ headers, rows, sortableColumns, defaultLimit }) {
+  if (!rows || !rows.length) return null;
+  var sortRef = useState({ col: -1, asc: true });
+  var sortState = sortRef[0], setSortState = sortRef[1];
+  var limitRef = useState(defaultLimit || 0);
+  var limit = limitRef[0], setLimit = limitRef[1];
+
+  var sortedRows = useMemo(function () {
+    if (sortState.col < 0) return rows;
+    var col = sortState.col;
+    var sorted = rows.slice().sort(function (a, b) {
+      var va = a[col], vb = b[col];
+      // 数値文字列からパース（%や+を除去）
+      var na = parseFloat(String(va).replace(/[%+戦件回]/g, ''));
+      var nb = parseFloat(String(vb).replace(/[%+戦件回]/g, ''));
+      if (!isNaN(na) && !isNaN(nb)) {
+        return sortState.asc ? na - nb : nb - na;
+      }
+      var sa = String(va), sb = String(vb);
+      return sortState.asc ? sa.localeCompare(sb) : sb.localeCompare(sa);
+    });
+    return sorted;
+  }, [rows, sortState]);
+
+  var displayRows = limit > 0 ? sortedRows.slice(0, limit) : sortedRows;
+  var hasMore = limit > 0 && sortedRows.length > limit;
+
+  function handleSort(colIdx) {
+    if (sortState.col === colIdx) {
+      setSortState({ col: colIdx, asc: !sortState.asc });
+    } else {
+      setSortState({ col: colIdx, asc: false });
+    }
+  }
+
+  var sortable = sortableColumns || [];
+
+  return html`<div>
+    ${defaultLimit > 0 && html`<div class="limit-controls">
+      <button class=${'limit-btn' + (limit === 5 ? ' active' : '')} onClick=${function () { setLimit(5); }}>5件</button>
+      <button class=${'limit-btn' + (limit === 10 ? ' active' : '')} onClick=${function () { setLimit(10); }}>10件</button>
+      <button class=${'limit-btn' + (limit === 0 ? ' active' : '')} onClick=${function () { setLimit(0); }}>全件</button>
+    </div>`}
+    <div class="table-wrap"><table>
+      <thead><tr>${headers.map(function (h, i) {
+        var isSortable = sortable.length === 0 || sortable.indexOf(i) >= 0;
+        var indicator = sortState.col === i ? (sortState.asc ? ' ▲' : ' ▼') : '';
+        return html`<th class=${isSortable ? 'sortable' : ''} onClick=${isSortable ? function () { handleSort(i); } : undefined}>${h}${indicator}</th>`;
+      })}</tr></thead>
+      <tbody>${displayRows.map(function (row) {
+        return html`<tr>${row.map(function (cell) { return html`<td>${cell}</td>`; })}</tr>`;
+      })}</tbody>
+    </table></div>
+    ${hasMore && html`<p class="show-more">他 ${sortedRows.length - limit} 件</p>`}
+  </div>`;
+}
+
 function Table({ headers, rows }) {
   if (!rows || !rows.length) return null;
-  return html`<div class="table-wrap"><table>
-    <thead><tr>${headers.map(function (h) { return html`<th>${h}</th>`; })}</tr></thead>
-    <tbody>${rows.map(function (row) {
-      return html`<tr>${row.map(function (cell) { return html`<td>${cell}</td>`; })}</tr>`;
-    })}</tbody>
-  </table></div>`;
+  return html`<${SortableTable} headers=${headers} rows=${rows} />`;
 }
 
 function Section({ title, open, children }) {
@@ -70,6 +124,19 @@ function Section({ title, open, children }) {
     <summary><strong>${title}</strong></summary>
     ${children}
   </details><hr />`;
+}
+
+// --- Period selector ---
+
+function PeriodSelector({ periods, selected, onSelect }) {
+  var keys = PERIOD_KEYS.filter(function (k) { return periods[k]; });
+  if (keys.length <= 1) return null;
+  return html`<div class="period-selector">
+    ${keys.map(function (k) {
+      return html`<button class=${'period-btn' + (selected === k ? ' active' : '')}
+        onClick=${function () { onSelect(k); }}>${periods[k].label}</button>`;
+    })}
+  </div>`;
 }
 
 // --- Report sections ---
@@ -129,9 +196,9 @@ function EnemyMatchupSection({ matchup, msName }) {
   }
   return html`<div>
     <h3>敵機体との相性（${esc(msName)}）</h3>
-    ${matchup.strong && matchup.strong.length > 0 && html`<p><strong>得意な相手:</strong></p><${Table} headers=${headers} rows=${matchupRows(matchup.strong)} />`}
-    ${matchup.weak && matchup.weak.length > 0 && html`<p><strong>苦手な相手:</strong></p><${Table} headers=${headers} rows=${matchupRows(matchup.weak)} />`}
-    ${matchup.even && matchup.even.length > 0 && html`<p><strong>互角の相手:</strong></p><${Table} headers=${headers} rows=${matchupRows(matchup.even)} />`}
+    ${matchup.strong && matchup.strong.length > 0 && html`<p><strong>得意な相手:</strong></p><${SortableTable} headers=${headers} rows=${matchupRows(matchup.strong)} defaultLimit=${5} />`}
+    ${matchup.weak && matchup.weak.length > 0 && html`<p><strong>苦手な相手:</strong></p><${SortableTable} headers=${headers} rows=${matchupRows(matchup.weak)} defaultLimit=${5} />`}
+    ${matchup.even && matchup.even.length > 0 && html`<p><strong>互角の相手:</strong></p><${SortableTable} headers=${headers} rows=${matchupRows(matchup.even)} defaultLimit=${5} />`}
     <${Tips} tips=${matchup.tips} />
   </div>`;
 }
@@ -143,7 +210,7 @@ function PartnerSection({ partners, msName }) {
   });
   return html`<div>
     <h3>相方機体との相性（${esc(msName)}）</h3>
-    <${Table} headers=${['機体名', '試合', '勝率', '与被ダメ比']} rows=${rows} />
+    <${SortableTable} headers=${['機体名', '試合', '勝率', '与被ダメ比']} rows=${rows} defaultLimit=${10} />
   </div>`;
 }
 
@@ -176,7 +243,7 @@ function MsPairSubSection({ msPair }) {
   });
   return html`<div>
     <h3>編成別勝率</h3>
-    <${Table} headers=${['編成', '試合数', '勝率', '与被ダメ比']} rows=${rows} />
+    <${SortableTable} headers=${['編成', '試合数', '勝率', '与被ダメ比']} rows=${rows} defaultLimit=${10} />
   </div>`;
 }
 
@@ -187,7 +254,7 @@ function CostPairSubSection({ costPair }) {
   });
   return html`<div>
     <h3>コスト編成別勝率</h3>
-    <${Table} headers=${['コスト編成', '試合数', '勝率', '与被ダメ比']} rows=${rows} />
+    <${SortableTable} headers=${['コスト編成', '試合数', '勝率', '与被ダメ比']} rows=${rows} defaultLimit=${10} />
   </div>`;
 }
 
@@ -341,41 +408,63 @@ function ShareArea({ shareData }) {
 // --- Table of Contents ---
 
 function TableOfContents({ data }) {
-  return html`<details open>
-    <summary><strong>目次</strong></summary>
-    <ol>
-      <li><a href="#sec-summary">総合アドバイス</a></li>
-      <li><a href="#sec-basic">基本データ</a></li>
-      <li><a href="#sec-fixed">固定相方分析</a></li>
-      <li><a href="#sec-deaths">被撃墜数と勝率</a></li>
-      <li><a href="#sec-time">時間帯別の勝率</a></li>
-      <li><a href="#sec-dow">曜日別の勝率</a></li>
-      <li><a href="#sec-daily">日別勝率推移</a></li>
-      <li><a href="#sec-season">シーズン別分析</a></li>
-    </ol>
-  </details><hr />`;
+  function toggleAll(open) {
+    var details = document.querySelectorAll('#report details');
+    for (var i = 0; i < details.length; i++) {
+      details[i].open = open;
+    }
+  }
+
+  return html`<div class="toc-area">
+    <details open>
+      <summary><strong>目次</strong></summary>
+      <ol>
+        <li><a href="#sec-summary">総合アドバイス</a></li>
+        <li><a href="#sec-basic">基本データ</a></li>
+        <li><a href="#sec-fixed">固定相方分析</a></li>
+        <li><a href="#sec-deaths">被撃墜数と勝率</a></li>
+        <li><a href="#sec-time">時間帯別の勝率</a></li>
+        <li><a href="#sec-dow">曜日別の勝率</a></li>
+        <li><a href="#sec-daily">日別勝率推移</a></li>
+        <li><a href="#sec-season">シーズン別分析</a></li>
+      </ol>
+    </details>
+    <div class="toggle-all">
+      <button class="toggle-btn" onClick=${function () { toggleAll(true); }}>すべて開く</button>
+      <button class="toggle-btn" onClick=${function () { toggleAll(false); }}>すべて閉じる</button>
+    </div>
+    <hr />
+  </div>`;
 }
 
 // --- Main report ---
 
 function Report({ data }) {
   if (!data) return null;
+  var periodRef = useState('all');
+  var selectedPeriod = periodRef[0], setSelectedPeriod = periodRef[1];
+
+  var periods = data.periods || {};
+  var pd = periods[selectedPeriod] || periods['all'];
+  if (!pd) return null;
+
   return html`
     <h1>${esc(data.player_name)} - 戦績分析レポート</h1>
     <${ShareArea} shareData=${data.share_data} />
-    <${TableOfContents} data=${data} />
-    <div id="sec-summary"><${SummarySection} summary=${data.summary} /></div>
+    <${PeriodSelector} periods=${periods} selected=${selectedPeriod} onSelect=${setSelectedPeriod} />
+    <${TableOfContents} data=${pd} />
+    <div id="sec-summary"><${SummarySection} summary=${pd.summary} /></div>
     <div id="sec-basic"><${Section} title="基本データ">
-      <${BasicStatsSection} stats=${data.basic_stats} />
-      <${WinLossPatternSection} pattern=${data.win_loss_pattern} />
+      <${BasicStatsSection} stats=${pd.basic_stats} />
+      <${WinLossPatternSection} pattern=${pd.win_loss_pattern} />
     <//></div>
-    <${MsStatsSection} msStats=${data.ms_stats} />
-    <div id="sec-fixed"><${FixedPartnersSection} partners=${data.fixed_partners} /></div>
-    <div id="sec-deaths"><${DeathsImpactSection} deaths=${data.deaths_impact} /></div>
-    <div id="sec-time"><${TimeOfDaySection} time=${data.time_of_day} /></div>
-    <div id="sec-dow"><${DayOfWeekSection} dow=${data.day_of_week} /></div>
-    <div id="sec-daily"><${DailyTrendSection} daily=${data.daily_trend} /></div>
-    <div id="sec-season"><${SeasonSection} seasons=${data.season} /></div>
+    <${MsStatsSection} msStats=${pd.ms_stats} />
+    <div id="sec-fixed"><${FixedPartnersSection} partners=${pd.fixed_partners} /></div>
+    <div id="sec-deaths"><${DeathsImpactSection} deaths=${pd.deaths_impact} /></div>
+    <div id="sec-time"><${TimeOfDaySection} time=${pd.time_of_day} /></div>
+    <div id="sec-dow"><${DayOfWeekSection} dow=${pd.day_of_week} /></div>
+    <div id="sec-daily"><${DailyTrendSection} daily=${pd.daily_trend} /></div>
+    <div id="sec-season"><${SeasonSection} seasons=${pd.season} /></div>
     <${ShareArea} shareData=${data.share_data} />
   `;
 }
