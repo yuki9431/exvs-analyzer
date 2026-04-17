@@ -1075,8 +1075,8 @@ def build_share_data(all_data, ms_data):
     return items
 
 
-def build_json_report(player_name, all_data, ms_data):
-    """構造化JSONレポートを生成する"""
+def build_period_report(all_data, ms_data):
+    """1期間分の分析レポートを生成する"""
     ms_names = [ms for ms in sorted(ms_data.keys(), key=lambda x: -len(ms_data[x])) if len(ms_data[ms]) >= 3]
 
     ms_stats = {}
@@ -1094,8 +1094,6 @@ def build_json_report(player_name, all_data, ms_data):
         }
 
     return {
-        "player_name": player_name,
-        "generated_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "summary": data_advice(all_data, ms_data),
         "basic_stats": data_basic_stats(all_data),
         "win_loss_pattern": data_win_loss_pattern(all_data),
@@ -1106,7 +1104,54 @@ def build_json_report(player_name, all_data, ms_data):
         "day_of_week": data_day_of_week(all_data),
         "daily_trend": data_daily_trend(all_data),
         "season": data_season(all_data),
+    }
+
+
+def filter_by_days(all_data, days):
+    """直近N日分のデータをフィルタする"""
+    if not all_data:
+        return []
+    latest = max(d["datetime"] for d in all_data)
+    from datetime import timedelta
+    cutoff = latest - timedelta(days=days)
+    return [d for d in all_data if d["datetime"] >= cutoff]
+
+
+def build_ms_data(data_list):
+    """データリストからMS別データを構築する"""
+    ms_data = defaultdict(list)
+    for d in data_list:
+        ms_data[d["ms"]].append(d)
+    return ms_data
+
+
+def build_json_report(player_name, all_data, ms_data):
+    """期間別の構造化JSONレポートを生成する"""
+    periods = {}
+
+    # 全期間
+    periods["all"] = build_period_report(all_data, ms_data)
+    periods["all"]["label"] = "全期間"
+
+    # 直近30日
+    data_30d = filter_by_days(all_data, 30)
+    if data_30d:
+        ms_data_30d = build_ms_data(data_30d)
+        periods["30d"] = build_period_report(data_30d, ms_data_30d)
+        periods["30d"]["label"] = "直近30日"
+
+    # 直近7日
+    data_7d = filter_by_days(all_data, 7)
+    if data_7d:
+        ms_data_7d = build_ms_data(data_7d)
+        periods["7d"] = build_period_report(data_7d, ms_data_7d)
+        periods["7d"]["label"] = "直近7日"
+
+    return {
+        "player_name": player_name,
+        "generated_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "share_data": build_share_data(all_data, ms_data),
+        "periods": periods,
     }
 
 
