@@ -1,4 +1,4 @@
-import { html, render, useState, useMemo, useCallback } from './htm-preact-standalone.js';
+import { html, render, useState, useMemo, useCallback, useEffect, useRef } from './htm-preact-standalone.js';
 
 // --- Constants ---
 var STATUS_MESSAGES = {
@@ -9,7 +9,7 @@ var STATUS_MESSAGES = {
   error: 'エラーが発生しました',
 };
 
-var PERIOD_KEYS = ['all', '30d', '7d'];
+var PERIOD_KEYS = ['all', '90d', '60d', '30d', '14d', '7d', '3d', '1d'];
 
 // --- Utility ---
 function esc(s) {
@@ -126,16 +126,209 @@ function Section({ title, open, children }) {
   </details><hr />`;
 }
 
-// --- Period selector ---
+// --- Calendar component ---
 
-function PeriodSelector({ periods, selected, onSelect }) {
+var DOW_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
+
+function CalendarPicker({ selectedDate, onSelect }) {
+  var now = selectedDate ? new Date(selectedDate) : new Date();
+  var viewRef = useState({ year: now.getFullYear(), month: now.getMonth() });
+  var view = viewRef[0], setView = viewRef[1];
+
+  function prevMonth() {
+    setView(function (v) {
+      var m = v.month - 1;
+      return m < 0 ? { year: v.year - 1, month: 11 } : { year: v.year, month: m };
+    });
+  }
+  function nextMonth() {
+    setView(function (v) {
+      var m = v.month + 1;
+      return m > 11 ? { year: v.year + 1, month: 0 } : { year: v.year, month: m };
+    });
+  }
+
+  var firstDay = new Date(view.year, view.month, 1).getDay();
+  var daysInMonth = new Date(view.year, view.month + 1, 0).getDate();
+
+  var cells = [];
+  for (var i = 0; i < firstDay; i++) cells.push(null);
+  for (var d = 1; d <= daysInMonth; d++) cells.push(d);
+
+  var selStr = selectedDate || '';
+
+  function isSelected(day) {
+    if (!day || !selStr) return false;
+    var m = String(view.month + 1).padStart(2, '0');
+    var dd = String(day).padStart(2, '0');
+    return selStr === view.year + '-' + m + '-' + dd;
+  }
+
+  function handleClick(day) {
+    if (!day) return;
+    var m = String(view.month + 1).padStart(2, '0');
+    var dd = String(day).padStart(2, '0');
+    onSelect(view.year + '-' + m + '-' + dd);
+  }
+
+  return html`<div class="cal">
+    <div class="cal-header">
+      <button class="cal-nav" onClick=${prevMonth}>\u25C0</button>
+      <span class="cal-title">${view.year}年${view.month + 1}月</span>
+      <button class="cal-nav" onClick=${nextMonth}>\u25B6</button>
+    </div>
+    <div class="cal-grid">
+      ${DOW_LABELS.map(function (d) { return html`<span class="cal-dow">${d}</span>`; })}
+      ${cells.map(function (day) {
+        if (!day) return html`<span class="cal-empty" />`;
+        return html`<button class=${'cal-day' + (isSelected(day) ? ' selected' : '')}
+          onClick=${function () { handleClick(day); }}>${day}</button>`;
+      })}
+    </div>
+  </div>`;
+}
+
+// --- Time selector ---
+
+var MINUTES_START = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+var MINUTES_END = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 59];
+
+function TimeSelector({ hour, minute, onChangeHour, onChangeMinute, isEnd }) {
+  var hours = [];
+  for (var h = 0; h < 24; h++) hours.push(h);
+  var minutes = isEnd ? MINUTES_END : MINUTES_START;
+
+  return html`<div class="time-sel">
+    <select class="time-select" value=${hour} onChange=${function (e) { onChangeHour(parseInt(e.target.value)); }}>
+      ${hours.map(function (h) { return html`<option value=${h}>${String(h).padStart(2, '0')}時</option>`; })}
+    </select>
+    <span class="time-colon">:</span>
+    <select class="time-select" value=${minute} onChange=${function (e) { onChangeMinute(parseInt(e.target.value)); }}>
+      ${minutes.map(function (m) { return html`<option value=${m}>${String(m).padStart(2, '0')}分</option>`; })}
+    </select>
+  </div>`;
+}
+
+// --- Period selector (GCP/AWS style dropdown) ---
+
+function PeriodSelector({ periods, selected, onSelect, jobId, onCustomReport }) {
   var keys = PERIOD_KEYS.filter(function (k) { return periods[k]; });
-  if (keys.length <= 1) return null;
-  return html`<div class="period-selector">
-    ${keys.map(function (k) {
-      return html`<button class=${'period-btn' + (selected === k ? ' active' : '')}
-        onClick=${function () { onSelect(k); }}>${periods[k].label}</button>`;
-    })}
+  if (keys.length <= 1 && !jobId) return null;
+
+  var openRef = useState(false);
+  var isOpen = openRef[0], setIsOpen = openRef[1];
+  var customRef = useState(false);
+  var showCustom = customRef[0], setShowCustom = customRef[1];
+  var loadingRef = useState(false);
+  var isLoading = loadingRef[0], setIsLoading = loadingRef[1];
+  var errorRef = useState('');
+  var customError = errorRef[0], setCustomError = errorRef[1];
+
+  // カスタム日時の状態（日付文字列 + 時/分）
+  var startDateRef = useState('');
+  var startDate = startDateRef[0], setStartDate = startDateRef[1];
+  var startHourRef = useState(0);
+  var startHour = startHourRef[0], setStartHour = startHourRef[1];
+  var startMinRef = useState(0);
+  var startMin = startMinRef[0], setStartMin = startMinRef[1];
+  var endDateRef = useState('');
+  var endDate = endDateRef[0], setEndDate = endDateRef[1];
+  var endHourRef = useState(23);
+  var endHour = endHourRef[0], setEndHour = endHourRef[1];
+  var endMinRef = useState(59);
+  var endMin = endMinRef[0], setEndMin = endMinRef[1];
+  var timeRef = useState(false);
+  var showTime = timeRef[0], setShowTime = timeRef[1];
+
+  var containerRef = useRef(null);
+
+  useEffect(function () {
+    function handleClick(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return function () { document.removeEventListener('mousedown', handleClick); };
+  }, []);
+
+  var currentLabel = selected === 'custom'
+    ? (periods.custom ? periods.custom.label : 'カスタム')
+    : (periods[selected] ? periods[selected].label : '全期間');
+
+  function selectPreset(k) {
+    onSelect(k);
+    setIsOpen(false);
+    setShowCustom(false);
+  }
+
+  function formatDt(date, hour, min) {
+    return date + ' ' + String(hour).padStart(2, '0') + ':' + String(min).padStart(2, '0');
+  }
+
+  function handleCustomApply() {
+    if (!startDate || !endDate) {
+      setCustomError('開始日と終了日をカレンダーから選択してください');
+      return;
+    }
+    var start = showTime ? formatDt(startDate, startHour, startMin) : startDate + ' 00:00';
+    var end = showTime ? formatDt(endDate, endHour, endMin) : endDate + ' 23:59';
+    setIsLoading(true);
+    setCustomError('');
+    fetch('/result/' + jobId + '/period?start=' + encodeURIComponent(start) + '&end=' + encodeURIComponent(end))
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        setIsLoading(false);
+        if (data.error) {
+          setCustomError(data.error);
+          return;
+        }
+        onCustomReport(data.report);
+        setIsOpen(false);
+      })
+      .catch(function (e) {
+        setIsLoading(false);
+        setCustomError(e.message);
+      });
+  }
+
+  return html`<div class="period-selector" ref=${containerRef}>
+    <button class="period-trigger" onClick=${function () { setIsOpen(!isOpen); }}>
+      ${currentLabel} <span class="period-arrow">${isOpen ? '\u25B2' : '\u25BC'}</span>
+    </button>
+    ${isOpen && html`<div class="period-dropdown">
+      <div class="period-dropdown-list">
+        ${keys.map(function (k) {
+          return html`<button class=${'period-dropdown-item' + (selected === k ? ' active' : '')}
+            onClick=${function () { selectPreset(k); }}>${periods[k].label}</button>`;
+        })}
+        ${jobId && html`<button class=${'period-dropdown-item period-dropdown-custom' + (showCustom ? ' active' : '')}
+          onClick=${function () { setShowCustom(!showCustom); }}>カスタム</button>`}
+      </div>
+      ${showCustom && html`<div class="period-custom">
+        <div class="period-custom-range">
+          <div class="period-custom-col">
+            <span class="period-custom-title">開始</span>
+            <span class="period-custom-value">${startDate || '日付を選択'}${showTime ? ' ' + String(startHour).padStart(2, '0') + ':' + String(startMin).padStart(2, '0') : ''}</span>
+            <${CalendarPicker} selectedDate=${startDate} onSelect=${setStartDate} />
+            ${showTime && html`<${TimeSelector} hour=${startHour} minute=${startMin}
+              onChangeHour=${setStartHour} onChangeMinute=${setStartMin} />`}
+          </div>
+          <div class="period-custom-col">
+            <span class="period-custom-title">終了</span>
+            <span class="period-custom-value">${endDate || '日付を選択'}${showTime ? ' ' + String(endHour).padStart(2, '0') + ':' + String(endMin).padStart(2, '0') : ''}</span>
+            <${CalendarPicker} selectedDate=${endDate} onSelect=${setEndDate} />
+            ${showTime && html`<${TimeSelector} hour=${endHour} minute=${endMin}
+              onChangeHour=${setEndHour} onChangeMinute=${setEndMin} isEnd />`}
+          </div>
+        </div>
+        <button class="period-time-toggle" onClick=${function () { setShowTime(!showTime); }}>
+          ${showTime ? '時刻指定を解除' : '時刻を指定'}</button>
+        <button class="period-custom-apply" onClick=${handleCustomApply} disabled=${isLoading}>
+          ${isLoading ? '分析中...' : '適用'}</button>
+        ${customError && html`<p class="period-custom-error">${customError}</p>`}
+      </div>`}
+    </div>`}
   </div>`;
 }
 
@@ -439,19 +632,31 @@ function TableOfContents({ data }) {
 
 // --- Main report ---
 
-function Report({ data }) {
+function Report({ data, jobId }) {
   if (!data) return null;
   var periodRef = useState('all');
   var selectedPeriod = periodRef[0], setSelectedPeriod = periodRef[1];
+  var customDataRef = useState(null);
+  var customData = customDataRef[0], setCustomData = customDataRef[1];
 
   var periods = data.periods || {};
-  var pd = periods[selectedPeriod] || periods['all'];
+  // カスタム期間データがある場合はマージ
+  var allPeriods = customData ? Object.assign({}, periods, { custom: customData.periods.custom }) : periods;
+  var pd = allPeriods[selectedPeriod] || allPeriods['all'];
   if (!pd) return null;
+
+  var shareData = selectedPeriod === 'custom' && customData ? customData.share_data : data.share_data;
+
+  function handleCustomReport(report) {
+    setCustomData(report);
+    setSelectedPeriod('custom');
+  }
 
   return html`
     <h1>${esc(data.player_name)} - 戦績分析レポート</h1>
-    <${ShareArea} shareData=${data.share_data} />
-    <${PeriodSelector} periods=${periods} selected=${selectedPeriod} onSelect=${setSelectedPeriod} />
+    <${ShareArea} shareData=${shareData} />
+    <${PeriodSelector} periods=${allPeriods} selected=${selectedPeriod} onSelect=${setSelectedPeriod}
+      jobId=${jobId} onCustomReport=${handleCustomReport} />
     <${TableOfContents} data=${pd} />
     <div id="sec-summary"><${SummarySection} summary=${pd.summary} /></div>
     <div id="sec-basic"><${Section} title="基本データ">
@@ -465,16 +670,16 @@ function Report({ data }) {
     <div id="sec-dow"><${DayOfWeekSection} dow=${pd.day_of_week} /></div>
     <div id="sec-daily"><${DailyTrendSection} daily=${pd.daily_trend} /></div>
     <div id="sec-season"><${SeasonSection} seasons=${pd.season} /></div>
-    <${ShareArea} shareData=${data.share_data} />
+    <${ShareArea} shareData=${shareData} />
   `;
 }
 
 // --- Main app logic ---
 
-function renderReport(data) {
+function renderReport(data, jobId) {
   var reportEl = document.getElementById('report');
   reportEl.style.display = 'block';
-  render(html`<${Report} data=${data} />`, reportEl);
+  render(html`<${Report} data=${data} jobId=${jobId} />`, reportEl);
 }
 
 async function analyze() {
@@ -543,7 +748,7 @@ async function analyze() {
         var prelimRes = await fetch('/result/' + jobId);
         var prelimData = await prelimRes.json();
         if (prelimData.report && prelimData.preliminary) {
-          renderReport(prelimData.report);
+          renderReport(prelimData.report, jobId);
           statusText.textContent = '最新データを取得中...';
           preliminaryShown = true;
         }
@@ -561,7 +766,7 @@ async function analyze() {
           throw new Error(resultData.error);
         }
 
-        renderReport(resultData.report);
+        renderReport(resultData.report, jobId);
         break;
       }
     }

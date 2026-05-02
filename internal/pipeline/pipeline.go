@@ -39,6 +39,7 @@ type Job struct {
 	Report             string    `json:"report,omitempty"`
 	PreliminaryReport  string    `json:"preliminary_report,omitempty"`
 	Error              string    `json:"error,omitempty"`
+	UserKey            string    `json:"-"`
 	completedAt        time.Time
 }
 
@@ -52,6 +53,7 @@ type JobSnapshot struct {
 	Report            string
 	PreliminaryReport string
 	Error             string
+	UserKey           string
 }
 
 // ジョブストア（インメモリ）
@@ -93,11 +95,15 @@ func (j *Job) Snapshot() JobSnapshot {
 		Report:            j.Report,
 		PreliminaryReport: j.PreliminaryReport,
 		Error:             j.Error,
+		UserKey:           j.UserKey,
 	}
 }
 
 // Run はスクレイピング→分析を実行し、レポートをジョブに保存する
 func Run(j *Job, username, password string) {
+	jobsMu.Lock()
+	j.UserKey = storage.UserKey(username)
+	jobsMu.Unlock()
 	updateStatus(j, StatusScraping)
 
 	tmpDir, err := os.MkdirTemp("", "exvs-*")
@@ -195,6 +201,39 @@ func Run(j *Job, username, password string) {
 	j.completedAt = time.Now()
 	jobsMu.Unlock()
 	log.Printf("[INFO] Job %s completed", j.ID)
+}
+
+// RunCustomPeriod はカスタム日時範囲で再分析を実行してJSON文字列を返す
+func RunCustomPeriod(userKey, start, end string) (string, error) {
+	tmpDir, err := os.MkdirTemp("", "exvs-period-*")
+	if err != nil {
+		return "", fmt.Errorf("failed to create temp dir: %w", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	csvPath := filepath.Join(tmpDir, "scores.csv")
+
+	exists, err := storage.DownloadCSVByKey(userKey, csvPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to download CSV: %w", err)
+	}
+	if !exists {
+		return "", fmt.Errorf("CSV not found for user")
+	}
+
+	cmd := exec.Command("python3", "scripts/analyze.py", csvPath, "--start", start, "--end", end)
+	cmd.Dir = "/app"
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("analysis failed: %v\n%s", err, string(output))
+	}
+
+	reportPath := filepath.Join(tmpDir, "report.json")
+	report, err := os.ReadFile(reportPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read report: %w", err)
+	}
+	return string(report), nil
 }
 
 // runAnalysis はPython分析を実行してJSON形式のレポートを返す。失敗時は空文字を返す。

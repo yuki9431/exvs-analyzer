@@ -5,12 +5,13 @@ CSVファイルを読み込み、JSON形式の構造化分析レポートを出�
 プレイヤー名はCSVのプレイヤーNo.1から自動取得する。
 """
 
+import argparse
 import csv
 import json
 import os
 import sys
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 def get_season(dt):
@@ -1112,9 +1113,15 @@ def filter_by_days(all_data, days):
     if not all_data:
         return []
     latest = max(d["datetime"] for d in all_data)
-    from datetime import timedelta
     cutoff = latest - timedelta(days=days)
     return [d for d in all_data if d["datetime"] >= cutoff]
+
+
+def filter_by_datetime_range(all_data, start, end):
+    """開始日時〜終了日時でデータをフィルタする"""
+    if not all_data:
+        return []
+    return [d for d in all_data if start <= d["datetime"] <= end]
 
 
 def build_ms_data(data_list):
@@ -1133,19 +1140,22 @@ def build_json_report(player_name, all_data, ms_data):
     periods["all"] = build_period_report(all_data, ms_data)
     periods["all"]["label"] = "全期間"
 
-    # 直近30日
-    data_30d = filter_by_days(all_data, 30)
-    if data_30d:
-        ms_data_30d = build_ms_data(data_30d)
-        periods["30d"] = build_period_report(data_30d, ms_data_30d)
-        periods["30d"]["label"] = "直近30日"
-
-    # 直近7日
-    data_7d = filter_by_days(all_data, 7)
-    if data_7d:
-        ms_data_7d = build_ms_data(data_7d)
-        periods["7d"] = build_period_report(data_7d, ms_data_7d)
-        periods["7d"]["label"] = "直近7日"
+    # プリセット期間
+    preset_periods = [
+        ("90d", 90, "直近90日"),
+        ("60d", 60, "直近60日"),
+        ("30d", 30, "直近30日"),
+        ("14d", 14, "直近14日"),
+        ("7d", 7, "直近7日"),
+        ("3d", 3, "直近3日"),
+        ("1d", 1, "直近1日"),
+    ]
+    for key, days, label in preset_periods:
+        filtered = filter_by_days(all_data, days)
+        if filtered:
+            ms_filtered = build_ms_data(filtered)
+            periods[key] = build_period_report(filtered, ms_filtered)
+            periods[key]["label"] = label
 
     return {
         "player_name": player_name,
@@ -1155,20 +1165,40 @@ def build_json_report(player_name, all_data, ms_data):
     }
 
 
+def build_custom_period_report(player_name, all_data, ms_data, start, end):
+    """カスタム日時範囲の構造化JSONレポートを生成する"""
+    filtered = filter_by_datetime_range(all_data, start, end)
+    if not filtered:
+        return None
+
+    ms_filtered = build_ms_data(filtered)
+    period_report = build_period_report(filtered, ms_filtered)
+    start_str = start.strftime("%Y-%m-%d %H:%M")
+    end_str = end.strftime("%Y-%m-%d %H:%M")
+    period_report["label"] = f"{start_str} 〜 {end_str}"
+
+    return {
+        "player_name": player_name,
+        "generated_at": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "share_data": build_share_data(filtered, ms_filtered),
+        "periods": {"custom": period_report},
+    }
+
+
 def main():
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} <csv_path>")
-        sys.exit(1)
+    parser = argparse.ArgumentParser(description="EXVS2IB 戦績分析")
+    parser.add_argument("csv_path", help="CSVファイルパス")
+    parser.add_argument("--start", help="開始日時 (YYYY-MM-DD HH:MM)")
+    parser.add_argument("--end", help="終了日時 (YYYY-MM-DD HH:MM)")
+    args = parser.parse_args()
 
-    csv_path = sys.argv[1]
-
-    matches = load_csv(csv_path)
+    matches = load_csv(args.csv_path)
 
     if not matches:
         print("試合データが見つかりませんでした。")
         sys.exit(1)
 
-    cost_map = load_ms_cost_map(csv_path)
+    cost_map = load_ms_cost_map(args.csv_path)
     player_name = detect_player_name(matches)
 
     all_data = [get_my_data(m, cost_map) for m in matches]
@@ -1177,8 +1207,17 @@ def main():
     for d in all_data:
         ms_data[d["ms"]].append(d)
 
-    report_data = build_json_report(player_name, all_data, ms_data)
-    output_path = os.path.join(os.path.dirname(csv_path), "report.json")
+    if args.start and args.end:
+        start = datetime.strptime(args.start, "%Y-%m-%d %H:%M")
+        end = datetime.strptime(args.end, "%Y-%m-%d %H:%M")
+        report_data = build_custom_period_report(player_name, all_data, ms_data, start, end)
+        if report_data is None:
+            print("指定期間のデータが見つかりませんでした。")
+            sys.exit(1)
+    else:
+        report_data = build_json_report(player_name, all_data, ms_data)
+
+    output_path = os.path.join(os.path.dirname(args.csv_path), "report.json")
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(report_data, f, ensure_ascii=False, indent=2)
     print(f"分析レポート(JSON)を出力しました: {output_path}")

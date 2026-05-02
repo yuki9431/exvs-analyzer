@@ -63,6 +63,40 @@ func DownloadCSV(email, localPath string) (bool, error) {
 	return true, nil
 }
 
+// DownloadCSVByKey はユーザーキーを使ってCloud StorageからCSVをダウンロードする
+func DownloadCSVByKey(userKey, localPath string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return false, fmt.Errorf("failed to create storage client: %w", err)
+	}
+	defer client.Close()
+
+	objPath := fmt.Sprintf("users/%s/scores.csv", userKey)
+	reader, err := client.Bucket(BucketName).Object(objPath).NewReader(ctx)
+	if err != nil {
+		if err == storage.ErrObjectNotExist {
+			return false, nil
+		}
+		return false, fmt.Errorf("failed to read from GCS: %w", err)
+	}
+	defer reader.Close()
+
+	f, err := os.Create(localPath)
+	if err != nil {
+		return false, fmt.Errorf("failed to create local file: %w", err)
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, reader); err != nil {
+		return false, fmt.Errorf("failed to download CSV: %w", err)
+	}
+
+	return true, nil
+}
+
 // UploadCSV はローカルのCSVファイルをCloud Storageにアップロードする
 func UploadCSV(email, localPath string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
