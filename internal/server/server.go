@@ -156,6 +156,11 @@ func StartServer() {
 		handleResult(w, r, path)
 	})
 
+	// GET /period?user_key=...&start=...&end=... → カスタム期間で再分析（ジョブ不要）
+	http.HandleFunc("/period", func(w http.ResponseWriter, r *http.Request) {
+		handlePeriod(w, r)
+	})
+
 	// 静的ファイル（フロントエンド）
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/", fs)
@@ -178,7 +183,7 @@ func handleResult(w http.ResponseWriter, r *http.Request, id string) {
 
 	if snap.Status != pipeline.StatusDone && snap.Status != pipeline.StatusError {
 		if snap.PreliminaryReport != "" {
-			sendRawReport(w, http.StatusOK, snap.PreliminaryReport, string(snap.Status), true)
+			sendRawReport(w, http.StatusOK, snap.PreliminaryReport, string(snap.Status), snap.UserKey, true)
 			return
 		}
 		sendJSON(w, http.StatusAccepted, map[string]string{"status": string(snap.Status)})
@@ -190,7 +195,7 @@ func handleResult(w http.ResponseWriter, r *http.Request, id string) {
 		return
 	}
 
-	sendRawReport(w, http.StatusOK, snap.Report, "", false)
+	sendRawReport(w, http.StatusOK, snap.Report, "", snap.UserKey, false)
 }
 
 func handleCustomPeriod(w http.ResponseWriter, r *http.Request, id string) {
@@ -236,7 +241,37 @@ func handleCustomPeriod(w http.ResponseWriter, r *http.Request, id string) {
 		return
 	}
 
-	sendRawReport(w, http.StatusOK, report, "", false)
+	sendRawReport(w, http.StatusOK, report, "", snap.UserKey, false)
+}
+
+func handlePeriod(w http.ResponseWriter, r *http.Request) {
+	userKey := r.URL.Query().Get("user_key")
+	start := r.URL.Query().Get("start")
+	end := r.URL.Query().Get("end")
+
+	if userKey == "" || start == "" || end == "" {
+		sendJSON(w, http.StatusBadRequest, map[string]string{"error": "user_key, start and end parameters are required"})
+		return
+	}
+
+	const layout = "2006-01-02 15:04"
+	if _, err := time.Parse(layout, start); err != nil {
+		sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid start datetime format (expected: YYYY-MM-DD HH:MM)"})
+		return
+	}
+	if _, err := time.Parse(layout, end); err != nil {
+		sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid end datetime format (expected: YYYY-MM-DD HH:MM)"})
+		return
+	}
+
+	report, err := pipeline.RunCustomPeriod(userKey, start, end)
+	if err != nil {
+		log.Printf("[ERROR] Custom period analysis failed: %v", err)
+		sendJSON(w, http.StatusInternalServerError, map[string]string{"error": "カスタム期間の分析に失敗しました"})
+		return
+	}
+
+	sendRawReport(w, http.StatusOK, report, "", userKey, false)
 }
 
 // securityHeaders は全レスポンスにセキュリティヘッダーを付与する
@@ -258,16 +293,18 @@ func sendJSON(w http.ResponseWriter, code int, data interface{}) {
 
 // sendRawReport はJSON形式のレポートをレスポンスとして返す。
 // reportJSONはanalyze.pyが生成したJSON文字列。json.RawMessageで二重エンコードを防ぐ。
-func sendRawReport(w http.ResponseWriter, code int, reportJSON, status string, preliminary bool) {
+func sendRawReport(w http.ResponseWriter, code int, reportJSON, status, userKey string, preliminary bool) {
 	type reportResponse struct {
 		Report      json.RawMessage `json:"report"`
 		Status      string          `json:"status,omitempty"`
 		Preliminary bool            `json:"preliminary,omitempty"`
+		UserKey     string          `json:"user_key,omitempty"`
 	}
 	resp := reportResponse{
 		Report:      json.RawMessage(reportJSON),
 		Status:      status,
 		Preliminary: preliminary,
+		UserKey:     userKey,
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
