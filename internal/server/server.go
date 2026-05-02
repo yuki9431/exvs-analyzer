@@ -141,32 +141,19 @@ func StartServer() {
 	})
 
 	// GET /result/{id} → 分析結果(JSON)を返す
+	// GET /result/{id}/period?start=...&end=... → カスタム期間で再分析
 	http.HandleFunc("/result/", func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Path[len("/result/"):]
+		path := r.URL.Path[len("/result/"):]
 
-		j, ok := pipeline.GetJob(id)
-		if !ok {
-			sendJSON(w, http.StatusNotFound, map[string]string{"error": "Job not found"})
+		// /result/{id}/period のパターンを判定
+		if idx := len(path) - len("/period"); idx > 0 && path[idx:] == "/period" {
+			id := path[:idx]
+			handleCustomPeriod(w, r, id)
 			return
 		}
 
-		snap := j.Snapshot()
-
-		if snap.Status != pipeline.StatusDone && snap.Status != pipeline.StatusError {
-			if snap.PreliminaryReport != "" {
-				sendRawReport(w, http.StatusOK, snap.PreliminaryReport, string(snap.Status), true)
-				return
-			}
-			sendJSON(w, http.StatusAccepted, map[string]string{"status": string(snap.Status)})
-			return
-		}
-
-		if snap.Status == pipeline.StatusError {
-			sendJSON(w, http.StatusInternalServerError, map[string]string{"error": snap.Error})
-			return
-		}
-
-		sendRawReport(w, http.StatusOK, snap.Report, "", false)
+		// 既存の /result/{id} 処理
+		handleResult(w, r, path)
 	})
 
 	// 静的ファイル（フロントエンド）
@@ -178,6 +165,78 @@ func StartServer() {
 	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		log.Fatalf("[ERROR] Server failed: %v", err)
 	}
+}
+
+func handleResult(w http.ResponseWriter, r *http.Request, id string) {
+	j, ok := pipeline.GetJob(id)
+	if !ok {
+		sendJSON(w, http.StatusNotFound, map[string]string{"error": "Job not found"})
+		return
+	}
+
+	snap := j.Snapshot()
+
+	if snap.Status != pipeline.StatusDone && snap.Status != pipeline.StatusError {
+		if snap.PreliminaryReport != "" {
+			sendRawReport(w, http.StatusOK, snap.PreliminaryReport, string(snap.Status), true)
+			return
+		}
+		sendJSON(w, http.StatusAccepted, map[string]string{"status": string(snap.Status)})
+		return
+	}
+
+	if snap.Status == pipeline.StatusError {
+		sendJSON(w, http.StatusInternalServerError, map[string]string{"error": snap.Error})
+		return
+	}
+
+	sendRawReport(w, http.StatusOK, snap.Report, "", false)
+}
+
+func handleCustomPeriod(w http.ResponseWriter, r *http.Request, id string) {
+	j, ok := pipeline.GetJob(id)
+	if !ok {
+		sendJSON(w, http.StatusNotFound, map[string]string{"error": "Job not found"})
+		return
+	}
+
+	snap := j.Snapshot()
+	if snap.Status != pipeline.StatusDone {
+		sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Job not completed"})
+		return
+	}
+
+	if snap.UserKey == "" {
+		sendJSON(w, http.StatusInternalServerError, map[string]string{"error": "User key not found"})
+		return
+	}
+
+	start := r.URL.Query().Get("start")
+	end := r.URL.Query().Get("end")
+	if start == "" || end == "" {
+		sendJSON(w, http.StatusBadRequest, map[string]string{"error": "start and end parameters are required"})
+		return
+	}
+
+	// 日時フォーマットの簡易バリデーション（YYYY-MM-DD HH:MM）
+	const layout = "2006-01-02 15:04"
+	if _, err := time.Parse(layout, start); err != nil {
+		sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid start datetime format (expected: YYYY-MM-DD HH:MM)"})
+		return
+	}
+	if _, err := time.Parse(layout, end); err != nil {
+		sendJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid end datetime format (expected: YYYY-MM-DD HH:MM)"})
+		return
+	}
+
+	report, err := pipeline.RunCustomPeriod(snap.UserKey, start, end)
+	if err != nil {
+		log.Printf("[ERROR] Custom period analysis failed: %v", err)
+		sendJSON(w, http.StatusInternalServerError, map[string]string{"error": "カスタム期間の分析に失敗しました"})
+		return
+	}
+
+	sendRawReport(w, http.StatusOK, report, "", false)
 }
 
 // securityHeaders は全レスポンスにセキュリティヘッダーを付与する

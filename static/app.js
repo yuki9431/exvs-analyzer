@@ -1,4 +1,4 @@
-import { html, render, useState, useMemo, useCallback } from './htm-preact-standalone.js';
+import { html, render, useState, useMemo, useCallback, useEffect, useRef } from './htm-preact-standalone.js';
 
 // --- Constants ---
 var STATUS_MESSAGES = {
@@ -9,7 +9,7 @@ var STATUS_MESSAGES = {
   error: 'エラーが発生しました',
 };
 
-var PERIOD_KEYS = ['all', '30d', '7d'];
+var PERIOD_KEYS = ['all', '90d', '60d', '30d', '14d', '7d', '3d', '1d'];
 
 // --- Utility ---
 function esc(s) {
@@ -126,16 +126,97 @@ function Section({ title, open, children }) {
   </details><hr />`;
 }
 
-// --- Period selector ---
+// --- Period selector (GCP/AWS style dropdown) ---
 
-function PeriodSelector({ periods, selected, onSelect }) {
+function PeriodSelector({ periods, selected, onSelect, jobId, onCustomReport }) {
   var keys = PERIOD_KEYS.filter(function (k) { return periods[k]; });
-  if (keys.length <= 1) return null;
-  return html`<div class="period-selector">
-    ${keys.map(function (k) {
-      return html`<button class=${'period-btn' + (selected === k ? ' active' : '')}
-        onClick=${function () { onSelect(k); }}>${periods[k].label}</button>`;
-    })}
+  if (keys.length <= 1 && !jobId) return null;
+
+  var openRef = useState(false);
+  var isOpen = openRef[0], setIsOpen = openRef[1];
+  var customRef = useState(false);
+  var showCustom = customRef[0], setShowCustom = customRef[1];
+  var loadingRef = useState(false);
+  var isLoading = loadingRef[0], setIsLoading = loadingRef[1];
+  var errorRef = useState('');
+  var customError = errorRef[0], setCustomError = errorRef[1];
+  var startRef = useState('');
+  var customStart = startRef[0], setCustomStart = startRef[1];
+  var endRef = useState('');
+  var customEnd = endRef[0], setCustomEnd = endRef[1];
+
+  var containerRef = useRef(null);
+
+  // 外側クリックで閉じる
+  useEffect(function () {
+    function handleClick(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return function () { document.removeEventListener('mousedown', handleClick); };
+  }, []);
+
+  var currentLabel = selected === 'custom'
+    ? (periods.custom ? periods.custom.label : 'カスタム')
+    : (periods[selected] ? periods[selected].label : '全期間');
+
+  function selectPreset(k) {
+    onSelect(k);
+    setIsOpen(false);
+    setShowCustom(false);
+  }
+
+  function handleCustomApply() {
+    if (!customStart || !customEnd) {
+      setCustomError('開始日時と終了日時を入力してください');
+      return;
+    }
+    var start = customStart.replace('T', ' ');
+    var end = customEnd.replace('T', ' ');
+    setIsLoading(true);
+    setCustomError('');
+    fetch('/result/' + jobId + '/period?start=' + encodeURIComponent(start) + '&end=' + encodeURIComponent(end))
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        setIsLoading(false);
+        if (data.error) {
+          setCustomError(data.error);
+          return;
+        }
+        onCustomReport(data.report);
+        setIsOpen(false);
+      })
+      .catch(function (e) {
+        setIsLoading(false);
+        setCustomError(e.message);
+      });
+  }
+
+  return html`<div class="period-selector" ref=${containerRef}>
+    <button class="period-trigger" onClick=${function () { setIsOpen(!isOpen); }}>
+      ${currentLabel} <span class="period-arrow">${isOpen ? '\u25B2' : '\u25BC'}</span>
+    </button>
+    ${isOpen && html`<div class="period-dropdown">
+      <div class="period-dropdown-list">
+        ${keys.map(function (k) {
+          return html`<button class=${'period-dropdown-item' + (selected === k ? ' active' : '')}
+            onClick=${function () { selectPreset(k); }}>${periods[k].label}</button>`;
+        })}
+        ${jobId && html`<button class=${'period-dropdown-item' + (showCustom ? ' active' : '')}
+          onClick=${function () { setShowCustom(true); }}>カスタム</button>`}
+      </div>
+      ${showCustom && html`<div class="period-custom">
+        <label>開始<input type="datetime-local" value=${customStart}
+          onInput=${function (e) { setCustomStart(e.target.value); }} /></label>
+        <label>終了<input type="datetime-local" value=${customEnd}
+          onInput=${function (e) { setCustomEnd(e.target.value); }} /></label>
+        <button class="period-custom-apply" onClick=${handleCustomApply} disabled=${isLoading}>
+          ${isLoading ? '分析中...' : '適用'}</button>
+        ${customError && html`<p class="period-custom-error">${customError}</p>`}
+      </div>`}
+    </div>`}
   </div>`;
 }
 
@@ -439,19 +520,31 @@ function TableOfContents({ data }) {
 
 // --- Main report ---
 
-function Report({ data }) {
+function Report({ data, jobId }) {
   if (!data) return null;
   var periodRef = useState('all');
   var selectedPeriod = periodRef[0], setSelectedPeriod = periodRef[1];
+  var customDataRef = useState(null);
+  var customData = customDataRef[0], setCustomData = customDataRef[1];
 
   var periods = data.periods || {};
-  var pd = periods[selectedPeriod] || periods['all'];
+  // カスタム期間データがある場合はマージ
+  var allPeriods = customData ? Object.assign({}, periods, { custom: customData.periods.custom }) : periods;
+  var pd = allPeriods[selectedPeriod] || allPeriods['all'];
   if (!pd) return null;
+
+  var shareData = selectedPeriod === 'custom' && customData ? customData.share_data : data.share_data;
+
+  function handleCustomReport(report) {
+    setCustomData(report);
+    setSelectedPeriod('custom');
+  }
 
   return html`
     <h1>${esc(data.player_name)} - 戦績分析レポート</h1>
-    <${ShareArea} shareData=${data.share_data} />
-    <${PeriodSelector} periods=${periods} selected=${selectedPeriod} onSelect=${setSelectedPeriod} />
+    <${ShareArea} shareData=${shareData} />
+    <${PeriodSelector} periods=${allPeriods} selected=${selectedPeriod} onSelect=${setSelectedPeriod}
+      jobId=${jobId} onCustomReport=${handleCustomReport} />
     <${TableOfContents} data=${pd} />
     <div id="sec-summary"><${SummarySection} summary=${pd.summary} /></div>
     <div id="sec-basic"><${Section} title="基本データ">
@@ -465,16 +558,16 @@ function Report({ data }) {
     <div id="sec-dow"><${DayOfWeekSection} dow=${pd.day_of_week} /></div>
     <div id="sec-daily"><${DailyTrendSection} daily=${pd.daily_trend} /></div>
     <div id="sec-season"><${SeasonSection} seasons=${pd.season} /></div>
-    <${ShareArea} shareData=${data.share_data} />
+    <${ShareArea} shareData=${shareData} />
   `;
 }
 
 // --- Main app logic ---
 
-function renderReport(data) {
+function renderReport(data, jobId) {
   var reportEl = document.getElementById('report');
   reportEl.style.display = 'block';
-  render(html`<${Report} data=${data} />`, reportEl);
+  render(html`<${Report} data=${data} jobId=${jobId} />`, reportEl);
 }
 
 async function analyze() {
@@ -543,7 +636,7 @@ async function analyze() {
         var prelimRes = await fetch('/result/' + jobId);
         var prelimData = await prelimRes.json();
         if (prelimData.report && prelimData.preliminary) {
-          renderReport(prelimData.report);
+          renderReport(prelimData.report, jobId);
           statusText.textContent = '最新データを取得中...';
           preliminaryShown = true;
         }
@@ -561,7 +654,7 @@ async function analyze() {
           throw new Error(resultData.error);
         }
 
-        renderReport(resultData.report);
+        renderReport(resultData.report, jobId);
         break;
       }
     }
