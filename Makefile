@@ -1,7 +1,7 @@
 IMAGE_NAME := exvs-analyzer
 PORT ?= 8080
 
-.PHONY: build run restart stop test pulumi-install pulumi-init pulumi-preview pulumi-up
+.PHONY: build run restart stop test pulumi-install pulumi-init pulumi-preview pulumi-up pulumi-shell
 
 ## Docker イメージをビルド（キャッシュなし）
 build:
@@ -53,3 +53,15 @@ pulumi-preview:
 ## インフラ変更を適用
 pulumi-up:
 	$(PULUMI_RUN) sh -c "$(PULUMI_LOGIN) && pulumi up"
+
+## Pulumiコンテナにシェルで入る
+pulumi-shell:
+	docker run --rm -it --entrypoint "" \
+		-v "$(CURDIR)/infra":/infra \
+		-v "$(HOME)/.config/gcloud":/root/.config/gcloud \
+		-w /infra \
+		-e PULUMI_CONFIG_PASSPHRASE \
+		-e CLOUDSDK_CORE_PROJECT=$$(gcloud config get-value project 2>/dev/null) \
+		-e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json \
+		$(PULUMI_IMAGE) \
+		sh -c "$(PULUMI_LOGIN) && sh"
