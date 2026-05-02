@@ -154,6 +154,7 @@ function CalendarPicker({ selectedDate, onSelect }) {
   var cells = [];
   for (var i = 0; i < firstDay; i++) cells.push(null);
   for (var d = 1; d <= daysInMonth; d++) cells.push(d);
+  while (cells.length < 42) cells.push(null);
 
   var selStr = selectedDate || '';
 
@@ -211,9 +212,9 @@ function TimeSelector({ hour, minute, onChangeHour, onChangeMinute, isEnd }) {
 
 // --- Period selector (GCP/AWS style dropdown) ---
 
-function PeriodSelector({ periods, selected, onSelect, jobId, onCustomReport }) {
+function PeriodSelector({ periods, selected, onSelect, userKey, onCustomReport }) {
   var keys = PERIOD_KEYS.filter(function (k) { return periods[k]; });
-  if (keys.length <= 1 && !jobId) return null;
+  if (keys.length <= 1 && !userKey) return null;
 
   var openRef = useState(false);
   var isOpen = openRef[0], setIsOpen = openRef[1];
@@ -275,7 +276,7 @@ function PeriodSelector({ periods, selected, onSelect, jobId, onCustomReport }) 
     var end = showTime ? formatDt(endDate, endHour, endMin) : endDate + ' 23:59';
     setIsLoading(true);
     setCustomError('');
-    fetch('/result/' + jobId + '/period?start=' + encodeURIComponent(start) + '&end=' + encodeURIComponent(end))
+    fetch('/period?user_key=' + encodeURIComponent(userKey) + '&start=' + encodeURIComponent(start) + '&end=' + encodeURIComponent(end))
       .then(function (res) { return res.json(); })
       .then(function (data) {
         setIsLoading(false);
@@ -302,7 +303,7 @@ function PeriodSelector({ periods, selected, onSelect, jobId, onCustomReport }) 
           return html`<button class=${'period-dropdown-item' + (selected === k ? ' active' : '')}
             onClick=${function () { selectPreset(k); }}>${periods[k].label}</button>`;
         })}
-        ${jobId && html`<button class=${'period-dropdown-item period-dropdown-custom' + (showCustom ? ' active' : '')}
+        ${userKey && html`<button class=${'period-dropdown-item period-dropdown-custom' + (showCustom ? ' active' : '')}
           onClick=${function () { setShowCustom(!showCustom); }}>カスタム</button>`}
       </div>
       ${showCustom && html`<div class="period-custom">
@@ -632,7 +633,7 @@ function TableOfContents({ data }) {
 
 // --- Main report ---
 
-function Report({ data, jobId }) {
+function Report({ data, userKey }) {
   if (!data) return null;
   var periodRef = useState('all');
   var selectedPeriod = periodRef[0], setSelectedPeriod = periodRef[1];
@@ -656,7 +657,7 @@ function Report({ data, jobId }) {
     <h1>${esc(data.player_name)} - 戦績分析レポート</h1>
     <${ShareArea} shareData=${shareData} />
     <${PeriodSelector} periods=${allPeriods} selected=${selectedPeriod} onSelect=${setSelectedPeriod}
-      jobId=${jobId} onCustomReport=${handleCustomReport} />
+      userKey=${userKey} onCustomReport=${handleCustomReport} />
     <${TableOfContents} data=${pd} />
     <div id="sec-summary"><${SummarySection} summary=${pd.summary} /></div>
     <div id="sec-basic"><${Section} title="基本データ">
@@ -676,10 +677,10 @@ function Report({ data, jobId }) {
 
 // --- Main app logic ---
 
-function renderReport(data, jobId) {
+function renderReport(data, userKey) {
   var reportEl = document.getElementById('report');
   reportEl.style.display = 'block';
-  render(html`<${Report} data=${data} jobId=${jobId} />`, reportEl);
+  render(html`<${Report} data=${data} userKey=${userKey} />`, reportEl);
 }
 
 async function analyze() {
@@ -748,7 +749,7 @@ async function analyze() {
         var prelimRes = await fetch('/result/' + jobId);
         var prelimData = await prelimRes.json();
         if (prelimData.report && prelimData.preliminary) {
-          renderReport(prelimData.report, jobId);
+          renderReport(prelimData.report, prelimData.user_key);
           statusText.textContent = '最新データを取得中...';
           preliminaryShown = true;
         }
@@ -766,7 +767,7 @@ async function analyze() {
           throw new Error(resultData.error);
         }
 
-        renderReport(resultData.report, jobId);
+        renderReport(resultData.report, resultData.user_key);
         break;
       }
     }
