@@ -174,7 +174,7 @@ func StartServer() {
 	http.Handle("/", fs)
 
 	log.Printf("[INFO] Server starting on port %s", port)
-	handler := securityHeaders(http.DefaultServeMux)
+	handler := basicAuth(securityHeaders(http.DefaultServeMux), "/health")
 	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		log.Fatalf("[ERROR] Server failed: %v", err)
 	}
