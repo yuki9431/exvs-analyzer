@@ -86,6 +86,10 @@ function SortableTable({ headers, rows, sortableColumns, defaultLimit }) {
   var hasMore = limit > 0 && sortedRows.length > limit;
 
   function handleSort(colIdx) {
+    if (colIdx === 0) {
+      setSortState({ col: -1, asc: true });
+      return;
+    }
     if (sortState.col === colIdx) {
       setSortState({ col: colIdx, asc: !sortState.asc });
     } else {
@@ -99,6 +103,9 @@ function SortableTable({ headers, rows, sortableColumns, defaultLimit }) {
     <div class="table-wrap"><table>
       <thead><tr>${headers.map(function (h, i) {
         var isSortable = h !== '' && (sortable.length === 0 || sortable.indexOf(i) >= 0);
+        if (i === 0) {
+          return html`<th class="sortable" onClick=${function () { handleSort(0); }}>${h}</th>`;
+        }
         var indicator = sortState.col === i ? (sortState.asc ? ' ▲' : ' ▼') : (isSortable ? ' △' : '');
         return html`<th class=${isSortable ? 'sortable' : ''} onClick=${isSortable ? function () { handleSort(i); } : undefined}>${h}${indicator}</th>`;
       })}</tr></thead>
@@ -669,6 +676,7 @@ function TableOfContents({ data }) {
       <ol>
         <li><a href="#sec-summary">総合アドバイス</a></li>
         <li><a href="#sec-basic">基本データ</a></li>
+        <li><a href="#sec-winloss">勝利時/敗北時のダメージ傾向</a></li>
         ${msEntries.length > 0 && html`<li><a href=${'#' + msAnchorId(msEntries[0], 0)}>機体別分析</a>
           <details class="toc-ms-details">
             <summary>機体一覧</summary>
@@ -724,12 +732,10 @@ function Report({ data, userKey }) {
     <${TableOfContents} data=${pd} />
     <div key="sec-summary" id="sec-summary"><${SummarySection} summary=${pd.summary} /></div>
     <div key="sec-basic" id="sec-basic"><${Section} title="基本データ">
-      <${SubSection} title="基本データ" open>
-        <${BasicStatsSection} stats=${pd.basic_stats} />
-      <//>
-      <${SubSection} title="勝利時/敗北時のダメージ傾向">
-        <${WinLossPatternSection} pattern=${pd.win_loss_pattern} />
-      <//>
+      <${BasicStatsSection} stats=${pd.basic_stats} />
+    <//></div>
+    <div key="sec-winloss" id="sec-winloss"><${Section} title="勝利時/敗北時のダメージ傾向">
+      <${WinLossPatternSection} pattern=${pd.win_loss_pattern} />
     <//></div>
     <div key="sec-ms"><${MsStatsSection} msStats=${pd.ms_stats} /></div>
     <div key="sec-fixed" id="sec-fixed"><${FixedPartnersSection} partners=${pd.fixed_partners} /></div>

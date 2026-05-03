@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -10,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gocolly/colly/v2"
 	"github.com/yuki9431/exvs-analyzer/internal/model"
 )
@@ -21,8 +23,11 @@ const (
 	mobileMSUsedRate = "https://web.vsmobile.jp/exvs2ib/ranking/ms_used_rate"
 
 	// maxParallelism はバンナムサーバーへの最大同時リクエスト数
-	maxParallelism = 5
+	maxParallelism = 15
 )
+
+// ErrAccessDenied はサーバーからアクセス拒否(403)された場合のエラー
+var ErrAccessDenied = errors.New("サーバーからアクセスが拒否されました")
 
 // TagPartner はタッグ戦歴ページから取得した固定相方情報
 type TagPartner struct {
@@ -73,7 +78,10 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 	}
 
 	// Phase 1: rankpageから日別ページURLを収集
-	dailyLinks := collectDailyLinks(m.HTTPClient.Jar, since)
+	dailyLinks, err := collectDailyLinks(m.HTTPClient.Jar, since)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	// Phase 2+3: 日別ページ収集→詳細ページ取得をパイプラインで並行実行
 	// Phase 2で試合エントリが見つかり次第、Phase 3の詳細取得を開始する
@@ -98,11 +106,18 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 }
 
 // collectDailyLinks はrankpageから日別ページのURLを収集する
-func collectDailyLinks(jar http.CookieJar, since time.Time) []dailyLink {
+func collectDailyLinks(jar http.CookieJar, since time.Time) ([]dailyLink, error) {
 	var links []dailyLink
 
 	c := colly.NewCollector(colly.AllowedDomains(vsmobile))
 	c.SetCookieJar(jar)
+
+	var accessDenied bool
+	c.OnResponse(func(r *colly.Response) {
+		if r.StatusCode == http.StatusForbidden {
+			accessDenied = true
+		}
+	})
 
 	c.OnHTML("li.item", func(e *colly.HTMLElement) {
 		r := regexp.MustCompile(`\(.*`)
@@ -120,7 +135,11 @@ func collectDailyLinks(jar http.CookieJar, since time.Time) []dailyLink {
 	})
 
 	c.Visit(mobileRankpage)
-	return links
+
+	if accessDenied {
+		return nil, ErrAccessDenied
+	}
+	return links, nil
 }
 
 // streamMatchEntries は複数の日別ページから試合エントリを並列で収集し、チャネルにストリーミングする
@@ -243,23 +262,29 @@ func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, no
 	return scores
 }
 
-// fetchSingleDetail は単一の試合詳細ページを取得しスコアを返す
+// fetchSingleDetail は単一の試合詳細ページをnet/http+goqueryで取得しスコアを返す
 func fetchSingleDetail(jar http.CookieJar, e matchEntry) model.DatedScores {
+	client := &http.Client{Timeout: 30 * time.Second, Jar: jar}
+	resp, err := client.Get(e.detailURL)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return nil
+	}
+
 	var scores model.DatedScores
-
-	c := colly.NewCollector(colly.AllowedDomains(vsmobile))
-	c.SetCookieJar(jar)
-
-	c.OnHTML("div.panel_area", func(el *colly.HTMLElement) {
-		scores = parseDetailPage(el, e.date, e.hour, e.wins)
+	doc.Find("div.panel_area").Each(func(_ int, s *goquery.Selection) {
+		scores = parseDetailPage(s, e.date, e.hour, e.wins)
 	})
-
-	c.Visit(e.detailURL)
 	return scores
 }
 
 // parseDetailPage は試合詳細ページからスコアを抽出する
-func parseDetailPage(e *colly.HTMLElement, date, hour string, wins []string) model.DatedScores {
+func parseDetailPage(s *goquery.Selection, date, hour string, wins []string) model.DatedScores {
 	var scores model.DatedScores
 
 	selectorLeftValue := "div.w45.pr-ss > dl > dd"
@@ -268,11 +293,11 @@ func parseDetailPage(e *colly.HTMLElement, date, hour string, wins []string) mod
 	selectorName := "p.mb-ss.fz-m > span.name"
 	selectorMSImage := "#panel3 img.item-icon-img"
 
-	cities := e.ChildTexts(selectorCity)
-	names := e.ChildTexts(selectorName)
-	msImages := e.ChildAttrs(selectorMSImage, "data-original")
-	leftValue := e.ChildTexts(selectorLeftValue)
-	rightValue := e.ChildTexts(selectorRightValue)
+	cities := textsFromSelection(s, selectorCity)
+	names := textsFromSelection(s, selectorName)
+	msImages := attrsFromSelection(s, selectorMSImage, "data-original")
+	leftValue := textsFromSelection(s, selectorLeftValue)
+	rightValue := textsFromSelection(s, selectorRightValue)
 
 	layout := "2006/01/02 15:04"
 	t := date + " " + hour
@@ -320,6 +345,26 @@ func parseDetailPage(e *colly.HTMLElement, date, hour string, wins []string) mod
 	}
 
 	return scores
+}
+
+// textsFromSelection はgoquery.Selectionから指定セレクタの子要素テキストを収集する
+func textsFromSelection(s *goquery.Selection, selector string) []string {
+	var texts []string
+	s.Find(selector).Each(func(_ int, el *goquery.Selection) {
+		texts = append(texts, strings.TrimSpace(el.Text()))
+	})
+	return texts
+}
+
+// attrsFromSelection はgoquery.Selectionから指定セレクタの属性値を収集する
+func attrsFromSelection(s *goquery.Selection, selector, attr string) []string {
+	var attrs []string
+	s.Find(selector).Each(func(_ int, el *goquery.Selection) {
+		if val, exists := el.Attr(attr); exists {
+			attrs = append(attrs, val)
+		}
+	})
+	return attrs
 }
 
 // ScrapeTagPartners はタッグ戦歴ページからチーム名と相方のプレイヤー名を取得する
