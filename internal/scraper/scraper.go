@@ -53,7 +53,7 @@ type ProgressFunc func(current, total int)
 
 // Scraping はスクレイピング処理を実行し、DatedScoresを返す
 // 日別ページ収集と詳細ページ取得をパイプラインで並行実行し、高速化を図る
-func Scraping(username, password string, since time.Time, onProgress ...ProgressFunc) model.DatedScores {
+func Scraping(username, password string, since time.Time, onProgress ...ProgressFunc) (model.DatedScores, error) {
 	notify := func(current, total int) {
 		if len(onProgress) > 0 && onProgress[0] != nil {
 			onProgress[0](current, total)
@@ -61,7 +61,9 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 	}
 
 	m := NewClient(username, password)
-	m.Login()
+	if err := m.Login(); err != nil {
+		return nil, fmt.Errorf("ログインに失敗: %w", err)
+	}
 
 	// Phase 1: rankpageから日別ページURLを収集
 	dailyLinks := collectDailyLinks(m.HTTPClient.Jar, since)
@@ -85,7 +87,7 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 		return scores[i].PlayerNo < scores[j].PlayerNo
 	})
 
-	return scores
+	return scores, nil
 }
 
 // collectDailyLinks はrankpageから日別ページのURLを収集する
@@ -314,12 +316,14 @@ func parseDetailPage(e *colly.HTMLElement, date, hour string, wins []string) mod
 }
 
 // ScrapeMSList は機体使用率ランキングページから画像URLと機体名の一覧を取得する
-func ScrapeMSList(username, password string) []model.MSInfo {
+func ScrapeMSList(username, password string) ([]model.MSInfo, error) {
 	var msList []model.MSInfo
 	seen := make(map[string]bool)
 
 	m := NewClient(username, password)
-	m.Login()
+	if err := m.Login(); err != nil {
+		return nil, fmt.Errorf("ログインに失敗: %w", err)
+	}
 
 	// まずCSRFトークンを取得
 	var csrfToken string
@@ -370,5 +374,5 @@ func ScrapeMSList(username, password string) []model.MSInfo {
 		})
 	}
 
-	return msList
+	return msList, nil
 }

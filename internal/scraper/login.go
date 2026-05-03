@@ -2,6 +2,7 @@ package scraper
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/cookiejar"
@@ -9,6 +10,9 @@ import (
 	"strings"
 	"time"
 )
+
+// ErrLoginFailed はログイン認証に失敗した場合のエラー
+var ErrLoginFailed = errors.New("ログイン認証に失敗しました")
 
 const (
 	loginURL    = "https://account-api.bandainamcoid.com/v3/login/idpw"
@@ -133,6 +137,10 @@ func (c *Client) Login() error {
 	var l loginResponse
 	if err := json.NewDecoder(loginPage.Body).Decode(&l); err != nil {
 		return fmt.Errorf("ログインレスポンスの解析に失敗: %w", err)
+	}
+
+	if l.RedirectUrl == "" {
+		return ErrLoginFailed
 	}
 
 	if strings.Contains(l.RedirectUrl, "passkey") {

@@ -28,7 +28,10 @@ func main() {
 	}
 
 	log.Println("Scraping MS list...")
-	scraped := scraper.ScrapeMSList(username, password)
+	scraped, err := scraper.ScrapeMSList(username, password)
+	if err != nil {
+		log.Fatalf("Failed to scrape MS list: %v", err)
+	}
 
 	if len(scraped) == 0 {
 		log.Fatal("No MS data found")
