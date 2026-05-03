@@ -58,9 +58,9 @@ func parseNumber(s string) int {
 // ProgressFunc はスクレイピングの進捗を通知するコールバック型
 type ProgressFunc func(current, total int)
 
-// Scraping はスクレイピング処理を実行し、DatedScoresを返す
+// Scraping はスクレイピング処理を実行し、DatedScoresとログイン済みCookieJarを返す
 // 日別ページ収集と詳細ページ取得をパイプラインで並行実行し、高速化を図る
-func Scraping(username, password string, since time.Time, onProgress ...ProgressFunc) (model.DatedScores, error) {
+func Scraping(username, password string, since time.Time, onProgress ...ProgressFunc) (model.DatedScores, http.CookieJar, error) {
 	notify := func(current, total int) {
 		if len(onProgress) > 0 && onProgress[0] != nil {
 			onProgress[0](current, total)
@@ -69,7 +69,7 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 
 	m := NewClient(username, password)
 	if err := m.Login(); err != nil {
-		return nil, fmt.Errorf("ログインに失敗: %w", err)
+		return nil, nil, fmt.Errorf("ログインに失敗: %w", err)
 	}
 
 	// Phase 1: rankpageから日別ページURLを収集
@@ -94,7 +94,7 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 		return scores[i].PlayerNo < scores[j].PlayerNo
 	})
 
-	return scores, nil
+	return scores, m.HTTPClient.Jar, nil
 }
 
 // collectDailyLinks はrankpageから日別ページのURLを収集する
@@ -323,14 +323,11 @@ func parseDetailPage(e *colly.HTMLElement, date, hour string, wins []string) mod
 }
 
 // ScrapeTagPartners はタッグ戦歴ページからチーム名と相方のプレイヤー名を取得する
-func ScrapeTagPartners(username, password string) []TagPartner {
+func ScrapeTagPartners(jar http.CookieJar) []TagPartner {
 	var partners []TagPartner
 
-	m := NewClient(username, password)
-	m.Login()
-
 	c := colly.NewCollector(colly.AllowedDomains(vsmobile))
-	c.SetCookieJar(m.HTTPClient.Jar)
+	c.SetCookieJar(jar)
 
 	c.OnHTML("li.item", func(e *colly.HTMLElement) {
 		teamName := strings.TrimSpace(e.ChildText("p.tag-name"))
