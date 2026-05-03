@@ -151,7 +151,7 @@ func Run(j *Job, username, password string) {
 		j.ProgressTotal = total
 		jobsMu.Unlock()
 	}
-	datedScores, err := scraper.Scraping(username, password, since, onProgress)
+	datedScores, jar, err := scraper.Scraping(username, password, since, onProgress)
 	if err != nil {
 		if errors.Is(err, scraper.ErrLoginFailed) {
 			setError(j, "ログインに失敗しました。メールアドレスとパスワードを確認してください。", err.Error())
@@ -199,7 +199,7 @@ func Run(j *Job, username, password string) {
 
 	// タッグ相方名を取得
 	var tagPartnersPath string
-	tagPartners := scraper.ScrapeTagPartners(username, password)
+	tagPartners := scraper.ScrapeTagPartners(jar)
 	if len(tagPartners) > 0 {
 		tagPartnersPath = filepath.Join(tmpDir, "tag_partners.json")
 		if err := saveTagPartners(tagPartners, tagPartnersPath); err != nil {
