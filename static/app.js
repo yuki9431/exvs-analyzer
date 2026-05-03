@@ -264,8 +264,8 @@ function PeriodSelector({ periods, selected, onSelect, userKey, onCustomReport }
   }, [isOpen]);
 
   var currentLabel = selected === 'custom'
-    ? (periods.custom ? periods.custom.label : 'カスタム')
-    : (periods[selected] ? periods[selected].label : '全期間');
+    ? (periods.custom ? periods.custom.label : '日付指定')
+    : (periods[selected] ? periods[selected].label : '全データ');
 
   function selectPreset(k) {
     onSelect(k);
@@ -315,7 +315,7 @@ function PeriodSelector({ periods, selected, onSelect, userKey, onCustomReport }
             onClick=${function () { selectPreset(k); }}>${periods[k].label}</button>`;
         })}
         ${userKey && html`<button class=${'period-dropdown-item period-dropdown-custom' + (showCustom ? ' active' : '')}
-          onClick=${function () { setShowCustom(!showCustom); }}>カスタム</button>`}
+          onClick=${function () { setShowCustom(!showCustom); }}>日付指定</button>`}
       </div>
       ${showCustom && html`<div class="period-custom">
         <div class="period-custom-range">

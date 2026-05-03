@@ -1144,17 +1144,17 @@ def build_json_report(player_name, all_data, ms_data, tag_partners=None):
 
     # 全期間
     periods["all"] = build_period_report(all_data, ms_data, tag_partners)
-    periods["all"]["label"] = "全期間"
+    periods["all"]["label"] = "全データ"
 
     # プリセット期間
     preset_periods = [
-        ("90d", 90, "直近90日"),
-        ("60d", 60, "直近60日"),
-        ("30d", 30, "直近30日"),
-        ("14d", 14, "直近14日"),
-        ("7d", 7, "直近7日"),
-        ("3d", 3, "直近3日"),
-        ("1d", 1, "直近1日"),
+        ("90d", 90, "90日間"),
+        ("60d", 60, "60日間"),
+        ("30d", 30, "30日間"),
+        ("14d", 14, "14日間"),
+        ("7d", 7, "7日間"),
+        ("3d", 3, "3日間"),
+        ("1d", 1, "1日間"),
     ]
     for key, days, label in preset_periods:
         filtered = filter_by_days(all_data, days)
