@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -149,7 +150,15 @@ func Run(j *Job, username, password string) {
 		j.ProgressTotal = total
 		jobsMu.Unlock()
 	}
-	datedScores := scraper.Scraping(username, password, since, onProgress)
+	datedScores, err := scraper.Scraping(username, password, since, onProgress)
+	if err != nil {
+		if errors.Is(err, scraper.ErrLoginFailed) {
+			setError(j, "ログインに失敗しました。メールアドレスとパスワードを確認してください。", err.Error())
+		} else {
+			setError(j, "データの取得に失敗しました", err.Error())
+		}
+		return
+	}
 	if len(datedScores) == 0 && !exists {
 		setError(j, "戦績データが見つかりませんでした", "no scores found")
 		return
