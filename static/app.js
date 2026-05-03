@@ -253,9 +253,19 @@ function PeriodSelector({ periods, selected, onSelect, userKey, onCustomReport }
     return function () { document.removeEventListener('mousedown', handleClick); };
   }, []);
 
+  // スマホでドロップダウン表示中はbodyスクロールを止める
+  useEffect(function () {
+    if (isOpen && window.innerWidth <= 600) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return function () { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
   var currentLabel = selected === 'custom'
-    ? (periods.custom ? periods.custom.label : 'カスタム')
-    : (periods[selected] ? periods[selected].label : '全期間');
+    ? (periods.custom ? periods.custom.label : '日付指定')
+    : (periods[selected] ? periods[selected].label : '全データ');
 
   function selectPreset(k) {
     onSelect(k);
@@ -297,6 +307,7 @@ function PeriodSelector({ periods, selected, onSelect, userKey, onCustomReport }
     <button class="period-trigger" onClick=${function () { setIsOpen(!isOpen); }}>
       ${currentLabel} <span class="period-arrow">${isOpen ? '\u25B2' : '\u25BC'}</span>
     </button>
+    ${isOpen && html`<div class="period-backdrop" onClick=${function () { setIsOpen(false); }} />`}
     ${isOpen && html`<div class="period-dropdown">
       <div class="period-dropdown-list">
         ${keys.map(function (k) {
@@ -304,7 +315,7 @@ function PeriodSelector({ periods, selected, onSelect, userKey, onCustomReport }
             onClick=${function () { selectPreset(k); }}>${periods[k].label}</button>`;
         })}
         ${userKey && html`<button class=${'period-dropdown-item period-dropdown-custom' + (showCustom ? ' active' : '')}
-          onClick=${function () { setShowCustom(!showCustom); }}>カスタム</button>`}
+          onClick=${function () { setShowCustom(!showCustom); }}>日付指定</button>`}
       </div>
       ${showCustom && html`<div class="period-custom">
         <div class="period-custom-range">
