@@ -155,6 +155,8 @@ func Run(j *Job, username, password string) {
 	if err != nil {
 		if errors.Is(err, scraper.ErrLoginFailed) {
 			setError(j, "ログインに失敗しました。メールアドレスとパスワードを確認してください。", err.Error())
+		} else if errors.Is(err, scraper.ErrAccessDenied) {
+			setError(j, "アクセスが集中しているため、サーバーから拒否されました。しばらく時間をおいてから再度お試しください。", err.Error())
 		} else {
 			setError(j, "データの取得に失敗しました", err.Error())
 		}
