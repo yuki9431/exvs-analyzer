@@ -659,18 +659,18 @@ function Report({ data, userKey }) {
     <${PeriodSelector} periods=${allPeriods} selected=${selectedPeriod} onSelect=${setSelectedPeriod}
       userKey=${userKey} onCustomReport=${handleCustomReport} />
     <${TableOfContents} data=${pd} />
-    <div id="sec-summary"><${SummarySection} summary=${pd.summary} /></div>
-    <div id="sec-basic"><${Section} title="基本データ">
+    <div key="sec-summary" id="sec-summary"><${SummarySection} summary=${pd.summary} /></div>
+    <div key="sec-basic" id="sec-basic"><${Section} title="基本データ">
       <${BasicStatsSection} stats=${pd.basic_stats} />
       <${WinLossPatternSection} pattern=${pd.win_loss_pattern} />
     <//></div>
-    <${MsStatsSection} msStats=${pd.ms_stats} />
-    <div id="sec-fixed"><${FixedPartnersSection} partners=${pd.fixed_partners} /></div>
-    <div id="sec-deaths"><${DeathsImpactSection} deaths=${pd.deaths_impact} /></div>
-    <div id="sec-time"><${TimeOfDaySection} time=${pd.time_of_day} /></div>
-    <div id="sec-dow"><${DayOfWeekSection} dow=${pd.day_of_week} /></div>
-    <div id="sec-daily"><${DailyTrendSection} daily=${pd.daily_trend} /></div>
-    <div id="sec-season"><${SeasonSection} seasons=${pd.season} /></div>
+    <div key="sec-ms"><${MsStatsSection} msStats=${pd.ms_stats} /></div>
+    <div key="sec-fixed" id="sec-fixed"><${FixedPartnersSection} partners=${pd.fixed_partners} /></div>
+    <div key="sec-deaths" id="sec-deaths"><${DeathsImpactSection} deaths=${pd.deaths_impact} /></div>
+    <div key="sec-time" id="sec-time"><${TimeOfDaySection} time=${pd.time_of_day} /></div>
+    <div key="sec-dow" id="sec-dow"><${DayOfWeekSection} dow=${pd.day_of_week} /></div>
+    <div key="sec-daily" id="sec-daily"><${DailyTrendSection} daily=${pd.daily_trend} /></div>
+    <div key="sec-season" id="sec-season"><${SeasonSection} seasons=${pd.season} /></div>
     <${ShareArea} shareData=${shareData} />
   `;
 }
