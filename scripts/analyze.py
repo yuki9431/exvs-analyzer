@@ -627,39 +627,25 @@ def data_deaths_impact(data_list):
             by_deaths[key].append(d)
 
         buckets = []
-        for i in range(max_bucket):
+        for i in range(fatal):
             key = str(i)
             if key in by_deaths:
                 matches = by_deaths[key]
                 wr = win_rate(matches)
                 eff = dmg_efficiency(matches)
-                if i >= fatal:
-                    status = "fatal"
-                elif i == fatal - 1:
+                if i == fatal - 1:
                     status = "danger"
                 else:
                     status = "safe"
                 buckets.append({
                     "deaths": i,
-                    "label": f"{i}回",
+                    "label": f"{i}落ち",
                     "matches": len(matches),
                     "win_rate": round(wr, 1),
                     "dmg_efficiency": round(eff, 3),
                     "status": status,
                 })
         over_key = f"{max_bucket}+"
-        if over_key in by_deaths:
-            matches = by_deaths[over_key]
-            wr = win_rate(matches)
-            eff = dmg_efficiency(matches)
-            buckets.append({
-                "deaths": max_bucket,
-                "label": f"{max_bucket}回以上",
-                "matches": len(matches),
-                "win_rate": round(wr, 1),
-                "dmg_efficiency": round(eff, 3),
-                "status": "fatal",
-            })
 
         fatal_count = sum(len(by_deaths.get(str(i), [])) for i in range(fatal, max_bucket))
         fatal_count += len(by_deaths.get(over_key, []))
@@ -788,27 +774,13 @@ def data_daily_trend(data_list):
             "mark": mark,
         })
 
-    # 連敗ストリーク
-    sorted_data = sorted(data_list, key=lambda d: d["datetime"])
-    max_lose_streak = 0
-    current_streak = 0
-    for d in sorted_data:
-        if not d["win"]:
-            current_streak += 1
-            max_lose_streak = max(max_lose_streak, current_streak)
-        else:
-            current_streak = 0
-
     tips = []
     bad_days = [ds for ds in sorted(daily.keys()) if win_rate(daily[ds]) <= 40 and len(daily[ds]) >= 5]
     if bad_days:
         tips.append(f"勝率40%以下の日: {', '.join(bad_days)}。不調時は早めに切り上げましょう。")
-    if max_lose_streak >= 4:
-        tips.append(f"最大{max_lose_streak}連敗の記録があります。3連敗したら休憩を挟むことを推奨します。")
 
     return {
         "days": results,
-        "max_lose_streak": max_lose_streak,
         "tips": tips,
     }
 
@@ -1098,6 +1070,7 @@ def build_period_report(all_data, ms_data, tag_partners=None):
             "ms_pair": data_ms_pair(data),
             "cost_pair": data_cost_pair(data),
             "dmg_contribution": data_dmg_contribution(data),
+            "deaths_impact": data_deaths_impact(data),
         }
 
     return {
@@ -1106,7 +1079,7 @@ def build_period_report(all_data, ms_data, tag_partners=None):
         "win_loss_pattern": data_win_loss_pattern(all_data),
         "ms_stats": ms_stats,
         "fixed_partners": data_fixed_partners(all_data, tag_partners),
-        "deaths_impact": data_deaths_impact(all_data),
+
         "time_of_day": data_time_of_day(all_data),
         "day_of_week": data_day_of_week(all_data),
         "daily_trend": data_daily_trend(all_data),

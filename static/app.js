@@ -52,7 +52,7 @@ function buildShareText(items) {
 
 function Tips({ tips }) {
   if (!tips || !tips.length) return null;
-  return html`<blockquote><strong>アドバイス:</strong><br />${tips.map(function (t, i) {
+  return html`<blockquote><strong>💡アドバイス:</strong><br />${tips.map(function (t, i) {
     return html`${i > 0 && html`<br />`}${t}`;
   })}</blockquote>`;
 }
@@ -81,6 +81,7 @@ function SortableTable({ headers, rows, sortableColumns, defaultLimit }) {
     return sorted;
   }, [rows, sortState]);
 
+  var expanded = limit === 0;
   var displayRows = limit > 0 ? sortedRows.slice(0, limit) : sortedRows;
   var hasMore = limit > 0 && sortedRows.length > limit;
 
@@ -95,22 +96,21 @@ function SortableTable({ headers, rows, sortableColumns, defaultLimit }) {
   var sortable = sortableColumns || [];
 
   return html`<div>
-    ${defaultLimit > 0 && html`<div class="limit-controls">
-      <button class=${'limit-btn' + (limit === 5 ? ' active' : '')} onClick=${function () { setLimit(5); }}>5件</button>
-      <button class=${'limit-btn' + (limit === 10 ? ' active' : '')} onClick=${function () { setLimit(10); }}>10件</button>
-      <button class=${'limit-btn' + (limit === 0 ? ' active' : '')} onClick=${function () { setLimit(0); }}>全件</button>
-    </div>`}
     <div class="table-wrap"><table>
       <thead><tr>${headers.map(function (h, i) {
-        var isSortable = sortable.length === 0 || sortable.indexOf(i) >= 0;
-        var indicator = sortState.col === i ? (sortState.asc ? ' ▲' : ' ▼') : '';
+        var isSortable = h !== '' && (sortable.length === 0 || sortable.indexOf(i) >= 0);
+        var indicator = sortState.col === i ? (sortState.asc ? ' ▲' : ' ▼') : (isSortable ? ' △' : '');
         return html`<th class=${isSortable ? 'sortable' : ''} onClick=${isSortable ? function () { handleSort(i); } : undefined}>${h}${indicator}</th>`;
       })}</tr></thead>
       <tbody>${displayRows.map(function (row) {
         return html`<tr>${row.map(function (cell) { return html`<td>${cell}</td>`; })}</tr>`;
       })}</tbody>
     </table></div>
-    ${hasMore && html`<p class="show-more">他 ${sortedRows.length - limit} 件</p>`}
+    ${defaultLimit > 0 && sortedRows.length > defaultLimit && html`<div class="show-more-wrap">
+      ${hasMore
+        ? html`<button class="show-more-btn" onClick=${function () { setLimit(0); }}>もっと見る (+${sortedRows.length - limit}件)</button>`
+        : html`<button class="show-more-btn" onClick=${function () { setLimit(defaultLimit); }}>折りたたむ</button>`}
+    </div>`}
   </div>`;
 }
 
@@ -124,6 +124,13 @@ function Section({ title, open, children }) {
     <summary><strong>${title}</strong></summary>
     ${children}
   </details><hr />`;
+}
+
+function SubSection({ title, open, children }) {
+  return html`<details ...${{ open: open || false }}>
+    <summary>${title}</summary>
+    ${children}
+  </details>`;
 }
 
 // --- Calendar component ---
@@ -372,7 +379,6 @@ function BasicStatsSection({ stats }) {
     ['平均EXダメージ', num(stats.avg_ex_dmg)],
   ];
   return html`<div>
-    <h3>基本データ</h3>
     <${Table} headers=${['項目', '値']} rows=${rows} />
     <${Tips} tips=${stats.tips} />
   </div>`;
@@ -385,7 +391,6 @@ function WinLossPatternSection({ pattern }) {
     return [m.label, num(m.win_avg, 1), num(m.loss_avg, 1), diff];
   });
   return html`<div>
-    <h3>勝利時/敗北時のダメージ傾向</h3>
     <${Table} headers=${['項目', '勝利時', '敗北時', '差分']} rows=${rows} />
     <${Tips} tips=${pattern.tips} />
   </div>`;
@@ -400,7 +405,6 @@ function EnemyMatchupSection({ matchup, msName }) {
     });
   }
   return html`<div>
-    <h3>敵機体との相性（${esc(msName)}）</h3>
     ${matchup.strong && matchup.strong.length > 0 && html`<p><strong>得意な相手:</strong></p><${SortableTable} headers=${headers} rows=${matchupRows(matchup.strong)} defaultLimit=${5} />`}
     ${matchup.weak && matchup.weak.length > 0 && html`<p><strong>苦手な相手:</strong></p><${SortableTable} headers=${headers} rows=${matchupRows(matchup.weak)} defaultLimit=${5} />`}
     ${matchup.even && matchup.even.length > 0 && html`<p><strong>互角の相手:</strong></p><${SortableTable} headers=${headers} rows=${matchupRows(matchup.even)} defaultLimit=${5} />`}
@@ -414,9 +418,12 @@ function PartnerSection({ partners, msName }) {
     return [esc(p.ms), p.matches, pct(p.win_rate), num(p.dmg_efficiency, 3)];
   });
   return html`<div>
-    <h3>相方機体との相性（${esc(msName)}）</h3>
     <${SortableTable} headers=${['機体名', '試合', '勝率', '与被ダメ比']} rows=${rows} defaultLimit=${10} />
   </div>`;
+}
+
+function msAnchorId(msName, idx) {
+  return 'sec-ms-' + idx;
 }
 
 function MsStatsSection({ msStats }) {
@@ -425,17 +432,34 @@ function MsStatsSection({ msStats }) {
     return msStats[b].matches - msStats[a].matches;
   });
   if (!entries.length) return null;
-  return entries.map(function (msName) {
+  return entries.map(function (msName, idx) {
     var ms = msStats[msName];
-    return html`<${Section} title=${'機体別分析: ' + msName + ' (' + ms.matches + '戦)'}>
-      <${BasicStatsSection} stats=${ms.basic_stats} />
-      <${WinLossPatternSection} pattern=${ms.win_loss_pattern} />
-      <${EnemyMatchupSection} matchup=${ms.enemy_matchup} msName=${msName} />
-      <${PartnerSection} partners=${ms.partner} msName=${msName} />
-      <${MsPairSubSection} msPair=${ms.ms_pair} />
-      <${CostPairSubSection} costPair=${ms.cost_pair} />
-      <${DmgContributionSubSection} dmg=${ms.dmg_contribution} />
-    <//>`;
+    return html`<div id=${msAnchorId(msName, idx)}><${Section} title=${'機体別分析: ' + msName}>
+      <${SubSection} title="基本データ" open>
+        <${BasicStatsSection} stats=${ms.basic_stats} />
+      <//>
+      <${SubSection} title="被撃墜数と勝率">
+        <${DeathsImpactSubSection} deaths=${ms.deaths_impact} />
+      <//>
+      <${SubSection} title="勝利時/敗北時のダメージ傾向">
+        <${WinLossPatternSection} pattern=${ms.win_loss_pattern} />
+      <//>
+      <${SubSection} title="敵機体との相性">
+        <${EnemyMatchupSection} matchup=${ms.enemy_matchup} msName=${msName} />
+      <//>
+      <${SubSection} title="相方機体との相性">
+        <${PartnerSection} partners=${ms.partner} msName=${msName} />
+      <//>
+      <${SubSection} title="編成別勝率">
+        <${MsPairSubSection} msPair=${ms.ms_pair} />
+      <//>
+      <${SubSection} title="コスト編成別勝率">
+        <${CostPairSubSection} costPair=${ms.cost_pair} />
+      <//>
+      <${SubSection} title="ダメージ貢献率">
+        <${DmgContributionSubSection} dmg=${ms.dmg_contribution} />
+      <//>
+    <//></div>`;
   });
 }
 
@@ -447,7 +471,6 @@ function MsPairSubSection({ msPair }) {
     return [esc(p.pair), p.matches, pct(p.win_rate), num(p.dmg_efficiency, 3)];
   });
   return html`<div>
-    <h3>編成別勝率</h3>
     <${SortableTable} headers=${['編成', '試合数', '勝率', '与被ダメ比']} rows=${rows} defaultLimit=${10} />
   </div>`;
 }
@@ -458,7 +481,6 @@ function CostPairSubSection({ costPair }) {
     return [esc(p.pair), p.matches, pct(p.win_rate), num(p.dmg_efficiency, 3)];
   });
   return html`<div>
-    <h3>コスト編成別勝率</h3>
     <${SortableTable} headers=${['コスト編成', '試合数', '勝率', '与被ダメ比']} rows=${rows} defaultLimit=${10} />
   </div>`;
 }
@@ -476,7 +498,6 @@ function DmgContributionSubSection({ dmg }) {
     rows.push([c.matches, pct(c.avg_contribution), pct(c.avg_win_contribution), pct(c.avg_lose_contribution), diffPct(c.avg_win_contribution, c.avg_lose_contribution)]);
   });
   return html`<div>
-    <h3>ダメージ貢献率（自分の与ダメ / チーム合計与ダメ）</h3>
     <${Table} headers=${['試合数', '平均貢献率', '勝利時', '敗北時', '差分']} rows=${rows} />
   </div>`;
 }
@@ -518,21 +539,17 @@ function FixedPartnersSection({ partners }) {
   <//>`;
 }
 
-function DeathsImpactSection({ deaths }) {
+function DeathsImpactSubSection({ deaths }) {
   if (!deaths || !deaths.length) return null;
-  return html`<${Section} title="被撃墜数と勝率の関係">
-    ${deaths.map(function (d) {
-      var rows = (d.buckets || []).map(function (b) {
-        var lossRate = 100 - b.win_rate;
-        return [b.label, b.matches + '戦', pct(lossRate)];
-      });
-      return html`<div>
-        <h3>${esc(d.cost_label)}</h3>
-        <${Table} headers=${['被撃墜数', '試合数', '敗北率']} rows=${rows} />
-        <${Tips} tips=${d.tips} />
-      </div>`;
-    })}
-  <//>`;
+  return deaths.map(function (d) {
+    var rows = (d.buckets || []).map(function (b) {
+      return [b.label, b.matches + '戦', pct(b.win_rate)];
+    });
+    return html`<div>
+      <${Table} headers=${['被撃墜数', '試合数', '勝率']} rows=${rows} />
+      <${Tips} tips=${d.tips} />
+    </div>`;
+  });
 }
 
 function TimeOfDaySection({ time }) {
@@ -549,14 +566,22 @@ function TimeOfDaySection({ time }) {
 
 function DayOfWeekSection({ dow }) {
   if (!dow) return null;
-  var rows = [];
-  if (dow.weekday) rows.push(['平日', dow.weekday.matches, pct(dow.weekday.win_rate), num(dow.weekday.dmg_efficiency, 3)]);
-  if (dow.weekend) rows.push(['土日', dow.weekend.matches, pct(dow.weekend.win_rate), num(dow.weekend.dmg_efficiency, 3)]);
-  (dow.days || []).forEach(function (d) {
-    rows.push([d.name + '曜', d.matches, pct(d.win_rate), num(d.dmg_efficiency, 3)]);
+  var summaryRows = [];
+  if (dow.weekday) summaryRows.push(['平日', dow.weekday.matches, pct(dow.weekday.win_rate), num(dow.weekday.dmg_efficiency, 3)]);
+  if (dow.weekend) summaryRows.push(['土日', dow.weekend.matches, pct(dow.weekend.win_rate), num(dow.weekend.dmg_efficiency, 3)]);
+  var dayRows = (dow.days || []).map(function (d) {
+    return [d.name + '曜', d.matches, pct(d.win_rate), num(d.dmg_efficiency, 3)];
   });
-  return html`<${Section} title="曜日別の勝率（平日 vs 土日）">
-    <${Table} headers=${['曜日', '試合', '勝率', '与被ダメ比']} rows=${rows} />
+  var headers = ['曜日', '試合', '勝率', '与被ダメ比'];
+  return html`<${Section} title="曜日別の勝率">
+    ${summaryRows.length > 0 && html`<div>
+      <h3>平日 vs 土日</h3>
+      <${Table} headers=${headers} rows=${summaryRows} />
+    </div>`}
+    ${dayRows.length > 0 && html`<div>
+      <h3>曜日別</h3>
+      <${Table} headers=${headers} rows=${dayRows} />
+    </div>`}
     <${Tips} tips=${dow.tips} />
   <//>`;
 }
@@ -567,8 +592,7 @@ function DailyTrendSection({ daily }) {
     var mark = d.mark === 'good' ? '◎' : d.mark === 'bad' ? '△' : '';
     return [d.date + ' (' + d.dow_name + ')', d.matches, pct(d.win_rate), num(d.dmg_efficiency, 3), mark];
   });
-  return html`<${Section} title="日別勝率推移">
-    ${daily.max_lose_streak > 0 && html`<p>最大連敗: <strong>${daily.max_lose_streak}</strong>連敗</p>`}
+  return html`<${Section} title="日別勝率">
     <${Table} headers=${['日付', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
     <${Tips} tips=${daily.tips} />
   <//>`;
@@ -632,17 +656,33 @@ function TableOfContents({ data }) {
     }
   }
 
+  var msEntries = [];
+  if (data.ms_stats) {
+    msEntries = Object.keys(data.ms_stats).sort(function (a, b) {
+      return data.ms_stats[b].matches - data.ms_stats[a].matches;
+    });
+  }
+
   return html`<div class="toc-area">
     <details open>
       <summary><strong>目次</strong></summary>
       <ol>
         <li><a href="#sec-summary">総合アドバイス</a></li>
         <li><a href="#sec-basic">基本データ</a></li>
+        ${msEntries.length > 0 && html`<li><a href=${'#' + msAnchorId(msEntries[0], 0)}>機体別分析</a>
+          <details class="toc-ms-details">
+            <summary>機体一覧</summary>
+            <ul class="toc-ms-list">
+              ${msEntries.map(function (msName, idx) {
+                return html`<li><a href=${'#' + msAnchorId(msName, idx)}>${esc(msName)}</a></li>`;
+              })}
+            </ul>
+          </details>
+        </li>`}
         <li><a href="#sec-fixed">固定相方分析</a></li>
-        <li><a href="#sec-deaths">被撃墜数と勝率</a></li>
         <li><a href="#sec-time">時間帯別の勝率</a></li>
         <li><a href="#sec-dow">曜日別の勝率</a></li>
-        <li><a href="#sec-daily">日別勝率推移</a></li>
+        <li><a href="#sec-daily">日別勝率</a></li>
         <li><a href="#sec-season">シーズン別分析</a></li>
       </ol>
     </details>
@@ -684,12 +724,15 @@ function Report({ data, userKey }) {
     <${TableOfContents} data=${pd} />
     <div key="sec-summary" id="sec-summary"><${SummarySection} summary=${pd.summary} /></div>
     <div key="sec-basic" id="sec-basic"><${Section} title="基本データ">
-      <${BasicStatsSection} stats=${pd.basic_stats} />
-      <${WinLossPatternSection} pattern=${pd.win_loss_pattern} />
+      <${SubSection} title="基本データ" open>
+        <${BasicStatsSection} stats=${pd.basic_stats} />
+      <//>
+      <${SubSection} title="勝利時/敗北時のダメージ傾向">
+        <${WinLossPatternSection} pattern=${pd.win_loss_pattern} />
+      <//>
     <//></div>
     <div key="sec-ms"><${MsStatsSection} msStats=${pd.ms_stats} /></div>
     <div key="sec-fixed" id="sec-fixed"><${FixedPartnersSection} partners=${pd.fixed_partners} /></div>
-    <div key="sec-deaths" id="sec-deaths"><${DeathsImpactSection} deaths=${pd.deaths_impact} /></div>
     <div key="sec-time" id="sec-time"><${TimeOfDaySection} time=${pd.time_of_day} /></div>
     <div key="sec-dow" id="sec-dow"><${DayOfWeekSection} dow=${pd.day_of_week} /></div>
     <div key="sec-daily" id="sec-daily"><${DailyTrendSection} daily=${pd.daily_trend} /></div>
