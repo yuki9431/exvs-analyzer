@@ -109,6 +109,7 @@
     .toggle-all { display: flex; gap: 8px; margin-top: 8px; }
     .toggle-btn { padding: 4px 12px; border: 1px solid #333; border-radius: 4px; background: #162029; color: #aaa; font-size: 0.8em; cursor: pointer; transition: all 0.2s; }
     .toggle-btn:hover { border-color: #4fc3f7; color: #e0e0e0; }
+    .period-backdrop { display: none; }
     @media (max-width: 600px) {
       .container { padding: 10px; }
       h1 { font-size: 1.4em; margin: 20px 0 8px; }
@@ -121,7 +122,8 @@
       .report table { font-size: 0.8em; }
       .report th, .report td { padding: 5px 8px; }
       .report blockquote { padding: 8px 10px; font-size: 0.85em; }
-      .period-dropdown { position: fixed; top: auto; left: 10px; right: 10px; min-width: 0; width: auto; max-height: 80vh; overflow-y: auto; }
+      .period-backdrop { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+      .period-dropdown { position: fixed; bottom: 0; top: auto; left: 0; right: 0; min-width: 0; width: 100%; max-height: 85vh; overflow: visible; overflow-y: auto; border-radius: 12px 12px 0 0; z-index: 100; margin-top: 0; }
       .period-custom-range { flex-direction: column; }
     }
   </style>
