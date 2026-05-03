@@ -17,11 +17,18 @@ import (
 const (
 	vsmobile         = "web.vsmobile.jp"
 	mobileRankpage   = "https://web.vsmobile.jp/exvs2ib/results/classmatch/fight"
+	mobileTagPage    = "https://web.vsmobile.jp/exvs2ib/results/classmatch/tag"
 	mobileMSUsedRate = "https://web.vsmobile.jp/exvs2ib/ranking/ms_used_rate"
 
 	// maxParallelism はバンナムサーバーへの最大同時リクエスト数
 	maxParallelism = 5
 )
+
+// TagPartner はタッグ戦歴ページから取得した固定相方情報
+type TagPartner struct {
+	TeamName   string
+	PlayerName string
+}
 
 // dailyLink はrankpageから収集した日別ページ情報
 type dailyLink struct {
@@ -313,6 +320,32 @@ func parseDetailPage(e *colly.HTMLElement, date, hour string, wins []string) mod
 	}
 
 	return scores
+}
+
+// ScrapeTagPartners はタッグ戦歴ページからチーム名と相方のプレイヤー名を取得する
+func ScrapeTagPartners(username, password string) []TagPartner {
+	var partners []TagPartner
+
+	m := NewClient(username, password)
+	m.Login()
+
+	c := colly.NewCollector(colly.AllowedDomains(vsmobile))
+	c.SetCookieJar(m.HTTPClient.Jar)
+
+	c.OnHTML("li.item", func(e *colly.HTMLElement) {
+		teamName := strings.TrimSpace(e.ChildText("p.tag-name"))
+		playerName := strings.TrimSpace(e.ChildText("p.ml-ss"))
+
+		if playerName != "" {
+			partners = append(partners, TagPartner{
+				TeamName:   teamName,
+				PlayerName: playerName,
+			})
+		}
+	})
+
+	c.Visit(mobileTagPage)
+	return partners
 }
 
 // ScrapeMSList は機体使用率ランキングページから画像URLと機体名の一覧を取得する

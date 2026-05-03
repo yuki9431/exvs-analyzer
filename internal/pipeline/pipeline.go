@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -131,8 +132,8 @@ func Run(j *Job, username, password string) {
 			log.Printf("[INFO] Fetching scores after %s", since.Format("2006-01-02 15:04"))
 		}
 
-		// 前回データで即座に分析（速報レポート）
-		prelimReport := runAnalysis(csvPath, tmpDir)
+		// 前回データで即座に分析（速報レポート、タッグ情報なし）
+		prelimReport := runAnalysis(csvPath, tmpDir, "")
 		if prelimReport != "" {
 			jobsMu.Lock()
 			j.PreliminaryReport = prelimReport
@@ -196,9 +197,24 @@ func Run(j *Job, username, password string) {
 		log.Printf("[WARN] Failed to upload CSV to Cloud Storage: %v", err)
 	}
 
+	// タッグ相方名を取得
+	var tagPartnersPath string
+	tagPartners := scraper.ScrapeTagPartners(username, password)
+	if len(tagPartners) > 0 {
+		tagPartnersPath = filepath.Join(tmpDir, "tag_partners.json")
+		if err := saveTagPartners(tagPartners, tagPartnersPath); err != nil {
+			log.Printf("[WARN] Failed to save tag partners: %v", err)
+			tagPartnersPath = ""
+		} else {
+			log.Printf("[INFO] Found %d tag partners", len(tagPartners))
+		}
+	} else {
+		log.Printf("[INFO] No tag partners found")
+	}
+
 	// Python分析実行
 	updateStatus(j, StatusAnalyzing)
-	report := runAnalysis(csvPath, tmpDir)
+	report := runAnalysis(csvPath, tmpDir, tagPartnersPath)
 	if report == "" {
 		setError(j, "分析処理に失敗しました", "analysis returned empty report")
 		return
@@ -245,9 +261,32 @@ func RunCustomPeriod(userKey, start, end string) (string, error) {
 	return string(report), nil
 }
 
+// saveTagPartners はタッグ相方情報をJSONファイルに保存する
+func saveTagPartners(partners []scraper.TagPartner, path string) error {
+	type tagPartnerJSON struct {
+		TeamName   string `json:"team_name"`
+		PlayerName string `json:"player_name"`
+	}
+
+	data := make([]tagPartnerJSON, len(partners))
+	for i, p := range partners {
+		data[i] = tagPartnerJSON{TeamName: p.TeamName, PlayerName: p.PlayerName}
+	}
+
+	b, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("marshal tag partners: %w", err)
+	}
+	return os.WriteFile(path, b, 0644)
+}
+
 // runAnalysis はPython分析を実行してJSON形式のレポートを返す。失敗時は空文字を返す。
-func runAnalysis(csvPath, tmpDir string) string {
-	cmd := exec.Command("python3", "scripts/analyze.py", csvPath)
+func runAnalysis(csvPath, tmpDir, tagPartnersPath string) string {
+	args := []string{"scripts/analyze.py", csvPath}
+	if tagPartnersPath != "" {
+		args = append(args, "--tag-partners", tagPartnersPath)
+	}
+	cmd := exec.Command("python3", args...)
 	cmd.Dir = "/app"
 	output, err := cmd.CombinedOutput()
 	if err != nil {

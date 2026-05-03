@@ -471,9 +471,20 @@ function DmgContributionSubSection({ dmg }) {
 }
 
 function FixedPartnersSection({ partners }) {
-  if (!partners || !partners.length) return null;
-  return html`<${Section} title="固定相方分析（連続10戦以上）">
-    ${partners.map(function (p) {
+  if (!partners) return null;
+  var list = partners.partners || partners;
+  if (Array.isArray(list) && !list.length) {
+    if (partners.notice) {
+      return html`<${Section} title="固定相方分析">
+        <p class="notice">${esc(partners.notice)}</p>
+      <//>`;
+    }
+    return null;
+  }
+  var items = Array.isArray(list) ? list : [];
+  return html`<${Section} title="固定相方分析">
+    ${partners.notice && html`<p class="notice">${esc(partners.notice)}</p>`}
+    ${items.map(function (p) {
       var statsRows = [
         ['平均与ダメージ', num(p.my_stats.avg_dmg_given), num(p.partner_stats.avg_dmg_given)],
         ['平均被ダメージ', num(p.my_stats.avg_dmg_taken), num(p.partner_stats.avg_dmg_taken)],
@@ -484,8 +495,9 @@ function FixedPartnersSection({ partners }) {
       var msRows = (p.partner_ms_breakdown || []).map(function (m) {
         return [esc(m.ms), m.matches, pct(m.win_rate)];
       });
+      var title = p.team_name ? esc(p.partner_name) + '【' + esc(p.team_name) + '】' : esc(p.partner_name);
       return html`<div>
-        <h3>${esc(p.partner_name)} (${p.matches}戦)</h3>
+        <h3>${title} (${p.matches}戦)</h3>
         <p>${p.wins}勝${p.losses}敗 (勝率 ${pct(p.win_rate)})</p>
         <${Table} headers=${['項目', '自分', '相方']} rows=${statsRows} />
         ${msRows.length > 0 && html`<p><strong>相方の使用機体:</strong></p><${Table} headers=${['機体', '試合', '勝率']} rows=${msRows} />`}
