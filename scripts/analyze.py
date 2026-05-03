@@ -150,28 +150,29 @@ def get_my_data(match, cost_map=None):
     }
 
 
-def detect_fixed_partners(all_data, min_streak=10):
-    """連続で同じ相方と組んでいる区間を検出し、固定相方の試合を返す。
-    時系列順で連続10戦以上同じ相方名ならその区間を固定とみなす。
+def load_tag_partners(path):
+    """タッグ相方JSONファイルを読み込み、{player_name: team_name} の辞書を返す。"""
+    if not path or not os.path.exists(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return {entry["player_name"]: entry["team_name"] for entry in data}
+
+
+def detect_fixed_partners(all_data, tag_partners=None):
+    """タッグ相方名リストに基づいて固定相方の試合を返す。
+    tag_partners が指定されている場合、相方名が一致する試合を固定扱いにする。
+    tag_partners が空の場合、固定相方なしとして空を返す。
     """
-    sorted_data = sorted(all_data, key=lambda d: d["datetime"])
+    if not tag_partners:
+        return {}
 
+    partner_names = set(tag_partners.keys())
     fixed_matches = defaultdict(list)
-    streak = [sorted_data[0]]
 
-    for i in range(1, len(sorted_data)):
-        if sorted_data[i]["partner_name"] == streak[-1]["partner_name"]:
-            streak.append(sorted_data[i])
-        else:
-            if len(streak) >= min_streak:
-                name = streak[0]["partner_name"]
-                fixed_matches[name].extend(streak)
-            streak = [sorted_data[i]]
-
-    # 最後のストリーク
-    if len(streak) >= min_streak:
-        name = streak[0]["partner_name"]
-        fixed_matches[name].extend(streak)
+    for d in all_data:
+        if d["partner_name"] in partner_names:
+            fixed_matches[d["partner_name"]].append(d)
 
     return fixed_matches
 
@@ -511,11 +512,13 @@ def data_dmg_contribution(data_list, min_matches=3):
     }
 
 
-def data_fixed_partners(all_data):
-    fixed = detect_fixed_partners(all_data)
+def data_fixed_partners(all_data, tag_partners=None):
+    fixed = detect_fixed_partners(all_data, tag_partners)
 
     if not fixed:
-        return []
+        if not tag_partners:
+            return {"notice": "タッグ情報が見つかりませんでした。フレンドを登録してタッグを組むと、固定相方の詳細分析が利用できます。", "partners": []}
+        return {"partners": []}
 
     results = []
     for partner_name in sorted(fixed.keys(), key=lambda x: -len(fixed[x])):
@@ -571,7 +574,7 @@ def data_fixed_partners(all_data):
             elif wr >= 60:
                 tips.append(f"好調です！勝率{wr:.0f}%、安定した連携ができています。さらに勝率を伸ばすために相方との役割分担を意識してみましょう。")
 
-        results.append({
+        entry = {
             "partner_name": partner_name,
             "matches": n,
             "wins": w,
@@ -593,9 +596,12 @@ def data_fixed_partners(all_data):
             },
             "partner_ms_breakdown": ms_breakdown,
             "tips": tips,
-        })
+        }
+        if tag_partners and partner_name in tag_partners:
+            entry["team_name"] = tag_partners[partner_name]
+        results.append(entry)
 
-    return results
+    return {"partners": results}
 
 
 def data_deaths_impact(data_list):
@@ -858,7 +864,7 @@ def data_season(data_list):
     return results
 
 
-def data_advice(all_data, ms_data):
+def data_advice(all_data, ms_data, tag_partners=None):
     advices = []
 
     cost_groups = defaultdict(list)
@@ -949,7 +955,7 @@ def data_advice(all_data, ms_data):
                 "text": f"{better}の勝率({max(wd_wr, we_wr):.0f}%)が{worse}({min(wd_wr, we_wr):.0f}%)より{diff:.0f}ポイント高いです。",
             })
 
-    fixed = detect_fixed_partners(all_data)
+    fixed = detect_fixed_partners(all_data, tag_partners)
     if len(fixed) >= 2:
         partner_wrs = [(name, win_rate(data), len(data)) for name, data in fixed.items() if len(data) >= 5]
         if len(partner_wrs) >= 2:
@@ -1076,7 +1082,7 @@ def build_share_data(all_data, ms_data):
     return items
 
 
-def build_period_report(all_data, ms_data):
+def build_period_report(all_data, ms_data, tag_partners=None):
     """1期間分の分析レポートを生成する"""
     ms_names = [ms for ms in sorted(ms_data.keys(), key=lambda x: -len(ms_data[x])) if len(ms_data[ms]) >= 3]
 
@@ -1095,11 +1101,11 @@ def build_period_report(all_data, ms_data):
         }
 
     return {
-        "summary": data_advice(all_data, ms_data),
+        "summary": data_advice(all_data, ms_data, tag_partners),
         "basic_stats": data_basic_stats(all_data),
         "win_loss_pattern": data_win_loss_pattern(all_data),
         "ms_stats": ms_stats,
-        "fixed_partners": data_fixed_partners(all_data),
+        "fixed_partners": data_fixed_partners(all_data, tag_partners),
         "deaths_impact": data_deaths_impact(all_data),
         "time_of_day": data_time_of_day(all_data),
         "day_of_week": data_day_of_week(all_data),
@@ -1132,12 +1138,12 @@ def build_ms_data(data_list):
     return ms_data
 
 
-def build_json_report(player_name, all_data, ms_data):
+def build_json_report(player_name, all_data, ms_data, tag_partners=None):
     """期間別の構造化JSONレポートを生成する"""
     periods = {}
 
     # 全期間
-    periods["all"] = build_period_report(all_data, ms_data)
+    periods["all"] = build_period_report(all_data, ms_data, tag_partners)
     periods["all"]["label"] = "全期間"
 
     # プリセット期間
@@ -1154,7 +1160,7 @@ def build_json_report(player_name, all_data, ms_data):
         filtered = filter_by_days(all_data, days)
         if filtered:
             ms_filtered = build_ms_data(filtered)
-            periods[key] = build_period_report(filtered, ms_filtered)
+            periods[key] = build_period_report(filtered, ms_filtered, tag_partners)
             periods[key]["label"] = label
 
     return {
@@ -1190,6 +1196,7 @@ def main():
     parser.add_argument("csv_path", help="CSVファイルパス")
     parser.add_argument("--start", help="開始日時 (YYYY-MM-DD HH:MM)")
     parser.add_argument("--end", help="終了日時 (YYYY-MM-DD HH:MM)")
+    parser.add_argument("--tag-partners", help="タッグ相方JSONファイルパス", default=None)
     args = parser.parse_args()
 
     matches = load_csv(args.csv_path)
@@ -1200,6 +1207,7 @@ def main():
 
     cost_map = load_ms_cost_map(args.csv_path)
     player_name = detect_player_name(matches)
+    tag_partners = load_tag_partners(args.tag_partners)
 
     all_data = [get_my_data(m, cost_map) for m in matches]
 
@@ -1215,7 +1223,7 @@ def main():
             print("指定期間のデータが見つかりませんでした。")
             sys.exit(1)
     else:
-        report_data = build_json_report(player_name, all_data, ms_data)
+        report_data = build_json_report(player_name, all_data, ms_data, tag_partners)
 
     output_path = os.path.join(os.path.dirname(args.csv_path), "report.json")
     with open(output_path, "w", encoding="utf-8") as f:
