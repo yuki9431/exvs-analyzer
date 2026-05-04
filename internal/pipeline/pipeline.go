@@ -123,6 +123,16 @@ func Run(j *Job, username, password string) {
 	if err != nil {
 		log.Printf("[WARN] Failed to download existing CSV: %v", err)
 	}
+	// GCSから既存タッグ相方情報をダウンロード（速報レポートで使用）
+	cachedTagPartnersPath := filepath.Join(tmpDir, "cached_tag_partners.json")
+	tagPartnersExists, err := storage.DownloadTagPartners(username, cachedTagPartnersPath)
+	if err != nil {
+		log.Printf("[WARN] Failed to download existing tag partners: %v", err)
+	}
+	if !tagPartnersExists {
+		cachedTagPartnersPath = ""
+	}
+
 	if exists {
 		since, err = storage.GetLatestDatetime(csvPath)
 		if err != nil {
@@ -132,8 +142,8 @@ func Run(j *Job, username, password string) {
 			log.Printf("[INFO] Fetching scores after %s", since.Format("2006-01-02 15:04"))
 		}
 
-		// 前回データで即座に分析（速報レポート、タッグ情報なし）
-		prelimReport := runAnalysis(csvPath, tmpDir, "")
+		// 前回データで即座に分析（速報レポート、キャッシュ済みタッグ情報付き）
+		prelimReport := runAnalysis(csvPath, tmpDir, cachedTagPartnersPath)
 		if prelimReport != "" {
 			jobsMu.Lock()
 			j.PreliminaryReport = prelimReport
@@ -178,6 +188,10 @@ func Run(j *Job, username, password string) {
 				tagPartnersPath = ""
 			} else {
 				log.Printf("[INFO] Found %d tag partners (no new data path)", len(tagPartners))
+				// タッグ相方情報をGCSにアップロード
+				if err := storage.UploadTagPartners(username, tagPartnersPath); err != nil {
+					log.Printf("[WARN] Failed to upload tag partners to GCS: %v", err)
+				}
 			}
 		} else {
 			log.Printf("[INFO] No tag partners found (no new data path)")
@@ -232,6 +246,10 @@ func Run(j *Job, username, password string) {
 			tagPartnersPath = ""
 		} else {
 			log.Printf("[INFO] Found %d tag partners", len(tagPartners))
+			// タッグ相方情報をGCSにアップロード
+			if err := storage.UploadTagPartners(username, tagPartnersPath); err != nil {
+				log.Printf("[WARN] Failed to upload tag partners to GCS: %v", err)
+			}
 		}
 	} else {
 		log.Printf("[INFO] No tag partners found")

@@ -97,6 +97,81 @@ func DownloadCSVByKey(userKey, localPath string) (bool, error) {
 	return true, nil
 }
 
+// TagPartnersObjectPath はユーザーのタッグ相方JSONオブジェクトパスを返す
+func TagPartnersObjectPath(email string) string {
+	return fmt.Sprintf("users/%s/tag_partners.json", UserKey(email))
+}
+
+// DownloadTagPartners はCloud Storageからタッグ相方JSONをローカルファイルにダウンロードする
+// ファイルが存在しない場合はfalseを返す
+func DownloadTagPartners(email, localPath string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return false, fmt.Errorf("failed to create storage client: %w", err)
+	}
+	defer client.Close()
+
+	objPath := TagPartnersObjectPath(email)
+	reader, err := client.Bucket(BucketName).Object(objPath).NewReader(ctx)
+	if err != nil {
+		if err == storage.ErrObjectNotExist {
+			log.Printf("[INFO] No existing tag partners found for user")
+			return false, nil
+		}
+		return false, fmt.Errorf("failed to read tag partners from GCS: %w", err)
+	}
+	defer reader.Close()
+
+	f, err := os.Create(localPath)
+	if err != nil {
+		return false, fmt.Errorf("failed to create local file: %w", err)
+	}
+	defer f.Close()
+
+	if _, err := io.Copy(f, reader); err != nil {
+		return false, fmt.Errorf("failed to download tag partners: %w", err)
+	}
+
+	log.Printf("[INFO] Downloaded existing tag partners from GCS")
+	return true, nil
+}
+
+// UploadTagPartners はローカルのタッグ相方JSONファイルをCloud Storageにアップロードする
+func UploadTagPartners(email, localPath string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to create storage client: %w", err)
+	}
+	defer client.Close()
+
+	f, err := os.Open(localPath)
+	if err != nil {
+		return fmt.Errorf("failed to open local file: %w", err)
+	}
+	defer f.Close()
+
+	objPath := TagPartnersObjectPath(email)
+	writer := client.Bucket(BucketName).Object(objPath).NewWriter(ctx)
+	writer.ContentType = "application/json"
+
+	if _, err := io.Copy(writer, f); err != nil {
+		return fmt.Errorf("failed to upload tag partners: %w", err)
+	}
+
+	if err := writer.Close(); err != nil {
+		return fmt.Errorf("failed to finalize tag partners upload: %w", err)
+	}
+
+	log.Printf("[INFO] Uploaded tag partners to GCS")
+	return nil
+}
+
 // UploadCSV はローカルのCSVファイルをCloud Storageにアップロードする
 func UploadCSV(email, localPath string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
