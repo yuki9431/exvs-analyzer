@@ -167,14 +167,37 @@ func Run(j *Job, username, password string) {
 		return
 	}
 
-	// 新規データがない場合は速報レポートをそのまま最終結果にする
+	// 新規データがない場合はタッグ情報を付与して最終レポートにする
 	if len(datedScores) == 0 && j.PreliminaryReport != "" {
+		var tagPartnersPath string
+		tagPartners := scraper.ScrapeTagPartners(jar)
+		if len(tagPartners) > 0 {
+			tagPartnersPath = filepath.Join(tmpDir, "tag_partners.json")
+			if err := saveTagPartners(tagPartners, tagPartnersPath); err != nil {
+				log.Printf("[WARN] Failed to save tag partners: %v", err)
+				tagPartnersPath = ""
+			} else {
+				log.Printf("[INFO] Found %d tag partners (no new data path)", len(tagPartners))
+			}
+		} else {
+			log.Printf("[INFO] No tag partners found (no new data path)")
+		}
+
+		// タッグ情報がある場合は再分析、なければ速報レポートをそのまま使う
+		finalReport := j.PreliminaryReport
+		if tagPartnersPath != "" {
+			report := runAnalysis(csvPath, tmpDir, tagPartnersPath)
+			if report != "" {
+				finalReport = report
+			}
+		}
+
 		jobsMu.Lock()
 		j.Status = StatusDone
-		j.Report = j.PreliminaryReport
+		j.Report = finalReport
 		j.completedAt = time.Now()
 		jobsMu.Unlock()
-		log.Printf("[INFO] Job %s completed (no new data, using preliminary report)", j.ID)
+		log.Printf("[INFO] Job %s completed (no new data)", j.ID)
 		return
 	}
 
