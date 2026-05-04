@@ -3,6 +3,7 @@ package scraper
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"regexp"
 	"sort"
