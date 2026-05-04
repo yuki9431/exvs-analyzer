@@ -24,7 +24,10 @@ const (
 	mobileMSUsedRate = "https://web.vsmobile.jp/exvs2ib/ranking/ms_used_rate"
 
 	// maxParallelism はバンナムサーバーへの最大同時リクエスト数
-	maxParallelism = 15
+	maxParallelism = 5
+
+	// requestDelay はリクエスト完了後の待機時間（サーバー負荷軽減用）
+	requestDelay = 100 * time.Millisecond
 )
 
 // ErrAccessDenied はサーバーからアクセス拒否(403)された場合のエラー
@@ -159,6 +162,7 @@ func streamMatchEntries(jar http.CookieJar, links []dailyLink, since time.Time, 
 			for _, e := range entries {
 				out <- e
 			}
+			time.Sleep(requestDelay)
 		}(dl)
 	}
 
@@ -256,6 +260,7 @@ func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, no
 			mu.Unlock()
 
 			notify(current, total)
+			time.Sleep(requestDelay)
 		}(entry)
 	}
 
