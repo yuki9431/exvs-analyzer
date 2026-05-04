@@ -106,7 +106,7 @@ function SortableTable({ headers, rows, sortableColumns, defaultLimit }) {
         if (i === 0) {
           return html`<th class="sortable" onClick=${function () { handleSort(0); }}>${h}</th>`;
         }
-        var indicator = sortState.col === i ? (sortState.asc ? ' ▲' : ' ▼') : (isSortable ? ' △' : '');
+        var indicator = sortState.col === i ? (sortState.asc ? ' ▲' : ' ▼') : (isSortable ? ' ▽' : '');
         return html`<th class=${isSortable ? 'sortable' : ''} onClick=${isSortable ? function () { handleSort(i); } : undefined}>${h}${indicator}</th>`;
       })}</tr></thead>
       <tbody>${displayRows.map(function (row) {

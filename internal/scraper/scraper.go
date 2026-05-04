@@ -374,9 +374,18 @@ func ScrapeTagPartners(jar http.CookieJar) []TagPartner {
 	c := colly.NewCollector(colly.AllowedDomains(vsmobile))
 	c.SetCookieJar(jar)
 
+	c.OnResponse(func(r *colly.Response) {
+		fmt.Printf("[DEBUG] ScrapeTagPartners status=%d url=%s bodyLen=%d\n", r.StatusCode, r.Request.URL, len(r.Body))
+	})
+
+	c.OnError(func(r *colly.Response, err error) {
+		fmt.Printf("[DEBUG] ScrapeTagPartners error: %v, status=%d\n", err, r.StatusCode)
+	})
+
 	c.OnHTML("li.item", func(e *colly.HTMLElement) {
 		teamName := strings.TrimSpace(e.ChildText("p.tag-name"))
 		playerName := strings.TrimSpace(e.ChildText("p.ml-ss"))
+		fmt.Printf("[DEBUG] ScrapeTagPartners item: team=%q player=%q\n", teamName, playerName)
 
 		if playerName != "" {
 			partners = append(partners, TagPartner{
@@ -387,6 +396,7 @@ func ScrapeTagPartners(jar http.CookieJar) []TagPartner {
 	})
 
 	c.Visit(mobileTagPage)
+	fmt.Printf("[DEBUG] ScrapeTagPartners result: %d partners found\n", len(partners))
 	return partners
 }
 
