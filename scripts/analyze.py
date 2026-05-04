@@ -854,7 +854,7 @@ def data_advice(all_data, ms_data, tag_partners=None):
             rate = len(fatal_losses) / len(data) * 100
             advices.append({
                 "category": "survival",
-                "text": f"使用機体が{label}の時に、{fatal}落ちで敗北した試合が全体の{rate:.0f}%({len(fatal_losses)}/{len(data)}戦)",
+                "text": f"{label}機体で{fatal}落ち敗北: {rate:.0f}%（{len(fatal_losses)}/{len(data)}戦）。耐久管理を意識しましょう。",
             })
 
     for ms_name, data in ms_data.items():
@@ -864,7 +864,7 @@ def data_advice(all_data, ms_data, tag_partners=None):
         if eff < 1.0:
             advices.append({
                 "category": "ms",
-                "text": f"{ms_name} の与被ダメ比は{eff:.3f}で1.0未満です。被ダメージが与ダメージを上回っており、立ち回りの改善が必要です。",
+                "text": f"{ms_name}: 与被ダメ比 {eff:.3f}（1.0未満）。被ダメが与ダメを上回っています。立ち回りの改善を検討しましょう。",
             })
 
     hourly = defaultdict(list)
@@ -882,16 +882,18 @@ def data_advice(all_data, ms_data, tag_partners=None):
                 good_hours.append((hour, wr))
 
     if bad_hours:
-        hours_str = "、".join(f"{h}時台({wr:.0f}%)" for h, wr in bad_hours)
+        details = [f"{h}時台: 勝率 {wr:.0f}%" for h, wr in bad_hours]
         advices.append({
             "category": "time",
-            "text": f"勝率が低い時間帯: {hours_str}。この時間帯を避けるか、意識的にプレイしましょう。",
+            "text": "勝率が低い時間帯があります。この時間帯を避けるか、意識的にプレイしましょう。",
+            "details": details,
         })
     if good_hours:
-        hours_str = "、".join(f"{h}時台({wr:.0f}%)" for h, wr in good_hours)
+        details = [f"{h}時台: 勝率 {wr:.0f}%" for h, wr in good_hours]
         advices.append({
             "category": "time",
-            "text": f"勝率が高い時間帯: {hours_str}。この時間帯を活用しましょう。",
+            "text": "勝率が高い時間帯があります。積極的に活用しましょう。",
+            "details": details,
         })
 
     for ms_name, data in ms_data.items():
@@ -910,7 +912,8 @@ def data_advice(all_data, ms_data, tag_partners=None):
         if weak_enemies:
             advices.append({
                 "category": "ms",
-                "text": f"{ms_name} の苦手機体: {', '.join(weak_enemies)}。対策を練るか、別の機体での対応を検討しましょう。",
+                "text": f"{ms_name} の苦手機体（対策を練るか、別の機体での対応を検討しましょう）",
+                "details": weak_enemies,
             })
 
     weekday_data = [d for d in all_data if d["datetime"].weekday() < 5]
@@ -924,7 +927,7 @@ def data_advice(all_data, ms_data, tag_partners=None):
             worse = "土日" if wd_wr > we_wr else "平日"
             advices.append({
                 "category": "time",
-                "text": f"{better}の勝率({max(wd_wr, we_wr):.0f}%)が{worse}({min(wd_wr, we_wr):.0f}%)より{diff:.0f}ポイント高いです。",
+                "text": f"曜日による勝率差: {better} {max(wd_wr, we_wr):.0f}% ／ {worse} {min(wd_wr, we_wr):.0f}%（{diff:.0f}ポイント差）",
             })
 
     fixed = detect_fixed_partners(all_data, tag_partners)
@@ -935,9 +938,11 @@ def data_advice(all_data, ms_data, tag_partners=None):
             best = partner_wrs[0]
             worst = partner_wrs[-1]
             if best[1] - worst[1] >= 15:
+                details = [f"{name}: 勝率 {wr:.0f}%（{cnt}戦）" for name, wr, cnt in partner_wrs]
                 advices.append({
                     "category": "partner",
-                    "text": f"固定相方の勝率差が大きいです。{best[0]}({best[1]:.0f}%)と{worst[0]}({worst[1]:.0f}%)で{best[1]-worst[1]:.0f}ポイント差。相方ごとに戦い方を変えるか、相性の良い相方との試合を増やしましょう。",
+                    "text": f"固定相方の勝率差が{best[1]-worst[1]:.0f}ポイントあります。相方ごとに戦い方を変えるか、相性の良い相方との試合を増やしましょう。",
+                    "details": details,
                 })
 
     sorted_data = sorted(all_data, key=lambda d: d["datetime"])
@@ -952,7 +957,7 @@ def data_advice(all_data, ms_data, tag_partners=None):
     if max_lose_streak >= 4:
         advices.append({
             "category": "mental",
-            "text": f"最大{max_lose_streak}連敗の記録があります。3連敗したら休憩を挟みましょう。メンタル管理も勝率に直結します。",
+            "text": f"最大連敗数: {max_lose_streak}連敗。3連敗したら休憩を挟みましょう。メンタル管理も勝率に直結します。",
         })
 
     season_data_map = defaultdict(list)
@@ -1000,8 +1005,14 @@ def data_advice(all_data, ms_data, tag_partners=None):
 
     categories = []
     for cat in category_order:
-        items = [a["text"] for a in advices if a["category"] == cat]
-        if items:
+        cat_advices = [a for a in advices if a["category"] == cat]
+        if cat_advices:
+            items = []
+            for a in cat_advices:
+                item = {"text": a["text"]}
+                if "details" in a:
+                    item["details"] = a["details"]
+                items.append(item)
             categories.append({
                 "key": cat,
                 "title": category_titles[cat],

@@ -366,7 +366,14 @@ function SummarySection({ summary }) {
     ${summary.categories.map(function (cat) {
       return html`<div>
         <strong>${esc(cat.title)}</strong>
-        <ul>${cat.items.map(function (item) { return html`<li>${item}</li>`; })}</ul>
+        <ul>${cat.items.map(function (item) {
+          var text = typeof item === 'string' ? item : item.text;
+          var details = typeof item === 'object' && item.details ? item.details : null;
+          return html`<li>
+            ${text}
+            ${details && html`<ul class="advice-details">${details.map(function (d) { return html`<li>${d}</li>`; })}</ul>`}
+          </li>`;
+        })}</ul>
       </div>`;
     })}
   <//>`;
