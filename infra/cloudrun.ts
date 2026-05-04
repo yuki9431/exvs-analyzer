@@ -4,8 +4,6 @@ import * as gcp from "@pulumi/gcp";
 const config = new pulumi.Config();
 const gcsBucket = config.requireSecret("gcsBucket");
 const image = config.requireSecret("image");
-const basicAuthUser = config.requireSecret("basicAuthUser");
-const basicAuthPass = config.requireSecret("basicAuthPass");
 
 export const service = new gcp.cloudrunv2.Service(
   "exvs-analyzer",
@@ -25,14 +23,6 @@ export const service = new gcp.cloudrunv2.Service(
             {
               name: "GCS_BUCKET",
               value: gcsBucket,
-            },
-            {
-              name: "BASIC_AUTH_USER",
-              value: basicAuthUser,
-            },
-            {
-              name: "BASIC_AUTH_PASS",
-              value: basicAuthPass,
             },
           ],
           resources: {

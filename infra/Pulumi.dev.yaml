@@ -22,7 +22,3 @@ config:
     secure: v1:IgRCxU3FUKAgYFVM:84Vd9wpKbv4aii4ZiSsWCwdpXAEfNtx6l52NGnLzp6b2YZL/t04CeFNJTHSmsEOqGxHRazl1yAnoAUhe0ZfJKWRO
   exvs-analyzer:ownerEmail:
     secure: v1:PPXFgxigyRzBi94p:D9+0MQOCQGmsIsLGmPxFp8LzFnsuwRqgS+2HkAMWIXJR8FkJ
-  exvs-analyzer:basicAuthUser:
-    secure: v1:i7deaJdrREyHHqjv:ayNZz3wcb6PJPBr1POU+n+j0HKjwxfmW
-  exvs-analyzer:basicAuthPass:
-    secure: v1:/WAbyxOy3CdRJkMr:kLv9677cbjr7XzdPo+P/t8PiHbzH5C19pBGiew==
