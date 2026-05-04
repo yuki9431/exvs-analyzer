@@ -112,14 +112,14 @@ func DownloadCSVByKey(userKey, localPath string) (bool, error) {
 }
 
 // TagPartnersObjectPath はユーザーのタッグ相方JSONオブジェクトパスを返す
-func TagPartnersObjectPath(email string) string {
-	return fmt.Sprintf("users/%s/tag_partners.json", UserKey(email))
+func TagPartnersObjectPath(username string) string {
+	return fmt.Sprintf("users/%s/tag_partners.json", UserKey(username))
 }
 
 // DownloadTagPartners はCloud Storageからタッグ相方JSONをローカルファイルにダウンロードする
 // ファイルが存在しない場合はfalseを返す
-func DownloadTagPartners(email, localPath string) (bool, error) {
-	found, err := downloadObject(TagPartnersObjectPath(email), localPath)
+func DownloadTagPartners(username, localPath string) (bool, error) {
+	found, err := downloadObject(TagPartnersObjectPath(username), localPath)
 	if err != nil {
 		return false, err
 	}
@@ -141,8 +141,8 @@ func UploadCSV(email, localPath string) error {
 }
 
 // UploadTagPartners はローカルのタッグ相方JSONファイルをCloud Storageにアップロードする
-func UploadTagPartners(email, localPath string) error {
-	if err := uploadObject(TagPartnersObjectPath(email), localPath, "application/json"); err != nil {
+func UploadTagPartners(username, localPath string) error {
+	if err := uploadObject(TagPartnersObjectPath(username), localPath, "application/json"); err != nil {
 		return err
 	}
 	log.Printf("[INFO] Uploaded tag partners to GCS")
