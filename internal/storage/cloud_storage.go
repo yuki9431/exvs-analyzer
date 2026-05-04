@@ -15,20 +15,20 @@ import (
 // BucketName は環境変数 GCS_BUCKET から取得するCloud Storageのバケット名
 var BucketName = os.Getenv("GCS_BUCKET")
 
-// UserKey はメールアドレスからユーザー固有のキーを生成する
-func UserKey(email string) string {
-	hash := sha256.Sum256([]byte(email))
+// UserKey はユーザー名からユーザー固有のキーを生成する
+func UserKey(username string) string {
+	hash := sha256.Sum256([]byte(username))
 	return fmt.Sprintf("%x", hash[:8])
 }
 
 // CSVObjectPath はユーザーのCSVオブジェクトパスを返す
-func CSVObjectPath(email string) string {
-	return fmt.Sprintf("users/%s/scores.csv", UserKey(email))
+func CSVObjectPath(username string) string {
+	return fmt.Sprintf("users/%s/scores.csv", UserKey(username))
 }
 
 // DownloadCSV はCloud StorageからCSVをローカルファイルにダウンロードする
 // ファイルが存在しない場合はfalseを返す
-func DownloadCSV(email, localPath string) (bool, error) {
+func DownloadCSV(username, localPath string) (bool, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -38,7 +38,7 @@ func DownloadCSV(email, localPath string) (bool, error) {
 	}
 	defer client.Close()
 
-	objPath := CSVObjectPath(email)
+	objPath := CSVObjectPath(username)
 	reader, err := client.Bucket(BucketName).Object(objPath).NewReader(ctx)
 	if err != nil {
 		if err == storage.ErrObjectNotExist {
@@ -98,7 +98,7 @@ func DownloadCSVByKey(userKey, localPath string) (bool, error) {
 }
 
 // UploadCSV はローカルのCSVファイルをCloud Storageにアップロードする
-func UploadCSV(email, localPath string) error {
+func UploadCSV(username, localPath string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
@@ -114,7 +114,7 @@ func UploadCSV(email, localPath string) error {
 	}
 	defer f.Close()
 
-	objPath := CSVObjectPath(email)
+	objPath := CSVObjectPath(username)
 	writer := client.Bucket(BucketName).Object(objPath).NewWriter(ctx)
 	writer.ContentType = "text/csv"
 
