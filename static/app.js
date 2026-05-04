@@ -536,8 +536,8 @@ function FixedPartnersSection({ partners }) {
       });
       var title = p.team_name ? esc(p.partner_name) + '【' + esc(p.team_name) + '】' : esc(p.partner_name);
       return html`<div>
-        <h3>${title} (${p.matches}戦)</h3>
-        <p>${p.wins}勝${p.losses}敗 (勝率 ${pct(p.win_rate)})</p>
+        <h3>${title}</h3>
+        <p>${p.matches}戦${p.wins}勝 (勝率 ${pct(p.win_rate)})</p>
         <${Table} headers=${['項目', '自分', '相方']} rows=${statsRows} />
         ${msRows.length > 0 && html`<p><strong>相方の使用機体:</strong></p><${Table} headers=${['機体', '試合', '勝率']} rows=${msRows} />`}
         <${Tips} tips=${p.tips} />
