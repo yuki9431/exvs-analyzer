@@ -33,8 +33,8 @@ const (
 // ErrAccessDenied はサーバーからアクセス拒否(403)された場合のエラー
 var ErrAccessDenied = errors.New("サーバーからアクセスが拒否されました")
 
-// ErrTooManyHTTPErrors はHTTPエラーが多発した場合のエラー
-var ErrTooManyHTTPErrors = errors.New("データ取得中にHTTPエラーが発生しました")
+// ErrHTTPRequestFailed はHTTPリクエストが失敗した場合のエラー
+var ErrHTTPRequestFailed = errors.New("データ取得中にHTTPエラーが発生しました")
 
 // TagPartner はタッグ戦歴ページから取得した固定相方情報
 type TagPartner struct {
@@ -205,7 +205,7 @@ func streamMatchEntries(jar http.CookieJar, links []dailyLink, since time.Time, 
 		return ErrAccessDenied
 	}
 	if errorCount > 0 {
-		return fmt.Errorf("日別ページ取得で%w: %d/%d件がエラー", ErrTooManyHTTPErrors, errorCount, totalPages)
+		return fmt.Errorf("日別ページ取得で%w: %d/%d件がエラー", ErrHTTPRequestFailed, errorCount, totalPages)
 	}
 	return nil
 }
@@ -221,19 +221,11 @@ func collectMatchEntries(jar http.CookieJar, dl dailyLink, since time.Time) ([]m
 	c := colly.NewCollector(colly.AllowedDomains(vsmobile))
 	c.SetCookieJar(jar)
 
-	c.OnResponse(func(r *colly.Response) {
-		if r.StatusCode >= 400 {
-			if r.StatusCode == http.StatusForbidden {
-				httpErr = ErrAccessDenied
-				log.Printf("[ERROR] collectMatchEntries: 403 Forbidden url=%s", r.Request.URL)
-			} else {
-				httpErr = fmt.Errorf("HTTPエラー %d: url=%s", r.StatusCode, r.Request.URL)
-				log.Printf("[ERROR] collectMatchEntries: HTTP %d url=%s", r.StatusCode, r.Request.URL)
-			}
-		}
-	})
-
 	c.OnError(func(r *colly.Response, err error) {
+		// 403は最も重要なエラーなので、一度記録したら上書きしない
+		if errors.Is(httpErr, ErrAccessDenied) {
+			return
+		}
 		if r.StatusCode == http.StatusForbidden {
 			httpErr = ErrAccessDenied
 			log.Printf("[ERROR] collectMatchEntries: 403 Forbidden url=%s err=%v", r.Request.URL, err)
@@ -344,7 +336,7 @@ func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, no
 		return scores, ErrAccessDenied
 	}
 	if errorCount > 0 {
-		return scores, fmt.Errorf("詳細ページ取得で%w: %d/%d件がエラー", ErrTooManyHTTPErrors, errorCount, total)
+		return scores, fmt.Errorf("詳細ページ取得で%w: %d/%d件がエラー", ErrHTTPRequestFailed, errorCount, total)
 	}
 	return scores, nil
 }
