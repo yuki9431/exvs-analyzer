@@ -3,7 +3,6 @@ package scraper
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"regexp"
 	"sort"
@@ -465,18 +464,9 @@ func ScrapeTagPartners(jar http.CookieJar) []TagPartner {
 	c := colly.NewCollector(colly.AllowedDomains(vsmobile))
 	c.SetCookieJar(jar)
 
-	c.OnResponse(func(r *colly.Response) {
-		log.Printf("[DEBUG] ScrapeTagPartners status=%d url=%s bodyLen=%d", r.StatusCode, r.Request.URL, len(r.Body))
-	})
-
-	c.OnError(func(r *colly.Response, err error) {
-		log.Printf("[DEBUG] ScrapeTagPartners error: %v, status=%d", err, r.StatusCode)
-	})
-
 	c.OnHTML("li.item", func(e *colly.HTMLElement) {
 		teamName := strings.TrimSpace(e.ChildText("p.tag-name"))
 		playerName := strings.TrimSpace(e.ChildText("p.ml-ss"))
-		log.Printf("[DEBUG] ScrapeTagPartners item: team=%q player=%q", teamName, playerName)
 
 		if playerName != "" {
 			partners = append(partners, TagPartner{
@@ -487,7 +477,6 @@ func ScrapeTagPartners(jar http.CookieJar) []TagPartner {
 	})
 
 	c.Visit(mobileTagPage)
-	log.Printf("[DEBUG] ScrapeTagPartners result: %d partners found", len(partners))
 	return partners
 }
 
