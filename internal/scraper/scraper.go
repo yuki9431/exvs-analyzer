@@ -34,7 +34,7 @@ const (
 var ErrAccessDenied = errors.New("サーバーからアクセスが拒否されました")
 
 // ErrTooManyHTTPErrors はHTTPエラーが多発した場合のエラー
-var ErrTooManyHTTPErrors = errors.New("HTTPエラーが多発しました")
+var ErrTooManyHTTPErrors = errors.New("データ取得中にHTTPエラーが発生しました")
 
 // TagPartner はタッグ戦歴ページから取得した固定相方情報
 type TagPartner struct {
@@ -159,7 +159,7 @@ func collectDailyLinks(jar http.CookieJar, since time.Time) ([]dailyLink, error)
 }
 
 // streamMatchEntries は複数の日別ページから試合エントリを並列で収集し、チャネルにストリーミングする
-// エラーが多発した場合（半数以上）はエラーを返す。403の場合はErrAccessDeniedを返す
+// HTTPエラーが1件でもあればエラーを返す。403の場合はErrAccessDeniedを返す
 func streamMatchEntries(jar http.CookieJar, links []dailyLink, since time.Time, out chan<- matchEntry) error {
 	if len(links) == 0 {
 		return nil
@@ -204,7 +204,7 @@ func streamMatchEntries(jar http.CookieJar, links []dailyLink, since time.Time, 
 	if has403 {
 		return ErrAccessDenied
 	}
-	if errorCount > 0 && errorCount*2 >= totalPages {
+	if errorCount > 0 {
 		return fmt.Errorf("日別ページ取得で%w: %d/%d件がエラー", ErrTooManyHTTPErrors, errorCount, totalPages)
 	}
 	return nil
@@ -289,7 +289,7 @@ func collectMatchEntries(jar http.CookieJar, dl dailyLink, since time.Time) ([]m
 }
 
 // fetchDetailPagesStreaming はチャネルから試合エントリを受信しつつ詳細ページを並列取得する
-// エラーが多発した場合（半数以上）はエラーを返す。403の場合はErrAccessDeniedを返す
+// HTTPエラーが1件でもあればエラーを返す。403の場合はErrAccessDeniedを返す
 func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, notify func(int, int)) (model.DatedScores, error) {
 	// まず全エントリを収集してtotalを確定させる
 	var entries []matchEntry
@@ -343,7 +343,7 @@ func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, no
 	if has403 {
 		return scores, ErrAccessDenied
 	}
-	if errorCount > 0 && errorCount*2 >= total {
+	if errorCount > 0 {
 		return scores, fmt.Errorf("詳細ページ取得で%w: %d/%d件がエラー", ErrTooManyHTTPErrors, errorCount, total)
 	}
 	return scores, nil
