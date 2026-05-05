@@ -181,7 +181,7 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		case errors.Is(err, scraper.ErrServerError):
 			setError(j, "ガンダムモバイルのサーバーでエラーが発生しています。しばらく時間をおいてから再度お試しください。", err.Error())
 		default:
-			setError(j, "データの取得に失敗しました", err.Error())
+			setError(j, "データの取得に失敗しました。時間をおいて再度お試しいただき、解決しない場合は開発者までお問い合わせください。", err.Error())
 		}
 		return
 	}
