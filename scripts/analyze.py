@@ -212,11 +212,11 @@ def data_basic_stats(data_list):
 
     tips = []
     if eff < 1.0:
-        tips.append(f"与被ダメ比が{eff:.3f}で1.0未満です。被ダメが与ダメを上回っており、被弾を減らす立ち回りが必要です。")
+        tips.append(f"与被ダメ比 **{eff:.3f}** → 被ダメ超過。被弾を減らす立ち回りを意識")
     elif eff >= 1.2:
-        tips.append(f"与被ダメ比{eff:.3f}は優秀です。この調子を維持しましょう。")
+        tips.append(f"与被ダメ比 **{eff:.3f}** → 優秀。この調子を維持")
     if kd < 1.0:
-        tips.append(f"K/D比が{kd:.2f}で1.0未満です。撃墜数を増やすか、被撃墜を減らすことを意識しましょう。")
+        tips.append(f"K/D比 **{kd:.2f}** → 1.0未満。撃墜↑ or 被撃墜↓を意識")
 
     return {
         "matches": n,
@@ -264,9 +264,9 @@ def data_win_loss_pattern(data_list):
     l_deaths = avg([d["deaths"] for d in losses]) if losses else 0
     l_taken = avg([d["dmg_taken"] for d in losses]) if losses else 0
     if l_deaths >= 1.5:
-        tips.append(f"負け試合の平均被撃墜が{l_deaths:.1f}と高いです。耐久管理を意識しましょう。")
+        tips.append(f"敗北時の平均被撃墜 **{l_deaths:.1f}回** → 耐久管理を意識")
     if l_taken >= 1100:
-        tips.append(f"負け試合の被ダメージが平均{l_taken:.0f}と高いです。無駄な被弾を減らすことが改善の鍵です。")
+        tips.append(f"敗北時の平均被ダメ **{l_taken:.0f}** → 無駄な被弾を減らすのが改善の鍵")
 
     # コスト帯別
     cost_groups = defaultdict(list)
@@ -357,13 +357,13 @@ def data_enemy_matchup(data_list, min_matches=3):
     if weak:
         high_dmg_taken = [r for r in weak if r["avg_dmg_taken"] >= 1200]
         if high_dmg_taken:
-            tip = {"text": "以下の機体戦で被ダメが特に多いです。距離管理を見直しましょう。",
-                   "details": [f"{r['ms']}（被ダメ {r['avg_dmg_taken']:.0f}）" for r in high_dmg_taken[:3]]}
+            tip = {"text": "被ダメが多い相手 → 距離管理を見直し",
+                   "details": [f"**{r['ms']}** 被ダメ {r['avg_dmg_taken']:.0f}" for r in high_dmg_taken[:3]]}
             tips.append(tip)
         low_dmg_given = [r for r in weak if r["avg_dmg_given"] <= 900]
         if low_dmg_given:
-            tip = {"text": "以下の機体戦で与ダメが低いです。攻撃の手数や当て方を工夫しましょう。",
-                   "details": [f"{r['ms']}（与ダメ {r['avg_dmg_given']:.0f}）" for r in low_dmg_given[:3]]}
+            tip = {"text": "与ダメが低い相手 → 手数や当て方を工夫",
+                   "details": [f"**{r['ms']}** 与ダメ {r['avg_dmg_given']:.0f}" for r in low_dmg_given[:3]]}
             tips.append(tip)
 
     return {
@@ -563,18 +563,18 @@ def data_fixed_partners(all_data, tag_partners=None):
 
         tips = []
         if p_eff < 0.8:
-            tips.append(f"相方の与被ダメ比が{p_eff:.3f}と低めです。相方が狙われやすい展開になっている可能性があります。カットやラインを意識しましょう。")
+            tips.append(f"相方の与被ダメ比 **{p_eff:.3f}** → カットやライン維持を意識")
         if wr < 45 and n >= 5:
-            tips.append(f"勝率が{wr:.0f}%と低調です。連携や機体の組み合わせを見直してみましょう。")
+            tips.append(f"勝率 **{wr:.0f}%** → 連携や機体の組み合わせを見直し")
         if n >= 5:
             if wr >= 90:
-                tips.append(f"驚異的！勝率{wr:.0f}%は全国大会優勝レベルです。何も言うことがありません！")
+                tips.append(f"勝率 **{wr:.0f}%** → 驚異的！全国大会優勝レベル")
             elif wr >= 80:
-                tips.append(f"圧巻！勝率{wr:.0f}%は全国大会上位クラスです。勝ちパターンを分析して再現性を高めましょう。")
+                tips.append(f"勝率 **{wr:.0f}%** → 圧巻！勝ちパターンの再現性を高めよう")
             elif wr >= 70:
-                tips.append(f"素晴らしい相性です！勝率{wr:.0f}%は上位プレイヤーに匹敵する勝率です。この相方との連携を軸に、苦手な機体への対策を詰めていきましょう。")
+                tips.append(f"勝率 **{wr:.0f}%** → 素晴らしい相性。この相方を軸に苦手機体の対策を")
             elif wr >= 60:
-                tips.append(f"好調です！勝率{wr:.0f}%、安定した連携ができています。さらに勝率を伸ばすために相方との役割分担を意識してみましょう。")
+                tips.append(f"勝率 **{wr:.0f}%** → 好調。役割分担を意識してさらに上へ")
 
         entry = {
             "partner_name": partner_name,
@@ -658,9 +658,9 @@ def data_deaths_impact(data_list):
 
         tips = []
         if fatal_count > 0 and len(data) > 0:
-            tips.append(f"負け確定({fatal}落ち以上)に達した試合は{fatal_count}/{len(data)}戦({fatal_count/len(data)*100:.0f}%)。")
+            tips.append(f"{fatal}落ち以上 **{fatal_count}/{len(data)}戦**（{fatal_count/len(data)*100:.0f}%）")
         if safe_data:
-            tips.append(f"{fatal-1}落ち以内に抑えた場合の勝率は{safe_wr:.1f}%。")
+            tips.append(f"{fatal-1}落ち以内の勝率 **{safe_wr:.1f}%**")
 
         results.append({
             "cost": cost,
@@ -698,9 +698,9 @@ def data_time_of_day(data_list):
     good = [h for h, m in hourly.items() if len(m) >= 5 and win_rate(m) >= 70]
     bad = [h for h, m in hourly.items() if len(m) >= 5 and win_rate(m) <= 40]
     if good:
-        tips.append(f"{'、'.join(f'{h}時台' for h in sorted(good))}が好調です。")
+        tips.append(f"好調 → **{'、'.join(f'{h}時台' for h in sorted(good))}**")
     if bad:
-        tips.append(f"{'、'.join(f'{h}時台' for h in sorted(bad))}は不調です。強い相手が多い時間帯か、疲労の影響かもしれません。")
+        tips.append(f"不調 → **{'、'.join(f'{h}時台' for h in sorted(bad))}**（強豪が多い or 疲労の影響）")
 
     return {"hours": results, "tips": tips}
 
@@ -735,7 +735,7 @@ def data_day_of_week(data_list):
     if diff >= 10:
         better = "平日" if wd_wr > we_wr else "土日"
         worse = "土日" if wd_wr > we_wr else "平日"
-        tips.append(f"{better}の方が{worse}より勝率が{diff:.0f}%高いです。{worse}は対戦相手の質が変わる可能性があります。")
+        tips.append(f"**{better}**が{worse}より勝率 **{diff:.0f}%** 高い")
 
     return {
         "weekday": {
@@ -779,7 +779,7 @@ def data_daily_trend(data_list):
     tips = []
     bad_days = [ds for ds in sorted(daily.keys()) if win_rate(daily[ds]) <= 40 and len(daily[ds]) >= 5]
     if bad_days:
-        tips.append(f"勝率40%以下の日: {', '.join(bad_days)}。不調時は早めに切り上げましょう。")
+        tips.append(f"不調日（勝率40%以下）→ **{', '.join(bad_days)}**。早めの切り上げが有効")
 
     return {
         "days": results,
@@ -810,9 +810,9 @@ def data_season(data_list):
             diff = s_wr - f_wr
             if abs(diff) >= 5:
                 if diff > 0:
-                    tips.append(f"後半の方が勝率が{diff:.0f}%高く、シーズンが進むにつれて安定しています。")
+                    tips.append(f"後半が **+{diff:.0f}%** → シーズン後半に安定")
                 else:
-                    tips.append(f"前半の方が勝率が{-diff:.0f}%高いです。後半は対戦相手のレベルが上がっている可能性があります。")
+                    tips.append(f"前半が **+{-diff:.0f}%** → 後半は対戦環境が厳しくなった可能性")
 
         entry = {
             "name": season_name,
@@ -856,7 +856,7 @@ def data_advice(all_data, ms_data, tag_partners=None):
             rate = len(fatal_losses) / len(data) * 100
             advices.append({
                 "category": "survival",
-                "text": f"{label}機体で{fatal}落ち敗北: {rate:.0f}%（{len(fatal_losses)}/{len(data)}戦）。耐久管理を意識しましょう。",
+                "text": f"{label}機体の{fatal}落ち敗北 **{rate:.0f}%**（{len(fatal_losses)}/{len(data)}戦）→ 耐久管理を意識",
             })
 
     for ms_name, data in ms_data.items():
@@ -866,7 +866,7 @@ def data_advice(all_data, ms_data, tag_partners=None):
         if eff < 1.0:
             advices.append({
                 "category": "ms",
-                "text": f"{ms_name}: 与被ダメ比 {eff:.3f}（1.0未満）。被ダメが与ダメを上回っています。立ち回りの改善を検討しましょう。",
+                "text": f"{ms_name}: 与被ダメ比 **{eff:.3f}** → 被ダメ超過。立ち回りの改善を",
             })
 
     hourly = defaultdict(list)
@@ -884,17 +884,17 @@ def data_advice(all_data, ms_data, tag_partners=None):
                 good_hours.append((hour, wr))
 
     if bad_hours:
-        details = [f"{h}時台: 勝率 {wr:.0f}%" for h, wr in bad_hours]
+        details = [f"**{h}時台** 勝率 {wr:.0f}%" for h, wr in bad_hours]
         advices.append({
             "category": "time",
-            "text": "勝率が低い時間帯があります。この時間帯を避けるか、意識的にプレイしましょう。",
+            "text": "不調な時間帯 → 避けるか意識的にプレイ",
             "details": details,
         })
     if good_hours:
-        details = [f"{h}時台: 勝率 {wr:.0f}%" for h, wr in good_hours]
+        details = [f"**{h}時台** 勝率 {wr:.0f}%" for h, wr in good_hours]
         advices.append({
             "category": "time",
-            "text": "勝率が高い時間帯があります。積極的に活用しましょう。",
+            "text": "好調な時間帯 → 積極的に活用",
             "details": details,
         })
 
@@ -909,12 +909,12 @@ def data_advice(all_data, ms_data, tag_partners=None):
         weak_enemies = []
         for ems, matches in enemy_stats.items():
             if len(matches) >= 3 and win_rate(matches) <= 30:
-                weak_enemies.append(f"{ems}({win_rate(matches):.0f}%)")
+                weak_enemies.append(f"**{ems}** {win_rate(matches):.0f}%")
 
         if weak_enemies:
             advices.append({
                 "category": "ms",
-                "text": f"{ms_name} の苦手機体（対策を練るか、別の機体での対応を検討しましょう）",
+                "text": f"{ms_name} の苦手機体 → 対策 or 別機体で対応",
                 "details": weak_enemies,
             })
 
@@ -929,7 +929,7 @@ def data_advice(all_data, ms_data, tag_partners=None):
             worse = "土日" if wd_wr > we_wr else "平日"
             advices.append({
                 "category": "time",
-                "text": f"曜日による勝率差: {better} {max(wd_wr, we_wr):.0f}% ／ {worse} {min(wd_wr, we_wr):.0f}%（{diff:.0f}%差）",
+                "text": f"**{better}** {max(wd_wr, we_wr):.0f}% ／ {worse} {min(wd_wr, we_wr):.0f}%（**{diff:.0f}%差**）",
             })
 
     fixed = detect_fixed_partners(all_data, tag_partners)
@@ -940,10 +940,10 @@ def data_advice(all_data, ms_data, tag_partners=None):
             best = partner_wrs[0]
             worst = partner_wrs[-1]
             if best[1] - worst[1] >= 15:
-                details = [f"{name}: 勝率 {wr:.0f}%（{cnt}戦）" for name, wr, cnt in partner_wrs]
+                details = [f"**{name}** 勝率 {wr:.0f}%（{cnt}戦）" for name, wr, cnt in partner_wrs]
                 advices.append({
                     "category": "partner",
-                    "text": f"固定相方の勝率差が{best[1]-worst[1]:.0f}%あります。相方ごとに戦い方を変えるか、相性の良い相方との試合を増やしましょう。",
+                    "text": f"固定相方で勝率差 **{best[1]-worst[1]:.0f}%** → 相性の良い相方を軸に",
                     "details": details,
                 })
 
@@ -959,7 +959,7 @@ def data_advice(all_data, ms_data, tag_partners=None):
     if max_lose_streak >= 4:
         advices.append({
             "category": "mental",
-            "text": f"最大連敗数: {max_lose_streak}連敗。3連敗したら休憩を挟みましょう。メンタル管理も勝率に直結します。",
+            "text": f"最大 **{max_lose_streak}連敗** → 3連敗で休憩を。メンタル管理も勝率に直結",
         })
 
     season_data_map = defaultdict(list)
@@ -981,12 +981,12 @@ def data_advice(all_data, ms_data, tag_partners=None):
                 if diff > 0:
                     advices.append({
                         "category": "season",
-                        "text": f"{season_name}: 後半の勝率が前半より{diff:.0f}%高く、シーズン後半に安定する傾向があります。",
+                        "text": f"**{season_name}**: 後半が **+{diff:.0f}%** → 後半に安定",
                     })
                 else:
                     advices.append({
                         "category": "season",
-                        "text": f"{season_name}: 前半の勝率が後半より{-diff:.0f}%高いです。後半は対戦環境が厳しくなっている可能性があります。",
+                        "text": f"**{season_name}**: 前半が **+{-diff:.0f}%** → 後半は対戦環境が厳しくなった可能性",
                     })
 
     # カテゴリ順序
