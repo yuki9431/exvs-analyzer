@@ -156,14 +156,15 @@ function SortableTable({ headers, rows, sortableColumns, defaultLimit }) {
   var hasMore = limit > 0 && sortedRows.length > limit;
 
   function handleSort(colIdx) {
-    if (colIdx === 0) {
-      setSortState({ col: -1, asc: true });
-      return;
-    }
     if (sortState.col === colIdx) {
-      setSortState({ col: colIdx, asc: !sortState.asc });
+      if (colIdx === 0 && !sortState.asc) {
+        // 1列目で降順→リセット（元の順序に戻す）
+        setSortState({ col: -1, asc: true });
+      } else {
+        setSortState({ col: colIdx, asc: !sortState.asc });
+      }
     } else {
-      setSortState({ col: colIdx, asc: false });
+      setSortState({ col: colIdx, asc: colIdx === 0 ? true : false });
     }
   }
 
@@ -173,9 +174,6 @@ function SortableTable({ headers, rows, sortableColumns, defaultLimit }) {
     <div class="table-wrap"><table>
       <thead><tr>${headers.map(function (h, i) {
         var isSortable = h !== '' && (sortable.length === 0 || sortable.indexOf(i) >= 0);
-        if (i === 0) {
-          return html`<th class="sortable" onClick=${function () { handleSort(0); }}>${h}</th>`;
-        }
         var indicator = sortState.col === i ? (sortState.asc ? ' ▲' : ' ▼') : (isSortable ? ' ▽' : '');
         return html`<th class=${isSortable ? 'sortable' : ''} onClick=${isSortable ? function () { handleSort(i); } : undefined}>${h}${indicator}</th>`;
       })}</tr></thead>
@@ -449,6 +447,92 @@ function SummarySection({ summary }) {
   <//>`;
 }
 
+// 各指標を0-100に正規化するための定義
+// { min, max, invert } invert=trueは値が小さいほど良い
+var RADAR_AXES = [
+  { key: 'win_rate', label: '勝率', min: 30, max: 70 },
+  { key: 'avg_dmg_given', label: '与ダメ', min: 600, max: 1200 },
+  { key: 'avg_dmg_taken', label: '被ダメ', min: 600, max: 1200, invert: true },
+  { key: 'kd_ratio', label: 'K/D比', min: 0.5, max: 2.0 },
+  { key: 'dmg_efficiency', label: '与被ダメ比', min: 0.6, max: 1.6 },
+  { key: 'avg_ex_dmg', label: 'EXダメ', min: 80, max: 250 },
+];
+
+function normalizeRadar(stats) {
+  return RADAR_AXES.map(function (axis) {
+    var v = stats[axis.key];
+    if (v == null) return 0;
+    var norm = (v - axis.min) / (axis.max - axis.min) * 100;
+    if (axis.invert) norm = 100 - norm;
+    return Math.max(0, Math.min(100, norm));
+  });
+}
+
+function BasicStatsRadar({ stats }) {
+  var containerRef = useRef(null);
+  var canvasRef = useRef(null);
+  var chartRef = useRef(null);
+  var inView = useInView(containerRef);
+
+  useEffect(function () {
+    if (!inView || !canvasRef.current || !stats) return;
+    if (chartRef.current) chartRef.current.destroy();
+
+    var labels = RADAR_AXES.map(function (a) { return a.label; });
+    var data = normalizeRadar(stats);
+
+    chartRef.current = new Chart(canvasRef.current, {
+      type: 'radar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'パフォーマンス',
+          data: data,
+          borderColor: '#4fc3f7',
+          backgroundColor: 'rgba(79, 195, 247, 0.2)',
+          borderWidth: 2,
+          pointBackgroundColor: '#4fc3f7',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function (ctx) {
+                var axis = RADAR_AXES[ctx.dataIndex];
+                var raw = stats[axis.key];
+                if (raw == null) return axis.label + ': -';
+                if (axis.key === 'win_rate') return axis.label + ': ' + raw.toFixed(1) + '%';
+                if (axis.key === 'dmg_efficiency' || axis.key === 'kd_ratio') return axis.label + ': ' + raw.toFixed(2);
+                return axis.label + ': ' + raw.toFixed(0);
+              },
+            },
+          },
+        },
+        scales: {
+          r: {
+            min: 0,
+            max: 100,
+            ticks: { display: false, stepSize: 20 },
+            grid: { color: 'rgba(255,255,255,0.1)' },
+            angleLines: { color: 'rgba(255,255,255,0.1)' },
+            pointLabels: { color: '#aaa', font: { size: 12 } },
+          },
+        },
+      },
+    });
+
+    return function () { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; } };
+  }, [stats, inView]);
+
+  return html`<div class="chart-container chart-radar" ref=${containerRef}><canvas ref=${canvasRef} /></div>`;
+}
+
 function BasicStatsSection({ stats }) {
   if (!stats) return null;
   var rows = [
@@ -463,6 +547,7 @@ function BasicStatsSection({ stats }) {
     ['平均EXダメージ', colorExDmg(stats.avg_ex_dmg)],
   ];
   return html`<div>
+    <${BasicStatsRadar} stats=${stats} />
     <${Table} headers=${['項目', '値']} rows=${rows} />
     <${Tips} tips=${stats.tips} />
   </div>`;
@@ -640,15 +725,216 @@ function DeathsImpactSubSection({ deaths }) {
   });
 }
 
+// スクロール連動: 要素が画面に入ったらtrueを返すフック
+function useInView(ref) {
+  var state = useState(false);
+  var inView = state[0], setInView = state[1];
+
+  useEffect(function () {
+    if (!ref.current) return;
+    var observer = new IntersectionObserver(function (entries) {
+      if (entries[0].isIntersecting) {
+        setInView(true);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1 });
+    observer.observe(ref.current);
+    return function () { observer.disconnect(); };
+  }, []);
+
+  return inView;
+}
+
+// 50%基準線プラグイン
+var winRate50Plugin = {
+  id: 'winRate50Line',
+  afterDraw: function (chart) {
+    var yScale = chart.scales.y;
+    if (!yScale) return;
+    var y = yScale.getPixelForValue(50);
+    var ctx = chart.ctx;
+    ctx.save();
+    ctx.beginPath();
+    ctx.setLineDash([6, 4]);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.moveTo(chart.chartArea.left, y);
+    ctx.lineTo(chart.chartArea.right, y);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.font = '11px sans-serif';
+    ctx.fillText('50%', chart.chartArea.left + 4, y - 4);
+    ctx.restore();
+  },
+};
+
+function TimeOfDayChart({ hours }) {
+  var containerRef = useRef(null);
+  var canvasRef = useRef(null);
+  var chartRef = useRef(null);
+  var inView = useInView(containerRef);
+
+  useEffect(function () {
+    if (!inView || !canvasRef.current || !hours || !hours.length) return;
+    if (chartRef.current) chartRef.current.destroy();
+
+    var labels = hours.map(function (h) { return h.hour + '時'; });
+    var winRates = hours.map(function (h) { return h.win_rate; });
+    var matches = hours.map(function (h) { return h.matches; });
+
+    chartRef.current = new Chart(canvasRef.current, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '勝率 (%)',
+            data: winRates,
+            borderColor: '#4fc3f7',
+            backgroundColor: 'rgba(79, 195, 247, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'y',
+          },
+          {
+            label: '試合数',
+            data: matches,
+            type: 'bar',
+            backgroundColor: 'rgba(129, 212, 250, 0.3)',
+            borderColor: 'rgba(129, 212, 250, 0.5)',
+            borderWidth: 1,
+            yAxisID: 'y1',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: '#aaa', font: { size: 12 } } },
+        },
+        scales: {
+          x: {
+            ticks: { color: '#888', font: { size: 11 } },
+            grid: { color: 'rgba(255,255,255,0.05)' },
+          },
+          y: {
+            position: 'left',
+            min: 0,
+            max: 100,
+            ticks: { color: '#4fc3f7', callback: function (v) { return v + '%'; } },
+            grid: { color: 'rgba(255,255,255,0.08)' },
+          },
+          y1: {
+            position: 'right',
+            min: 0,
+            ticks: { color: '#81d4fa', stepSize: 1 },
+            grid: { display: false },
+          },
+        },
+      },
+      plugins: [winRate50Plugin],
+    });
+
+    return function () { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; } };
+  }, [hours, inView]);
+
+  return html`<div class="chart-container" ref=${containerRef}><canvas ref=${canvasRef} /></div>`;
+}
+
 function TimeOfDaySection({ time }) {
   if (!time || !time.hours || !time.hours.length) return null;
   var rows = time.hours.map(function (h) {
-    return [h.hour + '時', h.matches, colorPct(h.win_rate), colorDE(h.dmg_efficiency, 3)];
+    var mark = h.mark === 'good' ? '◎' : h.mark === 'bad' ? '△' : '';
+    return [{ sortValue: h.hour, display: h.hour + '時' }, h.matches, colorPct(h.win_rate), colorDE(h.dmg_efficiency, 3), mark];
   });
   return html`<${Section} title="時間帯別の勝率">
-    <${Table} headers=${['時間帯', '試合', '勝率', '与被ダメ比']} rows=${rows} />
+    <${TimeOfDayChart} hours=${time.hours} />
     <${Tips} tips=${time.tips} />
+    <${SubSection} title="テーブルで詳細を見る">
+      <${SortableTable} headers=${['時間帯', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
+    <//>
   <//>`;
+}
+
+function DayOfWeekChart({ days }) {
+  var containerRef = useRef(null);
+  var canvasRef = useRef(null);
+  var chartRef = useRef(null);
+  var inView = useInView(containerRef);
+
+  useEffect(function () {
+    if (!inView || !canvasRef.current || !days || !days.length) return;
+    if (chartRef.current) chartRef.current.destroy();
+
+    var labels = days.map(function (d) { return d.name + '曜'; });
+    var winRates = days.map(function (d) { return d.win_rate; });
+    var matches = days.map(function (d) { return d.matches; });
+
+    chartRef.current = new Chart(canvasRef.current, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '勝率 (%)',
+            data: winRates,
+            borderColor: '#4fc3f7',
+            backgroundColor: 'rgba(79, 195, 247, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            yAxisID: 'y',
+          },
+          {
+            label: '試合数',
+            data: matches,
+            type: 'bar',
+            backgroundColor: 'rgba(129, 212, 250, 0.3)',
+            borderColor: 'rgba(129, 212, 250, 0.5)',
+            borderWidth: 1,
+            yAxisID: 'y1',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: '#aaa', font: { size: 12 } } },
+        },
+        scales: {
+          x: {
+            ticks: { color: '#888', font: { size: 11 } },
+            grid: { color: 'rgba(255,255,255,0.05)' },
+          },
+          y: {
+            position: 'left',
+            min: 0,
+            max: 100,
+            ticks: { color: '#4fc3f7', callback: function (v) { return v + '%'; } },
+            grid: { color: 'rgba(255,255,255,0.08)' },
+          },
+          y1: {
+            position: 'right',
+            min: 0,
+            ticks: { color: '#81d4fa', stepSize: 1 },
+            grid: { display: false },
+          },
+        },
+      },
+      plugins: [winRate50Plugin],
+    });
+
+    return function () { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; } };
+  }, [days, inView]);
+
+  return html`<div class="chart-container" ref=${containerRef}><canvas ref=${canvasRef} /></div>`;
 }
 
 function DayOfWeekSection({ dow }) {
@@ -661,26 +947,132 @@ function DayOfWeekSection({ dow }) {
   });
   var headers = ['曜日', '試合', '勝率', '与被ダメ比'];
   return html`<${Section} title="曜日別の勝率">
-    ${summaryRows.length > 0 && html`<div>
-      <h3>平日 vs 土日</h3>
-      <${Table} headers=${headers} rows=${summaryRows} />
-    </div>`}
-    ${dayRows.length > 0 && html`<div>
-      <h3>曜日別</h3>
-      <${Table} headers=${headers} rows=${dayRows} />
-    </div>`}
+    <${DayOfWeekChart} days=${dow.days} />
     <${Tips} tips=${dow.tips} />
+    <${SubSection} title="テーブルで詳細を見る">
+      ${summaryRows.length > 0 && html`<div>
+        <h3>平日 vs 土日</h3>
+        <${Table} headers=${headers} rows=${summaryRows} />
+      </div>`}
+      ${dayRows.length > 0 && html`<div>
+        <h3>曜日別</h3>
+        <${Table} headers=${headers} rows=${dayRows} />
+      </div>`}
+    <//>
   <//>`;
+}
+
+function DailyTrendChart({ days }) {
+  var containerRef = useRef(null);
+  var canvasRef = useRef(null);
+  var chartRef = useRef(null);
+  var inView = useInView(containerRef);
+
+  useEffect(function () {
+    if (!inView || !canvasRef.current || !days || !days.length) return;
+
+    if (chartRef.current) {
+      chartRef.current.destroy();
+    }
+
+    var labels = days.map(function (d) { return d.date.slice(5); });
+    var winRates = days.map(function (d) { return d.win_rate; });
+    var matches = days.map(function (d) { return d.matches; });
+
+    chartRef.current = new Chart(canvasRef.current, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: '勝率 (%)',
+            data: winRates,
+            borderColor: '#4fc3f7',
+            backgroundColor: 'rgba(79, 195, 247, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: days.length > 30 ? 2 : 4,
+            pointHoverRadius: 6,
+            yAxisID: 'y',
+          },
+          {
+            label: '試合数',
+            data: matches,
+            type: 'bar',
+            backgroundColor: 'rgba(129, 212, 250, 0.3)',
+            borderColor: 'rgba(129, 212, 250, 0.5)',
+            borderWidth: 1,
+            yAxisID: 'y1',
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { labels: { color: '#aaa', font: { size: 12 } } },
+          tooltip: {
+            callbacks: {
+              title: function (items) {
+                var idx = items[0].dataIndex;
+                var d = days[idx];
+                return d.date + ' (' + d.dow_name + ')';
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            ticks: { color: '#888', maxRotation: 45, font: { size: 11 } },
+            grid: { color: 'rgba(255,255,255,0.05)' },
+          },
+          y: {
+            position: 'left',
+            min: 0,
+            max: 100,
+            ticks: {
+              color: '#4fc3f7',
+              callback: function (v) { return v + '%'; },
+            },
+            grid: { color: 'rgba(255,255,255,0.08)' },
+          },
+          y1: {
+            position: 'right',
+            min: 0,
+            ticks: { color: '#81d4fa', stepSize: 1 },
+            grid: { display: false },
+          },
+        },
+      },
+      plugins: [winRate50Plugin],
+    });
+
+    return function () {
+      if (chartRef.current) {
+        chartRef.current.destroy();
+        chartRef.current = null;
+      }
+    };
+  }, [days, inView]);
+
+  return html`<div class="chart-container" ref=${containerRef}>
+    <canvas ref=${canvasRef} />
+  </div>`;
 }
 
 function DailyTrendSection({ daily }) {
   if (!daily || !daily.days || !daily.days.length) return null;
   var rows = daily.days.map(function (d) {
-    return [d.date + ' (' + d.dow_name + ')', d.matches, colorPct(d.win_rate), colorDE(d.dmg_efficiency, 3)];
+    var mark = d.mark === 'good' ? '◎' : d.mark === 'bad' ? '△' : '';
+    return [{ sortValue: d.date, display: d.date + ' (' + d.dow_name + ')' }, d.matches, colorPct(d.win_rate), colorDE(d.dmg_efficiency, 3), mark];
   });
   return html`<${Section} title="日別勝率">
-    <${Table} headers=${['日付', '試合', '勝率', '与被ダメ比']} rows=${rows} />
+    <${DailyTrendChart} days=${daily.days} />
     <${Tips} tips=${daily.tips} />
+    <${SubSection} title="テーブルで詳細を見る">
+      <${SortableTable} headers=${['日付', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
+    <//>
   <//>`;
 }
 
