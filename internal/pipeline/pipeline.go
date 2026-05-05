@@ -169,7 +169,7 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		if errors.Is(err, scraper.ErrLoginFailed) {
 			setError(j, "ログインに失敗しました。メールアドレスとパスワードを確認してください。", err.Error())
 		} else if errors.Is(err, scraper.ErrAccessDenied) {
-			setError(j, "戦績詳細ページへのアクセスが拒否されました。ブラウザからガンダムモバイル(https://web.vsmobile.jp)にログインし、対戦履歴が閲覧できるか確認してください。", err.Error())
+			setError(j, "対戦履歴ページへのアクセスが拒否されました。ブラウザからガンダムモバイル(https://web.vsmobile.jp)にログインし、対戦履歴が閲覧できるか確認してください。", err.Error())
 			if len(on403) > 0 && on403[0] != nil {
 				on403[0](storage.UserKey(username))
 			}
