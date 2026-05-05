@@ -166,14 +166,21 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 	}
 	datedScores, jar, err := scraper.Scraping(username, password, since, onProgress)
 	if err != nil {
-		if errors.Is(err, scraper.ErrLoginFailed) {
+		switch {
+		case errors.Is(err, scraper.ErrLoginFailed):
 			setError(j, "ログインに失敗しました。メールアドレスとパスワードを確認してください。", err.Error())
-		} else if errors.Is(err, scraper.ErrAccessDenied) {
+		case errors.Is(err, scraper.ErrAccessDenied):
 			setError(j, "対戦履歴ページへのアクセスが拒否されました。ブラウザからガンダムモバイル(https://web.vsmobile.jp)にログインし、対戦履歴が閲覧できるか確認してください。", err.Error())
 			if len(on403) > 0 && on403[0] != nil {
 				on403[0](storage.UserKey(username))
 			}
-		} else {
+		case errors.Is(err, scraper.ErrUnauthorized):
+			setError(j, "認証の有効期限が切れました。再度ログインしてお試しください。", err.Error())
+		case errors.Is(err, scraper.ErrNotFound):
+			setError(j, "対戦履歴ページが見つかりませんでした。サイトの仕様が変更された可能性があります。", err.Error())
+		case errors.Is(err, scraper.ErrServerError):
+			setError(j, "ガンダムモバイルのサーバーでエラーが発生しています。しばらく時間をおいてから再度お試しください。", err.Error())
+		default:
 			setError(j, "データの取得に失敗しました", err.Error())
 		}
 		return
