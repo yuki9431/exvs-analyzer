@@ -904,3 +904,6 @@ if (document.getElementById('analyzeBtn')) {
     if (e.key === 'Enter') analyze();
   });
 }
+
+// preview.html用: windowにrenderReportを公開
+window.renderReport = renderReport;
