@@ -1,0 +1,3 @@
+name: exvs-shared
+runtime: nodejs
+description: EXVS Analyzer 共有インフラ（環境非依存）

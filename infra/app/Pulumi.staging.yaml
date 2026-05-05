@@ -1,0 +1,13 @@
+config:
+  gcp:project:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  gcp:region: asia-northeast1
+  exvs-app:cpu: "1"
+  exvs-app:memory: "512Mi"
+  exvs-app:maxInstances: "1"
+  exvs-app:domain: stg.exvs-analyzer.com
+  exvs-app:gcsBucket:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  exvs-app:image:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  exvs-app:sharedStack: exvs-shared/dev

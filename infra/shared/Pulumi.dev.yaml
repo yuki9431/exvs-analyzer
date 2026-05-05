@@ -1,0 +1,21 @@
+config:
+  gcp:project:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  gcp:region: asia-northeast1
+  exvs-shared:artifactRegistryRepo:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  exvs-shared:gcsBucket:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  exvs-shared:billingAccount:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  exvs-shared:budgetAmount:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  exvs-shared:pulumiStateBucket:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  exvs-shared:githubRepo: yuki9431/exvs-analyzer
+  exvs-shared:computeSa:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  exvs-shared:ownerEmail:
+    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+  exvs-shared:domainVerificationTxt: google-site-verification=TAXKxm2PncupGRZkk0mBxIxslp_7aZj-w9dxPAi-ObE
+  exvs-shared:domain: exvs-analyzer.com

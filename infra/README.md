@@ -1,87 +1,105 @@
 # インフラ管理 (Pulumi)
 
-GCPリソースをPulumi (TypeScript) で管理する。
+GCPリソースをPulumi (TypeScript) で管理する。2プロジェクト構成で環境を分離。
+
+## ディレクトリ構成
+
+```
+infra/
+├── shared/    ← 環境非依存リソース（API, IAM, DNS, GCS, Artifact Registry）
+│   └── スタック: dev（固定）
+└── app/       ← 環境ごとにデプロイするリソース（Cloud Run, ドメインマッピング）
+    ├── スタック: prod
+    └── スタック: staging
+```
 
 ## 前提条件
 
-- [Pulumi CLI](https://www.pulumi.com/docs/install/)
-- Node.js 22+
+- Docker（ローカル実行はMakefile経由）
 - GCP認証 (`gcloud auth application-default login`)
 
-## 初期セットアップ
+## 初��セットアップ
 
 ```bash
-# 1. 依存パッケージをインストール
-cd infra && npm install
+# 1. shared スタック初期化
+make pulumi-shared-install
+make pulumi-shared-init
 
-# 2. GCSバックエンドにログイン（バケット名はGitHub Secretsを参照）
-pulumi login gs://<PULUMI_STATE_BUCKET>
-
-# 3. スタックを作成
-pulumi stack init dev
-
-# 4. 設定値をセット
+# 2. shared の設定値をセット
+make pulumi-shared-shell
 pulumi config set gcp:project <PROJECT_ID> --secret
-pulumi config set gcp:region asia-northeast1
-pulumi config set exvs-analyzer:artifactRegistryRepo <REPO_NAME> --secret
-pulumi config set exvs-analyzer:gcsBucket <BUCKET_NAME> --secret
-pulumi config set exvs-analyzer:billingAccount <BILLING_ACCOUNT_ID> --secret
-pulumi config set exvs-analyzer:budgetAmount <AMOUNT>  --secret
+pulumi config set exvs-shared:artifactRegistryRepo <REPO_NAME> --secret
+pulumi config set exvs-shared:gcsBucket <BUCKET_NAME> --secret
+# ... 他の secret も同様
+
+# 3. app スタ���ク初期化（prod / staging）
+make pulumi-app-install
+STACK=prod make pulumi-app-init
+STACK=staging make pulumi-app-init
+
+# 4. app の設定値をセット
+STACK=prod make pulumi-app-shell
+pulumi config set gcp:project <PROJECT_ID> --secret
+pulumi config set exvs-app:image <IMAGE_URI> --secret
+pulumi config set exvs-app:gcsBucket <BUCKET_NAME> --secret
 ```
-
-## 既存リソースのimport
-
-初回のみ、既存GCPリソースをPulumi管理下に取り込む。
-
-```bash
-# API有効化
-pulumi import gcp:projects/service:Service run.googleapis.com <PROJECT_ID>/run.googleapis.com
-pulumi import gcp:projects/service:Service artifactregistry.googleapis.com <PROJECT_ID>/artifactregistry.googleapis.com
-pulumi import gcp:projects/service:Service cloudbuild.googleapis.com <PROJECT_ID>/cloudbuild.googleapis.com
-
-# Artifact Registry
-pulumi import gcp:artifactregistry/repository:Repository <REPO_NAME> projects/<PROJECT_ID>/locations/asia-northeast1/repositories/<REPO_NAME>
-
-# Cloud Run
-pulumi import gcp:cloudrunv2/service:Service exvs-analyzer projects/<PROJECT_ID>/locations/asia-northeast1/services/exvs-analyzer
-
-# 予算アラート
-pulumi import gcp:billing/budget:Budget monthly-budget <BUDGET_ID>
-```
-
-import後に `pulumi preview` で差分がゼロになるまでコードを調整する。
 
 ## 日常操作
 
 ```bash
-# プレビュー
-make pulumi-preview
+# shared プレビュー・適用
+make pulumi-shared-preview
+make pulumi-shared-up
 
-# 適用
-make pulumi-up
+# app プレビュー・適用（STACK で環境指定）
+STACK=prod make pulumi-app-preview
+STACK=staging make pulumi-app-preview
+STACK=prod make pulumi-app-up
+STACK=staging make pulumi-app-up
+```
+
+## デプロイフロー
+
+```
+コード変更 → mainマージ → staging に自動デプロイ
+確認OK → gh workflow run cd.yml (environment=prod) → 本番デプロイ
 ```
 
 ## GitOps
 
-`infra/` 配下のファイルを変更してPRを出すと、自動で以下が実行される。
-
-| タイミング | ワークフロー | 内容 |
+| タイミング | ���ークフロー | 内容 |
 |-----------|-------------|------|
-| PR作成/更新 | `infra-ci.yml` | `pulumi preview` を実行し、結果をPRコメントに投稿 |
-| mainマージ | `infra-cd.yml` | `pulumi up` を実行し、インフラを自動適用 |
+| PR��成/更新 | `infra-ci.yml` | shared + app (prod/staging) の `pulumi preview` |
+| mainマージ | `cd.yml` | ビルド → staging に自動デプロイ |
+| 手動実行 | `cd.yml` | 指定環境（prod/staging）にデプロイ |
 
-## 管理対象リソース
+## 管理対象リソー���
+
+### shared
 
 | リソース | ファイル |
 |---------|---------|
-| Cloud Run サービス | `cloudrun.ts` |
-| Artifact Registry | `artifact-registry.ts` |
 | 有効化API | `apis.ts` |
+| Artifact Registry | `artifact-registry.ts` |
+| GCSバケット | `storage.ts` |
+| Cloud DNS ゾーン | `dns.ts` |
+| IAM / WIF | `iam.ts` |
 | 予算アラート | `budget.ts` |
 
-## GitHub Secrets（追加が必要）
+### app
+
+| リソース | ファイル |
+|---------|---------|
+| Cloud Run サービス | `index.ts` |
+| ドメインマッピング | `index.ts` |
+| CNAME レコード | `index.ts` |
+
+## GitHub Secrets
 
 | Secret | 説明 |
 |--------|------|
 | `PULUMI_STATE_BUCKET` | Pulumiステート保存用GCSバケット名 |
 | `PULUMI_CONFIG_PASSPHRASE` | Pulumiスタックの暗号化パスフレーズ |
+| `GCR_IMAGE` | Artifact RegistryのイメージURIベース |
+| `WIF_PROVIDER` | Workload Identity Provider |
+| `WIF_SERVICE_ACCOUNT` | GitHub Actions用サービスア���ウント |
