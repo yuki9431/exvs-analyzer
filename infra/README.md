@@ -18,7 +18,7 @@ infra/
 - Docker（ローカル実行はMakefile経由）
 - GCP認証 (`gcloud auth application-default login`)
 
-## 初��セットアップ
+## 初期セットアップ
 
 ```bash
 # 1. shared スタック初期化
@@ -32,7 +32,7 @@ pulumi config set exvs-shared:artifactRegistryRepo <REPO_NAME> --secret
 pulumi config set exvs-shared:gcsBucket <BUCKET_NAME> --secret
 # ... 他の secret も同様
 
-# 3. app スタ���ク初期化（prod / staging）
+# 3. app スタック初期化（prod / staging）
 make pulumi-app-install
 STACK=prod make pulumi-app-init
 STACK=staging make pulumi-app-init
@@ -67,13 +67,13 @@ STACK=staging make pulumi-app-up
 
 ## GitOps
 
-| タイミング | ���ークフロー | 内容 |
+| タイミング | ワークフロー | 内容 |
 |-----------|-------------|------|
-| PR��成/更新 | `infra-ci.yml` | shared + app (prod/staging) の `pulumi preview` |
+| PR作成/更新 | `infra-ci.yml` | shared + app (prod/staging) の `pulumi preview` |
 | mainマージ | `cd.yml` | ビルド → staging に自動デプロイ |
 | 手動実行 | `cd.yml` | 指定環境（prod/staging）にデプロイ |
 
-## 管理対象リソー���
+## 管理対象リソース
 
 ### shared
 
@@ -102,4 +102,4 @@ STACK=staging make pulumi-app-up
 | `PULUMI_CONFIG_PASSPHRASE` | Pulumiスタックの暗号化パスフレーズ |
 | `GCR_IMAGE` | Artifact RegistryのイメージURIベース |
 | `WIF_PROVIDER` | Workload Identity Provider |
-| `WIF_SERVICE_ACCOUNT` | GitHub Actions用サービスア���ウント |
+| `WIF_SERVICE_ACCOUNT` | GitHub Actions用サービスアカウント |
