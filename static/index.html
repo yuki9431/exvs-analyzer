@@ -43,16 +43,25 @@
     .report th, .report td { padding: 8px 12px; border: 1px solid #333; text-align: left; }
     .report th { background: #1e3a4f; color: #4fc3f7; }
     .report tr:nth-child(even) { background: #162029; }
+    .report tbody tr { transition: background 0.15s; }
+    .report tbody tr:hover { background: #1e3a4f; }
     .report blockquote { border-left: 3px solid #4fc3f7; padding: 10px 15px; margin: 10px 0; background: #162029; border-radius: 0 8px 8px 0; }
     .report hr { border: none; border-top: 1px solid #333; margin: 20px 0; }
     .report ul, .report ol { padding-left: 20px; }
     .report ul.advice-details { margin-top: 6px; padding-left: 24px; list-style: disc; font-size: 0.92em; opacity: 0.9; }
+    .wr-high { color: #66bb6a; font-weight: bold; }
+    .wr-low { color: #ef5350; font-weight: bold; }
+    .de-high { color: #66bb6a; }
+    .de-low { color: #ef5350; }
     .report strong { color: #4fc3f7; }
     .report a { color: #4fc3f7; text-decoration: none; }
     .report a:hover { text-decoration: underline; }
+    @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+    .report details[open] > :not(summary) { animation: fadeSlideIn 0.25s ease-out; }
     .report details { margin-bottom: 20px; }
     .report details details { margin-bottom: 8px; margin-left: 12px; padding-left: 12px; border-left: 2px solid #2a3a4a; }
-    .report summary { cursor: pointer; font-weight: bold; color: #4fc3f7; }
+    .report summary { cursor: pointer; font-weight: bold; color: #4fc3f7; transition: color 0.15s; }
+    .report summary:hover { color: #81d4fa; }
     .report details details > summary { font-size: 0.95em; color: #81d4fa; }
     .toc-ms-details { display: inline; }
     .toc-ms-details > summary { font-size: 0.85em; color: #81d4fa; display: inline; cursor: pointer; }
