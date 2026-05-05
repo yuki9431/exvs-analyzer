@@ -20,6 +20,44 @@ function esc(s) {
 function pct(n) { return n != null ? n.toFixed(1) + '%' : '-'; }
 function num(n, d) { return n != null ? n.toFixed(d != null ? d : 0) : '-'; }
 
+function wrClass(n) {
+  if (n == null) return '';
+  if (n >= 55) return 'wr-high';
+  if (n <= 45) return 'wr-low';
+  return '';
+}
+
+function colorPct(n) {
+  if (n == null) return '-';
+  var cls = wrClass(n);
+  var text = n.toFixed(1) + '%';
+  if (!cls) return text;
+  return { sortValue: n, display: html`<span class=${cls}>${text}</span>` };
+}
+
+function deClass(n) {
+  if (n == null) return '';
+  if (n >= 1.0) return 'de-high';
+  if (n < 1.0) return 'de-low';
+  return '';
+}
+
+function colorDE(n, d) {
+  if (n == null) return '-';
+  var cls = deClass(n);
+  var text = n.toFixed(d != null ? d : 3);
+  if (!cls) return text;
+  return { sortValue: n, display: html`<span class=${cls}>${text}</span>` };
+}
+
+function cellValue(cell) {
+  return cell != null && typeof cell === 'object' && cell.sortValue != null ? cell.sortValue : cell;
+}
+
+function cellDisplay(cell) {
+  return cell != null && typeof cell === 'object' && cell.display != null ? cell.display : cell;
+}
+
 // --- Share helpers ---
 var SVG_X = '<svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>';
 var SVG_BSKY = '<svg viewBox="0 0 568 501"><path d="M123.121 33.664C188.241 82.553 258.281 181.68 284 234.873c25.719-53.192 95.759-152.32 160.879-201.21C491.866-1.611 568-28.906 568 57.947c0 17.346-9.945 145.713-15.778 166.555-20.275 72.453-94.155 90.933-159.875 79.748C507.222 323.8 536.444 388.56 473.333 453.32c-119.86 122.992-172.272-30.859-185.702-70.281-2.462-7.227-3.614-10.608-3.631-7.733-.017-2.875-1.169.506-3.631 7.733-13.43 39.422-65.842 193.273-185.702 70.281-63.111-64.76-33.889-129.52 80.986-149.071-65.72 11.185-139.6-7.295-159.875-79.748C9.945 203.659 0 75.291 0 57.946 0-28.906 76.135-1.612 123.121 33.664z"/></svg>';
@@ -68,14 +106,14 @@ function SortableTable({ headers, rows, sortableColumns, defaultLimit }) {
     if (sortState.col < 0) return rows;
     var col = sortState.col;
     var sorted = rows.slice().sort(function (a, b) {
-      var va = a[col], vb = b[col];
+      var va = cellValue(a[col]), vb = cellValue(b[col]);
       // 数値文字列からパース（%や+を除去）
-      var na = parseFloat(String(va).replace(/[%+戦件回]/g, ''));
-      var nb = parseFloat(String(vb).replace(/[%+戦件回]/g, ''));
+      var na = typeof va === 'number' ? va : parseFloat(String(va).replace(/[%+戦件回]/g, ''));
+      var nb = typeof vb === 'number' ? vb : parseFloat(String(vb).replace(/[%+戦件回]/g, ''));
       if (!isNaN(na) && !isNaN(nb)) {
         return sortState.asc ? na - nb : nb - na;
       }
-      var sa = String(va), sb = String(vb);
+      var sa = String(cellValue(a[col])), sb = String(cellValue(b[col]));
       return sortState.asc ? sa.localeCompare(sb) : sb.localeCompare(sa);
     });
     return sorted;
@@ -110,7 +148,7 @@ function SortableTable({ headers, rows, sortableColumns, defaultLimit }) {
         return html`<th class=${isSortable ? 'sortable' : ''} onClick=${isSortable ? function () { handleSort(i); } : undefined}>${h}${indicator}</th>`;
       })}</tr></thead>
       <tbody>${displayRows.map(function (row) {
-        return html`<tr>${row.map(function (cell) { return html`<td>${cell}</td>`; })}</tr>`;
+        return html`<tr>${row.map(function (cell) { return html`<td>${cellDisplay(cell)}</td>`; })}</tr>`;
       })}</tbody>
     </table></div>
     ${defaultLimit > 0 && sortedRows.length > defaultLimit && html`<div class="show-more-wrap">
@@ -383,10 +421,10 @@ function BasicStatsSection({ stats }) {
   if (!stats) return null;
   var rows = [
     ['試合数', stats.matches + '戦 (' + stats.wins + '勝' + stats.losses + '敗)'],
-    ['勝率', pct(stats.win_rate)],
+    ['勝率', colorPct(stats.win_rate)],
     ['平均与ダメージ', num(stats.avg_dmg_given)],
     ['平均被ダメージ', num(stats.avg_dmg_taken)],
-    ['与被ダメ比', num(stats.dmg_efficiency, 3)],
+    ['与被ダメ比', colorDE(stats.dmg_efficiency, 3)],
     ['平均撃墜', num(stats.avg_kills, 2)],
     ['平均被撃墜', num(stats.avg_deaths, 2)],
     ['K/D比', num(stats.kd_ratio, 2)],
@@ -415,7 +453,7 @@ function EnemyMatchupSection({ matchup, msName }) {
   var headers = ['機体名', '試合', '勝率', '与被ダメ比', '与ダメ', '被ダメ'];
   function matchupRows(list) {
     return (list || []).map(function (e) {
-      return [esc(e.ms), e.matches, pct(e.win_rate), num(e.dmg_efficiency, 3), num(e.avg_dmg_given, 1), num(e.avg_dmg_taken, 1)];
+      return [esc(e.ms), e.matches, colorPct(e.win_rate), colorDE(e.dmg_efficiency, 3), num(e.avg_dmg_given, 1), num(e.avg_dmg_taken, 1)];
     });
   }
   return html`<div>
@@ -429,7 +467,7 @@ function EnemyMatchupSection({ matchup, msName }) {
 function PartnerSection({ partners, msName }) {
   if (!partners || !partners.length) return null;
   var rows = partners.map(function (p) {
-    return [esc(p.ms), p.matches, pct(p.win_rate), num(p.dmg_efficiency, 3)];
+    return [esc(p.ms), p.matches, colorPct(p.win_rate), colorDE(p.dmg_efficiency, 3)];
   });
   return html`<div>
     <${SortableTable} headers=${['機体名', '試合', '勝率', '与被ダメ比']} rows=${rows} defaultLimit=${10} />
@@ -482,7 +520,7 @@ function MsPairSubSection({ msPair }) {
   var list = msPair.by_matches || [];
   if (!list.length) return null;
   var rows = list.map(function (p) {
-    return [esc(p.pair), p.matches, pct(p.win_rate), num(p.dmg_efficiency, 3)];
+    return [esc(p.pair), p.matches, colorPct(p.win_rate), colorDE(p.dmg_efficiency, 3)];
   });
   return html`<div>
     <${SortableTable} headers=${['編成', '試合数', '勝率', '与被ダメ比']} rows=${rows} defaultLimit=${10} />
@@ -492,7 +530,7 @@ function MsPairSubSection({ msPair }) {
 function CostPairSubSection({ costPair }) {
   if (!costPair || !costPair.length) return null;
   var rows = costPair.map(function (p) {
-    return [esc(p.pair), p.matches, pct(p.win_rate), num(p.dmg_efficiency, 3)];
+    return [esc(p.pair), p.matches, colorPct(p.win_rate), colorDE(p.dmg_efficiency, 3)];
   });
   return html`<div>
     <${SortableTable} headers=${['コスト編成', '試合数', '勝率', '与被ダメ比']} rows=${rows} defaultLimit=${10} />
@@ -534,17 +572,17 @@ function FixedPartnersSection({ partners }) {
       var statsRows = [
         ['平均与ダメージ', num(p.my_stats.avg_dmg_given), num(p.partner_stats.avg_dmg_given)],
         ['平均被ダメージ', num(p.my_stats.avg_dmg_taken), num(p.partner_stats.avg_dmg_taken)],
-        ['与被ダメ比', num(p.my_stats.dmg_efficiency, 3), num(p.partner_stats.dmg_efficiency, 3)],
+        ['与被ダメ比', colorDE(p.my_stats.dmg_efficiency, 3), colorDE(p.partner_stats.dmg_efficiency, 3)],
         ['平均撃墜', num(p.my_stats.avg_kills, 2), num(p.partner_stats.avg_kills, 2)],
         ['平均被撃墜', num(p.my_stats.avg_deaths, 2), num(p.partner_stats.avg_deaths, 2)],
       ];
       var msRows = (p.partner_ms_breakdown || []).map(function (m) {
-        return [esc(m.ms), m.matches, pct(m.win_rate)];
+        return [esc(m.ms), m.matches, colorPct(m.win_rate)];
       });
       var title = p.team_name ? esc(p.partner_name) + '【' + esc(p.team_name) + '】' : esc(p.partner_name);
       return html`<div>
         <h3>${title}</h3>
-        <p>${p.matches}戦${p.wins}勝 (勝率 ${pct(p.win_rate)})</p>
+        <p>${p.matches}戦${p.wins}勝 (勝率 ${cellDisplay(colorPct(p.win_rate))})</p>
         <${Table} headers=${['項目', '自分', '相方']} rows=${statsRows} />
         ${msRows.length > 0 && html`<p><strong>相方の使用機体:</strong></p><${Table} headers=${['機体', '試合', '勝率']} rows=${msRows} />`}
         <${Tips} tips=${p.tips} />
@@ -557,7 +595,7 @@ function DeathsImpactSubSection({ deaths }) {
   if (!deaths || !deaths.length) return null;
   return deaths.map(function (d) {
     var rows = (d.buckets || []).map(function (b) {
-      return [b.label, b.matches + '戦', pct(b.win_rate)];
+      return [b.label, b.matches + '戦', colorPct(b.win_rate)];
     });
     return html`<div>
       <${Table} headers=${['被撃墜数', '試合数', '勝率']} rows=${rows} />
@@ -570,7 +608,7 @@ function TimeOfDaySection({ time }) {
   if (!time || !time.hours || !time.hours.length) return null;
   var rows = time.hours.map(function (h) {
     var mark = h.mark === 'good' ? '◎' : h.mark === 'bad' ? '△' : '';
-    return [h.hour + '時', h.matches, pct(h.win_rate), num(h.dmg_efficiency, 3), mark];
+    return [h.hour + '時', h.matches, colorPct(h.win_rate), colorDE(h.dmg_efficiency, 3), mark];
   });
   return html`<${Section} title="時間帯別の勝率">
     <${Table} headers=${['時間帯', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
@@ -581,10 +619,10 @@ function TimeOfDaySection({ time }) {
 function DayOfWeekSection({ dow }) {
   if (!dow) return null;
   var summaryRows = [];
-  if (dow.weekday) summaryRows.push(['平日', dow.weekday.matches, pct(dow.weekday.win_rate), num(dow.weekday.dmg_efficiency, 3)]);
-  if (dow.weekend) summaryRows.push(['土日', dow.weekend.matches, pct(dow.weekend.win_rate), num(dow.weekend.dmg_efficiency, 3)]);
+  if (dow.weekday) summaryRows.push(['平日', dow.weekday.matches, colorPct(dow.weekday.win_rate), colorDE(dow.weekday.dmg_efficiency, 3)]);
+  if (dow.weekend) summaryRows.push(['土日', dow.weekend.matches, colorPct(dow.weekend.win_rate), colorDE(dow.weekend.dmg_efficiency, 3)]);
   var dayRows = (dow.days || []).map(function (d) {
-    return [d.name + '曜', d.matches, pct(d.win_rate), num(d.dmg_efficiency, 3)];
+    return [d.name + '曜', d.matches, colorPct(d.win_rate), colorDE(d.dmg_efficiency, 3)];
   });
   var headers = ['曜日', '試合', '勝率', '与被ダメ比'];
   return html`<${Section} title="曜日別の勝率">
@@ -604,7 +642,7 @@ function DailyTrendSection({ daily }) {
   if (!daily || !daily.days || !daily.days.length) return null;
   var rows = daily.days.map(function (d) {
     var mark = d.mark === 'good' ? '◎' : d.mark === 'bad' ? '△' : '';
-    return [d.date + ' (' + d.dow_name + ')', d.matches, pct(d.win_rate), num(d.dmg_efficiency, 3), mark];
+    return [d.date + ' (' + d.dow_name + ')', d.matches, colorPct(d.win_rate), colorDE(d.dmg_efficiency, 3), mark];
   });
   return html`<${Section} title="日別勝率">
     <${Table} headers=${['日付', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
@@ -616,9 +654,9 @@ function SeasonSection({ seasons }) {
   if (!seasons || !seasons.length) return null;
   return html`<${Section} title="シーズン別分析">
     ${seasons.map(function (s) {
-      var rows = [['全体', s.matches, pct(s.win_rate), num(s.dmg_efficiency, 3)]];
-      if (s.first_half) rows.push(['前半', s.first_half.matches, pct(s.first_half.win_rate), num(s.first_half.dmg_efficiency, 3)]);
-      if (s.second_half) rows.push(['後半', s.second_half.matches, pct(s.second_half.win_rate), num(s.second_half.dmg_efficiency, 3)]);
+      var rows = [['全体', s.matches, colorPct(s.win_rate), colorDE(s.dmg_efficiency, 3)]];
+      if (s.first_half) rows.push(['前半', s.first_half.matches, colorPct(s.first_half.win_rate), colorDE(s.first_half.dmg_efficiency, 3)]);
+      if (s.second_half) rows.push(['後半', s.second_half.matches, colorPct(s.second_half.win_rate), colorDE(s.second_half.dmg_efficiency, 3)]);
       return html`<div>
         <h3>${esc(s.name)}</h3>
         <${Table} headers=${['期間', '試合', '勝率', '与被ダメ比']} rows=${rows} />
