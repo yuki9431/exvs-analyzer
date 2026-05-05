@@ -33,7 +33,7 @@ PULUMI_STATE_BUCKET ?= exvs2ib-analyzer-pulumi-state
 STACK ?= prod
 
 # shared用（スタック固定: dev）
-PULUMI_SHARED_LOGIN = pulumi login gs://$(PULUMI_STATE_BUCKET) && pulumi stack select dev
+PULUMI_SHARED_LOGIN = pulumi login gs://$(PULUMI_STATE_BUCKET) && pulumi stack select shared
 PULUMI_SHARED_RUN = docker run --rm --entrypoint "" \
 	-v "$(CURDIR)/infra/shared":/infra \
 	-v "$(HOME)/.config/gcloud":/root/.config/gcloud \
@@ -62,7 +62,7 @@ pulumi-shared-install:
 
 ## shared: バックエンドにログイン＆スタック初期化
 pulumi-shared-init:
-	$(PULUMI_SHARED_RUN) sh -c "pulumi login gs://$(PULUMI_STATE_BUCKET) && pulumi stack init dev || pulumi stack select dev"
+	$(PULUMI_SHARED_RUN) sh -c "pulumi login gs://$(PULUMI_STATE_BUCKET) && pulumi stack init shared || pulumi stack select shared"
 
 ## shared: インフラ変更のプレビュー
 pulumi-shared-preview:

@@ -10,4 +10,4 @@ config:
     secure: v1:PLACEHOLDER:needs-pulumi-config-set
   exvs-app:image:
     secure: v1:PLACEHOLDER:needs-pulumi-config-set
-  exvs-app:sharedStack: exvs-shared/dev
+  exvs-app:sharedStack: exvs-shared/shared
