@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/yuki9431/exvs-analyzer/internal/pipeline"
+	"github.com/yuki9431/exvs-analyzer/internal/storage"
 	"golang.org/x/time/rate"
 )
 
@@ -88,6 +89,13 @@ func StartServer() {
 			return
 		}
 
+		// 403ブロックチェック
+		userHash := storage.UserKey(req.Username)
+		if forbidden403.IsBlocked(userHash) {
+			sendJSON(w, http.StatusTooManyRequests, map[string]string{"error": "対戦履歴ページへのアクセスが拒否されました。ブラウザからガンダムモバイル(https://web.vsmobile.jp)にログインし、対戦履歴が閲覧できるか確認してください。"})
+			return
+		}
+
 		// 同時実行数制限
 		select {
 		case requestLimiter <- struct{}{}:
@@ -102,7 +110,7 @@ func StartServer() {
 		// バックグラウンドで実行
 		go func() {
 			defer func() { <-requestLimiter }()
-			pipeline.Run(j, req.Username, req.Password)
+			pipeline.Run(j, req.Username, req.Password, forbidden403.Block)
 		}()
 
 		sendJSON(w, http.StatusAccepted, map[string]string{"id": j.ID})
