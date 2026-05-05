@@ -120,7 +120,10 @@ function buildShareText(items) {
 function Tips({ tips }) {
   if (!tips || !tips.length) return null;
   return html`<blockquote><strong>💡アドバイス:</strong><br />${tips.map(function (t, i) {
-    return html`${i > 0 && html`<br />`}${t}`;
+    var text = typeof t === 'string' ? t : t.text;
+    var details = typeof t === 'object' && t.details ? t.details : null;
+    return html`${i > 0 && html`<br />`}${text}
+      ${details && html`<ul class="advice-details">${details.map(function (d) { return html`<li>${d}</li>`; })}</ul>`}`;
   })}</blockquote>`;
 }
 

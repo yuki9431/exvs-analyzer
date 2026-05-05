@@ -357,12 +357,14 @@ def data_enemy_matchup(data_list, min_matches=3):
     if weak:
         high_dmg_taken = [r for r in weak if r["avg_dmg_taken"] >= 1200]
         if high_dmg_taken:
-            names = "、".join(r["ms"] for r in high_dmg_taken[:3])
-            tips.append(f"{names} 戦では被ダメが特に多いです。距離管理を見直しましょう。")
+            tip = {"text": "以下の機体戦で被ダメが特に多いです。距離管理を見直しましょう。",
+                   "details": [f"{r['ms']}（被ダメ {r['avg_dmg_taken']:.0f}）" for r in high_dmg_taken[:3]]}
+            tips.append(tip)
         low_dmg_given = [r for r in weak if r["avg_dmg_given"] <= 900]
         if low_dmg_given:
-            names = "、".join(r["ms"] for r in low_dmg_given[:3])
-            tips.append(f"{names} 戦では与ダメが低いです。攻撃の手数や当て方を工夫しましょう。")
+            tip = {"text": "以下の機体戦で与ダメが低いです。攻撃の手数や当て方を工夫しましょう。",
+                   "details": [f"{r['ms']}（与ダメ {r['avg_dmg_given']:.0f}）" for r in low_dmg_given[:3]]}
+            tips.append(tip)
 
     return {
         "strong": strong,
