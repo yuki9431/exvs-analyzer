@@ -208,8 +208,8 @@ func streamMatchEntries(ctx context.Context, cancel context.CancelFunc, jar http
 				errorCount++
 				if errors.Is(err, ErrAccessDenied) {
 					has403 = true
-					cancel()
 				}
+				cancel()
 			}
 			mu.Unlock()
 
@@ -381,8 +381,8 @@ func fetchDetailPagesStreaming(ctx context.Context, cancel context.CancelFunc, j
 				errorCount++
 				if errors.Is(err, ErrAccessDenied) {
 					has403 = true
-					cancel()
 				}
+				cancel()
 			}
 			current := processed
 			mu.Unlock()
@@ -398,7 +398,7 @@ func fetchDetailPagesStreaming(ctx context.Context, cancel context.CancelFunc, j
 		return nil, ErrAccessDenied
 	}
 	if errorCount > 0 {
-		return scores, fmt.Errorf("詳細ページ取得で%w: %d/%d件がエラー", ErrHTTPRequestFailed, errorCount, total)
+		return nil, fmt.Errorf("詳細ページ取得で%w: %d/%d件がエラー", ErrHTTPRequestFailed, errorCount, total)
 	}
 	return scores, nil
 }
