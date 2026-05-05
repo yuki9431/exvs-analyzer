@@ -1,5 +1,5 @@
 {
-  "name": "exvs-analyzer-infra",
+  "name": "exvs-shared-infra",
   "main": "index.ts",
   "devDependencies": {
     "typescript": "^5",

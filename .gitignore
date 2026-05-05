@@ -17,3 +17,6 @@
 # Preview files
 static/preview.html
 static/sample_report.md
+
+# Node.js
+node_modules/

@@ -33,11 +33,6 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install dependencies
-        if: steps.check-secrets.outputs.skip != 'true'
-        working-directory: infra
-        run: npm ci
-
       - id: auth
         if: steps.check-secrets.outputs.skip != 'true'
         uses: google-github-actions/auth@v3
@@ -45,14 +40,55 @@ jobs:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
-      - name: Pulumi preview
+      - name: Install shared dependencies
         if: steps.check-secrets.outputs.skip != 'true'
-        working-directory: infra
+        working-directory: infra/shared
+        run: npm ci
+
+      - name: Install app dependencies
+        if: steps.check-secrets.outputs.skip != 'true'
+        working-directory: infra/app
+        run: npm ci
+
+      - name: Pulumi preview (shared)
+        if: steps.check-secrets.outputs.skip != 'true'
+        working-directory: infra/shared
         run: |
           npm install -g @pulumi/pulumi 2>/dev/null || true
           pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
-          pulumi stack select dev
-          pulumi preview 2>&1 | tee /tmp/pulumi-preview.txt
+          if ! pulumi stack select shared 2>/dev/null; then
+            echo "### shared: stack not initialized, skipping" > /tmp/pulumi-preview.txt
+            exit 0
+          fi
+          echo "### shared" > /tmp/pulumi-preview.txt
+          pulumi preview 2>&1 | tee -a /tmp/pulumi-preview.txt
+        env:
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
+      - name: Pulumi preview (app/prod)
+        if: steps.check-secrets.outputs.skip != 'true'
+        working-directory: infra/app
+        run: |
+          pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
+          if ! pulumi stack select prod 2>/dev/null; then
+            echo "### app (prod): stack not initialized, skipping" >> /tmp/pulumi-preview.txt
+            exit 0
+          fi
+          echo "### app (prod)" >> /tmp/pulumi-preview.txt
+          pulumi preview 2>&1 | tee -a /tmp/pulumi-preview.txt
+        env:
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
+      - name: Pulumi preview (app/stg)
+        if: steps.check-secrets.outputs.skip != 'true'
+        working-directory: infra/app
+        run: |
+          if ! pulumi stack select stg 2>/dev/null; then
+            echo "### app (stg): stack not initialized, skipping" >> /tmp/pulumi-preview.txt
+            exit 0
+          fi
+          echo "### app (stg)" >> /tmp/pulumi-preview.txt
+          pulumi preview 2>&1 | tee -a /tmp/pulumi-preview.txt
         env:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 

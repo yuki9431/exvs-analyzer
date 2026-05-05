@@ -1,0 +1,3 @@
+name: exvs-app
+runtime: nodejs
+description: EXVS Analyzer アプリ環境（環境ごとにデプロイ）

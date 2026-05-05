@@ -36,8 +36,12 @@ python3 -m http.server 8888 --directory static
 python3 scripts/analyze.py /tmp/scores.csv
 
 # Pulumiコマンド（Docker経由）
-PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-preview   # 変更プレビュー
-PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-up        # 変更適用
+PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-shared-preview            # shared プレビュー
+PULUMI_CONFIG_PASSPHRASE=<passphrase> STACK=prod make pulumi-app-preview    # app(本番) プレビュー
+PULUMI_CONFIG_PASSPHRASE=<passphrase> STACK=stg make pulumi-app-preview # app(検証) プレビュー
+PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-shared-shell              # shared シェル（pulumi upはここで）
+PULUMI_CONFIG_PASSPHRASE=<passphrase> STACK=prod make pulumi-app-shell      # app(本番) シェル
+PULUMI_CONFIG_PASSPHRASE=<passphrase> STACK=stg make pulumi-app-shell   # app(検証) シェル
 ```
 
 http://localhost:8080 でアクセス可能。
@@ -79,13 +83,14 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 - `static/htm-preact-standalone.js` — htm + Preact ライブラリ（スタンドアロン版）
 - `static/preview.html` — フロントエンド開発用プレビュー（gitignore対象）
 - `data/ms_list.json` — MS画像URL→名前・コストのマッピング（コスト: 3000/2500/2000/1500）
-- `infra/` — Pulumi IaC（`apis.ts`, `artifact-registry.ts`, `cloudrun.ts`, `domain.ts`, `storage.ts`, `iam.ts`, `budget.ts`）
+- `infra/shared/` — Pulumi IaC 共有リソース（`apis.ts`, `artifact-registry.ts`, `storage.ts`, `dns.ts`, `iam.ts`, `budget.ts`）
+- `infra/app/` — Pulumi IaC 環境別リソース（`index.ts` — Cloud Run, ドメインマッピング, CNAME）
 
 ## GitHub Actions
 
 - CI: `ci.yml`（PRのみ。Docker build, go vet, py_compile。ラベル `skip-ci` でスキップ）
-- CD: `cd.yml`（mainマージ時 or 手動実行。Pulumi経由でCloud Runへデプロイ。ラベル `no-deploy` でスキップ）
-- Infra CI: `infra-ci.yml`（infra/配下の変更時にPulumi preview）
+- CD: `cd.yml`（mainマージ時 → stagingデプロイ、手動実行 → 環境選択可。ラベル `no-deploy` でスキップ）
+- Infra CI: `infra-ci.yml`（infra/配下の変更時にshared + app(prod/staging)のPulumi preview）
 - MSリスト更新: `update-mslist.yml`（毎日03:00-06:00 JST、ランダムスリープ。変更時にPR自動作成）
 - **サードパーティアクションを追加・変更する際は、GitHubリポジトリのリリースページで最新メジャーバージョンを確認すること。** 古いバージョンを指定するとNode.js非推奨警告やエラーが発生する（過去に複数回発生）。
 

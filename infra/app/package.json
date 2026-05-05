@@ -1,0 +1,12 @@
+{
+  "name": "exvs-app-infra",
+  "main": "index.ts",
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^22"
+  },
+  "dependencies": {
+    "@pulumi/pulumi": "^3.230.0",
+    "@pulumi/gcp": "^9.18.0"
+  }
+}

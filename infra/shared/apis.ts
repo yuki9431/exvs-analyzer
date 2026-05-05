@@ -1,6 +1,6 @@
 import * as gcp from "@pulumi/gcp";
 
-const enabledApis = [
+const requiredApis = [
   "run.googleapis.com",
   "artifactregistry.googleapis.com",
   "cloudbuild.googleapis.com",
@@ -10,7 +10,7 @@ const enabledApis = [
   "compute.googleapis.com",
 ];
 
-export const services = enabledApis.map(
+export const services = requiredApis.map(
   (api) =>
     new gcp.projects.Service(api, {
       service: api,

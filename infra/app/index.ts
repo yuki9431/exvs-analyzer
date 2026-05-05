@@ -2,18 +2,30 @@ import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
 
 const config = new pulumi.Config();
-const gcsBucket = config.requireSecret("gcsBucket");
+const serviceName = config.require("serviceName");
+const cpu = config.require("cpu");
+const memory = config.require("memory");
+const maxInstances = config.requireNumber("maxInstances");
 const image = config.requireSecret("image");
+const domain = config.require("domain");
+const gcsBucket = config.requireSecret("gcsBucket");
 
+// shared スタックからDNSゾーン名を取得
+const sharedStackName = config.require("sharedStack");
+const shared = new pulumi.StackReference(sharedStackName);
+const dnsZoneName = shared.getOutput("dnsZoneName") as pulumi.Output<string>;
+
+// Cloud Run サービス
 export const service = new gcp.cloudrunv2.Service(
-  "exvs-analyzer",
+  serviceName,
   {
+    name: serviceName,
     location: gcp.config.region!,
     ingress: "INGRESS_TRAFFIC_ALL",
     launchStage: "GA",
     template: {
       scaling: {
-        maxInstanceCount: 3,
+        maxInstanceCount: maxInstances,
       },
       containers: [
         {
@@ -29,8 +41,8 @@ export const service = new gcp.cloudrunv2.Service(
             cpuIdle: true,
             startupCpuBoost: true,
             limits: {
-              cpu: "2",
-              memory: "1Gi",
+              cpu: cpu,
+              memory: memory,
             },
           },
           startupProbe: {
@@ -78,4 +90,30 @@ export const iamBinding = new gcp.cloudrunv2.ServiceIamBinding(
   }
 );
 
+// Cloud Runドメインマッピング
+export const domainMapping = new gcp.cloudrun.DomainMapping(
+  "exvs-analyzer-domain",
+  {
+    location: gcp.config.region!,
+    name: domain,
+    metadata: {
+      namespace: gcp.config.project!,
+    },
+    spec: {
+      routeName: service.name,
+    },
+  }
+);
+
+// サブドメインのCNAMEレコード（Cloud Runのドメインマッピング用）
+export const cnameRecord = new gcp.dns.RecordSet("cname", {
+  managedZone: dnsZoneName,
+  name: domain + ".",
+  type: "CNAME",
+  ttl: 300,
+  rrdatas: ["ghs.googlehosted.com."],
+});
+
 export const url = service.uri;
+export const cloudRunServiceName = service.name;
+export const customDomain = domainMapping.name;

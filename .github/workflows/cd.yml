@@ -4,6 +4,15 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deploy target environment"
+        required: true
+        default: "stg"
+        type: choice
+        options:
+          - stg
+          - prod
 
 jobs:
   check-deploy-label:
@@ -53,7 +62,7 @@ jobs:
           node-version: "22"
 
       - name: Install dependencies
-        working-directory: infra
+        working-directory: infra/app
         run: npm ci
 
       - id: auth
@@ -70,13 +79,21 @@ jobs:
           gcloud builds submit --tag "$IMAGE"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
+      - name: Determine target environment
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "DEPLOY_ENV=${{ inputs.environment }}" >> "$GITHUB_ENV"
+          else
+            echo "DEPLOY_ENV=stg" >> "$GITHUB_ENV"
+          fi
+
       - name: Deploy with Pulumi
-        working-directory: infra
+        working-directory: infra/app
         run: |
           npm install -g @pulumi/pulumi 2>/dev/null || true
           pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
-          pulumi stack select dev
-          pulumi config set exvs-analyzer:image "$IMAGE" --secret
+          pulumi stack select "$DEPLOY_ENV"
+          pulumi config set exvs-app:image "$IMAGE" --secret
           pulumi up --yes
         env:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
