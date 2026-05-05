@@ -102,6 +102,6 @@ STACK=stg make pulumi-app-shell    # → pulumi up
 |--------|------|
 | `PULUMI_STATE_BUCKET` | Pulumiステート保存用GCSバケット名 |
 | `PULUMI_CONFIG_PASSPHRASE` | Pulumiスタックの暗号化パスフレーズ |
-| `GCR_IMAGE` | Artifact RegistryのイメージURIベース |
+| `IMAGE_URI` | コンテナイメージURIベース |
 | `WIF_PROVIDER` | Workload Identity Provider |
 | `WIF_SERVICE_ACCOUNT` | GitHub Actions用サービスアカウント |
