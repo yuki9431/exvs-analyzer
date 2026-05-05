@@ -467,8 +467,13 @@ function BasicStatsSection({ stats }) {
 
 function WinLossPatternSection({ pattern }) {
   if (!pattern) return null;
+  var colorFns = {
+    '与ダメージ': colorDmgGiven, '被ダメージ': colorDmgTaken,
+    '撃墜数': colorKills, '被撃墜数': colorDeaths
+  };
   var rows = (pattern.metrics || []).map(function (m) {
-    return [m.label, num(m.win_avg, 1), num(m.loss_avg, 1), colorDiff(m.diff, 1)];
+    var fn = colorFns[m.label] || function (n) { return num(n, 1); };
+    return [m.label, fn(m.win_avg), fn(m.loss_avg), colorDiff(m.diff, 1)];
   });
   return html`<div>
     <${Table} headers=${['項目', '勝利時', '敗北時', '差分']} rows=${rows} />
