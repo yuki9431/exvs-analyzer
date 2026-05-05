@@ -8,10 +8,10 @@ on:
       environment:
         description: "Deploy target environment"
         required: true
-        default: "staging"
+        default: "stg"
         type: choice
         options:
-          - staging
+          - stg
           - prod
 
 jobs:
@@ -62,9 +62,8 @@ jobs:
           node-version: "22"
 
       - name: Install dependencies
-        run: |
-          cd infra/shared && npm ci
-          cd "$GITHUB_WORKSPACE/infra/app" && npm ci
+        working-directory: infra/app
+        run: npm ci
 
       - id: auth
         uses: google-github-actions/auth@v3
@@ -85,7 +84,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "DEPLOY_ENV=${{ inputs.environment }}" >> "$GITHUB_ENV"
           else
-            echo "DEPLOY_ENV=staging" >> "$GITHUB_ENV"
+            echo "DEPLOY_ENV=stg" >> "$GITHUB_ENV"
           fi
 
       - name: Deploy with Pulumi

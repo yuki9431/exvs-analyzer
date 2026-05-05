@@ -10,7 +10,7 @@ infra/
 │   └── スタック: shared（固定）
 └── app/       ← 環境ごとにデプロイするリソース（Cloud Run, ドメインマッピング）
     ├── スタック: prod
-    └── スタック: staging
+    └── スタック: stg
 ```
 
 ## 前提条件
@@ -35,7 +35,7 @@ pulumi config set exvs-shared:gcsBucket <BUCKET_NAME> --secret
 # 3. app スタック初期化（prod / staging）
 make pulumi-app-install
 STACK=prod make pulumi-app-init
-STACK=staging make pulumi-app-init
+STACK=stg make pulumi-app-init
 
 # 4. app の設定値をセット
 STACK=prod make pulumi-app-shell
@@ -47,15 +47,17 @@ pulumi config set exvs-app:gcsBucket <BUCKET_NAME> --secret
 ## 日常操作
 
 ```bash
-# shared プレビュー・適用
+# shared プレビュー
 make pulumi-shared-preview
-make pulumi-shared-up
 
-# app プレビュー・適用（STACK で環境指定）
+# app プレビュー（STACK で環境指定）
 STACK=prod make pulumi-app-preview
-STACK=staging make pulumi-app-preview
-STACK=prod make pulumi-app-up
-STACK=staging make pulumi-app-up
+STACK=stg make pulumi-app-preview
+
+# 変更適用はシェルに入って対話的に実行
+make pulumi-shared-shell    # → pulumi up
+STACK=prod make pulumi-app-shell   # → pulumi up
+STACK=stg make pulumi-app-shell    # → pulumi up
 ```
 
 ## デプロイフロー

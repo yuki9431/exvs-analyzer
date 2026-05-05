@@ -15,8 +15,8 @@ export const budget = new gcp.billing.Budget("monthly-budget", {
     },
   },
   thresholdRules: [
-    { thresholdPercent: 0.5 },
-    { thresholdPercent: 0.8 },
-    { thresholdPercent: 1.0 },
+    { thresholdPercent: 0.5, spendBasis: "CURRENT_SPEND" },
+    { thresholdPercent: 0.8, spendBasis: "CURRENT_SPEND" },
+    { thresholdPercent: 1.0, spendBasis: "CURRENT_SPEND" },
   ],
 });

@@ -43,7 +43,7 @@ PULUMI_SHARED_RUN = docker run --rm --entrypoint "" \
 	-e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json \
 	$(PULUMI_IMAGE)
 
-# app用（STACK変数で環境切り替え: prod / staging）
+# app用（STACK変数で環境切り替え: prod / stg）
 PULUMI_APP_LOGIN = pulumi login gs://$(PULUMI_STATE_BUCKET) && pulumi stack select $(STACK)
 PULUMI_APP_RUN = docker run --rm --entrypoint "" \
 	-v "$(CURDIR)/infra/app":/infra \
@@ -80,7 +80,7 @@ pulumi-shared-shell:
 		$(PULUMI_IMAGE) \
 		sh -c "$(PULUMI_SHARED_LOGIN) && sh"
 
-## === app（環境ごとにデプロイ: STACK=prod|staging） ===
+## === app（環境ごとにデプロイ: STACK=prod|stg） ===
 
 ## app: 依存パッケージをインストール
 pulumi-app-install:
@@ -90,11 +90,11 @@ pulumi-app-install:
 pulumi-app-init:
 	$(PULUMI_APP_RUN) sh -c "pulumi login gs://$(PULUMI_STATE_BUCKET) && pulumi stack init $(STACK) || pulumi stack select $(STACK)"
 
-## app: インフラ変更のプレビュー（STACK=prod|staging）
+## app: インフラ変更のプレビュー（STACK=prod|stg）
 pulumi-app-preview:
 	$(PULUMI_APP_RUN) sh -c "$(PULUMI_APP_LOGIN) && pulumi preview"
 
-## app: シェルで入る（pulumi up はここで実行。STACK=prod|staging）
+## app: シェルで入る（pulumi up はここで実行。STACK=prod|stg）
 pulumi-app-shell:
 	docker run --rm -it --entrypoint "" \
 		-v "$(CURDIR)/infra/app":/infra \
