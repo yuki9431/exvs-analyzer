@@ -848,14 +848,13 @@ function TimeOfDayChart({ hours }) {
 function TimeOfDaySection({ time }) {
   if (!time || !time.hours || !time.hours.length) return null;
   var rows = time.hours.map(function (h) {
-    var mark = h.mark === 'good' ? '◎' : h.mark === 'bad' ? '△' : '';
-    return [{ sortValue: h.hour, display: h.hour + '時' }, h.matches, colorPct(h.win_rate), colorDE(h.dmg_efficiency, 3), mark];
+    return [{ sortValue: h.hour, display: h.hour + '時' }, h.matches, colorPct(h.win_rate), colorDE(h.dmg_efficiency, 3)];
   });
   return html`<${Section} title="時間帯別の勝率">
     <${TimeOfDayChart} hours=${time.hours} />
     <${Tips} tips=${time.tips} />
     <${SubSection} title="テーブルで詳細を見る">
-      <${SortableTable} headers=${['時間帯', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
+      <${SortableTable} headers=${['時間帯', '試合', '勝率', '与被ダメ比']} rows=${rows} />
     <//>
   <//>`;
 }
@@ -1064,14 +1063,13 @@ function DailyTrendChart({ days }) {
 function DailyTrendSection({ daily }) {
   if (!daily || !daily.days || !daily.days.length) return null;
   var rows = daily.days.map(function (d) {
-    var mark = d.mark === 'good' ? '◎' : d.mark === 'bad' ? '△' : '';
-    return [{ sortValue: d.date, display: d.date + ' (' + d.dow_name + ')' }, d.matches, colorPct(d.win_rate), colorDE(d.dmg_efficiency, 3), mark];
+    return [{ sortValue: d.date, display: d.date + ' (' + d.dow_name + ')' }, d.matches, colorPct(d.win_rate), colorDE(d.dmg_efficiency, 3)];
   });
   return html`<${Section} title="日別勝率">
     <${DailyTrendChart} days=${daily.days} />
     <${Tips} tips=${daily.tips} />
     <${SubSection} title="テーブルで詳細を見る">
-      <${SortableTable} headers=${['日付', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
+      <${SortableTable} headers=${['日付', '試合', '勝率', '与被ダメ比']} rows=${rows} />
     <//>
   <//>`;
 }
