@@ -89,7 +89,8 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 ## GitHub Actions
 
 - CI: `ci.yml`（PRのみ。Docker build, go vet, py_compile。ラベル `skip-ci` でスキップ）
-- CD: `cd.yml`（mainマージ時 → stagingデプロイ、手動実行 → 環境選択可。ラベル `no-deploy` でスキップ）
+- Build: `build.yml`（mainマージ時 → イメージビルド&プッシュ → Pulumi yaml の image 更新 → コミット → deploy.yml 呼び出し。ラベル `no-deploy` でスキップ。手動実行で環境選択可）
+- Deploy: `deploy.yml`（`infra/app/Pulumi.*.yaml` 変更トリガー or build.yml からの `workflow_dispatch` → `pulumi up`）
 - Infra CI: `infra-ci.yml`（infra/配下の変更時にshared + app(prod/staging)のPulumi preview）
 - MSリスト更新: `update-mslist.yml`（毎日03:00-06:00 JST、ランダムスリープ。変更時にPR自動作成）
 - **サードパーティアクションを追加・変更する際は、GitHubリポジトリのリリースページで最新メジャーバージョンを確認すること。** 古いバージョンを指定するとNode.js非推奨警告やエラーが発生する（過去に複数回発生）。
@@ -98,7 +99,7 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 
 - PRには基本的に `no-deploy` ラベルを付ける（デプロイはまとめて行う）
 - Go/Docker以外の軽微な変更には `skip-ci` ラベルを付ける
-- デプロイは `gh workflow run cd.yml` で手動実行、または `no-deploy` なしでPRをマージ
+- デプロイは `gh workflow run build.yml` で手動実行（環境選択可）、または `no-deploy` なしでPRをマージ
 - **コード構成やディレクトリ構造に変更があった場合は、CLAUDE.mdの「コード構成」セクションとREADME.mdのプロジェクト構成も合わせて更新すること**
 
 ## 主要な技術情報

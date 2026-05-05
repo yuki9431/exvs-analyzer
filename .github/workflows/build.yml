@@ -1,12 +1,15 @@
-name: CD
+name: Build
 
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "infra/app/Pulumi.*.yaml"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
     inputs:
       environment:
-        description: "Deploy target environment"
+        description: "Target environment to update image"
         required: true
         default: "stg"
         type: choice
@@ -25,7 +28,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # マージコミットに関連するPRを取得
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "no-deploy=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
           PR_NUMBER=$(gh api \
             "repos/${{ github.repository }}/commits/${{ github.sha }}/pulls" \
             --jq '.[0].number' 2>/dev/null || echo "")
@@ -41,18 +48,19 @@ jobs:
 
           if echo "$LABELS" | grep -q "^no-deploy$"; then
             echo "no-deploy=true" >> "$GITHUB_OUTPUT"
-            echo "Skipping deploy: no-deploy label found on PR #${PR_NUMBER}"
+            echo "Skipping build: no-deploy label found on PR #${PR_NUMBER}"
           else
             echo "no-deploy=false" >> "$GITHUB_OUTPUT"
           fi
 
-  deploy:
+  build:
     needs: check-deploy-label
-    if: github.event_name == 'workflow_dispatch' || needs.check-deploy-label.outputs.no-deploy != 'true'
+    if: needs.check-deploy-label.outputs.no-deploy != 'true'
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       id-token: write
+      actions: write
 
     steps:
       - uses: actions/checkout@v6
@@ -87,13 +95,34 @@ jobs:
             echo "DEPLOY_ENV=stg" >> "$GITHUB_ENV"
           fi
 
-      - name: Deploy with Pulumi
+      - name: Update Pulumi config with new image
         working-directory: infra/app
         run: |
           npm install -g @pulumi/pulumi 2>/dev/null || true
           pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
           pulumi stack select "$DEPLOY_ENV"
           pulumi config set exvs-app:image "$IMAGE" --secret
-          pulumi up --yes
         env:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
+      - name: Commit updated Pulumi config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add infra/app/Pulumi.*.yaml
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            echo "CHANGED=false" >> "$GITHUB_ENV"
+          else
+            git commit -m "ci: update $DEPLOY_ENV image to ${{ github.sha }}"
+            git push
+            echo "CHANGED=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Trigger deploy workflow
+        if: env.CHANGED == 'true'
+        run: |
+          gh workflow run deploy.yml \
+            -f environment="$DEPLOY_ENV"
+        env:
+          GH_TOKEN: ${{ github.token }}
