@@ -92,7 +92,7 @@ func StartServer() {
 		// 403ブロックチェック
 		userHash := storage.UserKey(req.Username)
 		if forbidden403.IsBlocked(userHash) {
-			sendJSON(w, http.StatusTooManyRequests, map[string]string{"error": "戦績詳細ページへのアクセスが拒否されました。ブラウザからプレイヤーズサイト(https://web.vsmobile.jp)にログインし、戦績詳細が閲覧できるか確認してください。"})
+			sendJSON(w, http.StatusTooManyRequests, map[string]string{"error": "戦績詳細ページへのアクセスが拒否されました。ブラウザからガンダムモバイル(https://web.vsmobile.jp)にログインし、対戦履歴が閲覧できるか確認してください。"})
 			return
 		}
 
