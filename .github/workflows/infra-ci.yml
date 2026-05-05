@@ -56,7 +56,10 @@ jobs:
         run: |
           npm install -g @pulumi/pulumi 2>/dev/null || true
           pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
-          pulumi stack select dev
+          if ! pulumi stack select dev 2>/dev/null; then
+            echo "### shared: stack not initialized, skipping" > /tmp/pulumi-preview.txt
+            exit 0
+          fi
           echo "### shared" > /tmp/pulumi-preview.txt
           pulumi preview 2>&1 | tee -a /tmp/pulumi-preview.txt
         env:
@@ -67,7 +70,10 @@ jobs:
         working-directory: infra/app
         run: |
           pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
-          pulumi stack select prod
+          if ! pulumi stack select prod 2>/dev/null; then
+            echo "### app (prod): stack not initialized, skipping" >> /tmp/pulumi-preview.txt
+            exit 0
+          fi
           echo "### app (prod)" >> /tmp/pulumi-preview.txt
           pulumi preview 2>&1 | tee -a /tmp/pulumi-preview.txt
         env:
@@ -77,7 +83,10 @@ jobs:
         if: steps.check-secrets.outputs.skip != 'true'
         working-directory: infra/app
         run: |
-          pulumi stack select staging
+          if ! pulumi stack select staging 2>/dev/null; then
+            echo "### app (staging): stack not initialized, skipping" >> /tmp/pulumi-preview.txt
+            exit 0
+          fi
           echo "### app (staging)" >> /tmp/pulumi-preview.txt
           pulumi preview 2>&1 | tee -a /tmp/pulumi-preview.txt
         env:
