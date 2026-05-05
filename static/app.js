@@ -20,34 +20,63 @@ function esc(s) {
 function pct(n) { return n != null ? n.toFixed(1) + '%' : '-'; }
 function num(n, d) { return n != null ? n.toFixed(d != null ? d : 0) : '-'; }
 
-function wrClass(n) {
+// --- Color helpers (4段階: great > good > bad > terrible) ---
+// higherIsBetter: true=値が大きいほど良い, false=値が小さいほど良い
+function valClass4(n, great, good, bad, terrible, higherIsBetter) {
   if (n == null) return '';
-  if (n >= 55) return 'wr-high';
-  if (n <= 45) return 'wr-low';
-  return '';
+  if (higherIsBetter) {
+    if (n >= great) return 'val-great';
+    if (n >= good) return 'val-good';
+    if (n <= terrible) return 'val-terrible';
+    return 'val-bad';
+  } else {
+    if (n <= great) return 'val-great';
+    if (n <= good) return 'val-good';
+    if (n >= terrible) return 'val-terrible';
+    return 'val-bad';
+  }
 }
 
+function colorVal(n, great, good, bad, terrible, higherIsBetter, decimals) {
+  if (n == null) return '-';
+  var cls = valClass4(n, great, good, bad, terrible, higherIsBetter);
+  var text = n.toFixed(decimals != null ? decimals : 0);
+  return { sortValue: n, display: html`<span class=${cls}>${text}</span>` };
+}
+
+// 勝率: ≥60=great, ≥50=good, <50=bad, ≤40=terrible
 function colorPct(n) {
   if (n == null) return '-';
-  var cls = wrClass(n);
+  var cls = valClass4(n, 60, 50, 50, 40, true);
   var text = n.toFixed(1) + '%';
-  if (!cls) return text;
   return { sortValue: n, display: html`<span class=${cls}>${text}</span>` };
 }
 
-function deClass(n) {
-  if (n == null) return '';
-  if (n >= 1.0) return 'de-high';
-  if (n < 1.0) return 'de-low';
-  return '';
-}
-
+// 与被ダメ比: ≥1.2=great, ≥1.0=good, <1.0=bad, ≤0.8=terrible
 function colorDE(n, d) {
   if (n == null) return '-';
-  var cls = deClass(n);
+  var cls = valClass4(n, 1.2, 1.0, 1.0, 0.8, true);
   var text = n.toFixed(d != null ? d : 3);
-  if (!cls) return text;
   return { sortValue: n, display: html`<span class=${cls}>${text}</span>` };
+}
+
+// 与ダメ: ≥1100=great, ≥900=good, <900=bad, ≤700=terrible
+function colorDmgGiven(n) { return colorVal(n, 1100, 900, 900, 700, true, 0); }
+// 被ダメ: <700=great, <800=good, ≥800=bad, ≥900=terrible
+function colorDmgTaken(n) { return colorVal(n, 700, 800, 800, 900, false, 0); }
+// 撃墜: ≥1.8=great, ≥1.5=good, <1.5=bad, ≤1.0=terrible
+function colorKills(n) { return colorVal(n, 1.8, 1.5, 1.5, 1.0, true, 2); }
+// 被撃墜: <1.0=great, ≤1.5=good, >1.5=bad, ≥2.5=terrible
+function colorDeaths(n) { return colorVal(n, 1.0, 1.5, 1.5, 2.5, false, 2); }
+// K/D比: ≥1.5=great, ≥1.0=good, <1.0=bad, ≤0.6=terrible
+function colorKD(n) { return colorVal(n, 1.5, 1.0, 1.0, 0.6, true, 2); }
+// EXダメ: ≥200=great, ≥160=good, <160=bad, ≤100=terrible
+function colorExDmg(n) { return colorVal(n, 200, 160, 160, 100, true, 0); }
+// 差分: 色なし
+function colorDiff(n, d) {
+  if (n == null) return '-';
+  var text = (n >= 0 ? '+' : '') + n.toFixed(d != null ? d : 1);
+  return text;
 }
 
 function cellValue(cell) {
@@ -422,13 +451,13 @@ function BasicStatsSection({ stats }) {
   var rows = [
     ['試合数', stats.matches + '戦 (' + stats.wins + '勝' + stats.losses + '敗)'],
     ['勝率', colorPct(stats.win_rate)],
-    ['平均与ダメージ', num(stats.avg_dmg_given)],
-    ['平均被ダメージ', num(stats.avg_dmg_taken)],
+    ['平均与ダメージ', colorDmgGiven(stats.avg_dmg_given)],
+    ['平均被ダメージ', colorDmgTaken(stats.avg_dmg_taken)],
     ['与被ダメ比', colorDE(stats.dmg_efficiency, 3)],
-    ['平均撃墜', num(stats.avg_kills, 2)],
-    ['平均被撃墜', num(stats.avg_deaths, 2)],
-    ['K/D比', num(stats.kd_ratio, 2)],
-    ['平均EXダメージ', num(stats.avg_ex_dmg)],
+    ['平均撃墜', colorKills(stats.avg_kills)],
+    ['平均被撃墜', colorDeaths(stats.avg_deaths)],
+    ['K/D比', colorKD(stats.kd_ratio)],
+    ['平均EXダメージ', colorExDmg(stats.avg_ex_dmg)],
   ];
   return html`<div>
     <${Table} headers=${['項目', '値']} rows=${rows} />
@@ -439,8 +468,7 @@ function BasicStatsSection({ stats }) {
 function WinLossPatternSection({ pattern }) {
   if (!pattern) return null;
   var rows = (pattern.metrics || []).map(function (m) {
-    var diff = m.diff >= 0 ? '+' + num(m.diff, 1) : num(m.diff, 1);
-    return [m.label, num(m.win_avg, 1), num(m.loss_avg, 1), diff];
+    return [m.label, num(m.win_avg, 1), num(m.loss_avg, 1), colorDiff(m.diff, 1)];
   });
   return html`<div>
     <${Table} headers=${['項目', '勝利時', '敗北時', '差分']} rows=${rows} />
@@ -453,7 +481,7 @@ function EnemyMatchupSection({ matchup, msName }) {
   var headers = ['機体名', '試合', '勝率', '与被ダメ比', '与ダメ', '被ダメ'];
   function matchupRows(list) {
     return (list || []).map(function (e) {
-      return [esc(e.ms), e.matches, colorPct(e.win_rate), colorDE(e.dmg_efficiency, 3), num(e.avg_dmg_given, 1), num(e.avg_dmg_taken, 1)];
+      return [esc(e.ms), e.matches, colorPct(e.win_rate), colorDE(e.dmg_efficiency, 3), colorDmgGiven(e.avg_dmg_given), colorDmgTaken(e.avg_dmg_taken)];
     });
   }
   return html`<div>
@@ -570,11 +598,11 @@ function FixedPartnersSection({ partners }) {
     ${partners.notice && html`<p class="notice">${esc(partners.notice)}</p>`}
     ${items.map(function (p) {
       var statsRows = [
-        ['平均与ダメージ', num(p.my_stats.avg_dmg_given), num(p.partner_stats.avg_dmg_given)],
-        ['平均被ダメージ', num(p.my_stats.avg_dmg_taken), num(p.partner_stats.avg_dmg_taken)],
+        ['平均与ダメージ', colorDmgGiven(p.my_stats.avg_dmg_given), colorDmgGiven(p.partner_stats.avg_dmg_given)],
+        ['平均被ダメージ', colorDmgTaken(p.my_stats.avg_dmg_taken), colorDmgTaken(p.partner_stats.avg_dmg_taken)],
         ['与被ダメ比', colorDE(p.my_stats.dmg_efficiency, 3), colorDE(p.partner_stats.dmg_efficiency, 3)],
-        ['平均撃墜', num(p.my_stats.avg_kills, 2), num(p.partner_stats.avg_kills, 2)],
-        ['平均被撃墜', num(p.my_stats.avg_deaths, 2), num(p.partner_stats.avg_deaths, 2)],
+        ['平均撃墜', colorKills(p.my_stats.avg_kills), colorKills(p.partner_stats.avg_kills)],
+        ['平均被撃墜', colorDeaths(p.my_stats.avg_deaths), colorDeaths(p.partner_stats.avg_deaths)],
       ];
       var msRows = (p.partner_ms_breakdown || []).map(function (m) {
         return [esc(m.ms), m.matches, colorPct(m.win_rate)];
