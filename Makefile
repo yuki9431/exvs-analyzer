@@ -2,8 +2,8 @@ IMAGE_NAME := exvs-analyzer
 PORT ?= 8080
 
 .PHONY: build run restart stop test \
-	pulumi-shared-install pulumi-shared-init pulumi-shared-preview pulumi-shared-up pulumi-shared-shell \
-	pulumi-app-install pulumi-app-init pulumi-app-preview pulumi-app-up pulumi-app-shell
+	pulumi-shared-install pulumi-shared-init pulumi-shared-preview pulumi-shared-shell \
+	pulumi-app-install pulumi-app-init pulumi-app-preview pulumi-app-shell
 
 ## Docker イメージをビルド（キャッシュなし）
 build:
@@ -68,11 +68,7 @@ pulumi-shared-init:
 pulumi-shared-preview:
 	$(PULUMI_SHARED_RUN) sh -c "$(PULUMI_SHARED_LOGIN) && pulumi preview"
 
-## shared: インフラ変更を適用
-pulumi-shared-up:
-	$(PULUMI_SHARED_RUN) sh -c "$(PULUMI_SHARED_LOGIN) && pulumi up"
-
-## shared: シェルで入る
+## shared: シェルで入る（pulumi up はここで実行）
 pulumi-shared-shell:
 	docker run --rm -it --entrypoint "" \
 		-v "$(CURDIR)/infra/shared":/infra \
@@ -98,11 +94,7 @@ pulumi-app-init:
 pulumi-app-preview:
 	$(PULUMI_APP_RUN) sh -c "$(PULUMI_APP_LOGIN) && pulumi preview"
 
-## app: インフラ変更を適用（STACK=prod|staging）
-pulumi-app-up:
-	$(PULUMI_APP_RUN) sh -c "$(PULUMI_APP_LOGIN) && pulumi up"
-
-## app: シェルで入る（STACK=prod|staging）
+## app: シェルで入る（pulumi up はここで実行。STACK=prod|staging）
 pulumi-app-shell:
 	docker run --rm -it --entrypoint "" \
 		-v "$(CURDIR)/infra/app":/infra \

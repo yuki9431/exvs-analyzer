@@ -36,12 +36,12 @@ python3 -m http.server 8888 --directory static
 python3 scripts/analyze.py /tmp/scores.csv
 
 # Pulumiコマンド（Docker経由）
-PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-shared-preview   # shared プレビュー
-PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-shared-up        # shared 適用
+PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-shared-preview            # shared プレビュー
 PULUMI_CONFIG_PASSPHRASE=<passphrase> STACK=prod make pulumi-app-preview    # app(本番) プレビュー
 PULUMI_CONFIG_PASSPHRASE=<passphrase> STACK=staging make pulumi-app-preview # app(検証) プレビュー
-PULUMI_CONFIG_PASSPHRASE=<passphrase> STACK=prod make pulumi-app-up         # app(本番) 適用
-PULUMI_CONFIG_PASSPHRASE=<passphrase> STACK=staging make pulumi-app-up      # app(検証) 適用
+PULUMI_CONFIG_PASSPHRASE=<passphrase> make pulumi-shared-shell              # shared シェル（pulumi upはここで）
+PULUMI_CONFIG_PASSPHRASE=<passphrase> STACK=prod make pulumi-app-shell      # app(本番) シェル
+PULUMI_CONFIG_PASSPHRASE=<passphrase> STACK=staging make pulumi-app-shell   # app(検証) シェル
 ```
 
 http://localhost:8080 でアクセス可能。
