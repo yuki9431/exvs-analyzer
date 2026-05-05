@@ -441,9 +441,9 @@ function PeriodSelector({ periods, selected, onSelect, userKey, onCustomReport }
 function formatMsAdvice(text) {
   var m = text.match(/^(.+?)([:：] | の)/);
   if (m) {
-    return html`<strong class="ms-name">${m[1]}</strong>${text.slice(m[1].length)}`;
+    return html`<strong class="ms-name">${m[1]}</strong>${boldText(text.slice(m[1].length))}`;
   }
-  return text;
+  return boldText(text);
 }
 
 function SummarySection({ summary }) {
