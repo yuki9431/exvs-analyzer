@@ -733,7 +733,7 @@ def data_day_of_week(data_list):
     if diff >= 10:
         better = "平日" if wd_wr > we_wr else "土日"
         worse = "土日" if wd_wr > we_wr else "平日"
-        tips.append(f"{better}の方が{worse}より勝率が{diff:.0f}ポイント高いです。{worse}は対戦相手の質が変わる可能性があります。")
+        tips.append(f"{better}の方が{worse}より勝率が{diff:.0f}%高いです。{worse}は対戦相手の質が変わる可能性があります。")
 
     return {
         "weekday": {
@@ -808,9 +808,9 @@ def data_season(data_list):
             diff = s_wr - f_wr
             if abs(diff) >= 5:
                 if diff > 0:
-                    tips.append(f"後半の方が勝率が{diff:.0f}ポイント高く、シーズンが進むにつれて安定しています。")
+                    tips.append(f"後半の方が勝率が{diff:.0f}%高く、シーズンが進むにつれて安定しています。")
                 else:
-                    tips.append(f"前半の方が勝率が{-diff:.0f}ポイント高いです。後半は対戦相手のレベルが上がっている可能性があります。")
+                    tips.append(f"前半の方が勝率が{-diff:.0f}%高いです。後半は対戦相手のレベルが上がっている可能性があります。")
 
         entry = {
             "name": season_name,
@@ -927,7 +927,7 @@ def data_advice(all_data, ms_data, tag_partners=None):
             worse = "土日" if wd_wr > we_wr else "平日"
             advices.append({
                 "category": "time",
-                "text": f"曜日による勝率差: {better} {max(wd_wr, we_wr):.0f}% ／ {worse} {min(wd_wr, we_wr):.0f}%（{diff:.0f}ポイント差）",
+                "text": f"曜日による勝率差: {better} {max(wd_wr, we_wr):.0f}% ／ {worse} {min(wd_wr, we_wr):.0f}%（{diff:.0f}%差）",
             })
 
     fixed = detect_fixed_partners(all_data, tag_partners)
@@ -941,7 +941,7 @@ def data_advice(all_data, ms_data, tag_partners=None):
                 details = [f"{name}: 勝率 {wr:.0f}%（{cnt}戦）" for name, wr, cnt in partner_wrs]
                 advices.append({
                     "category": "partner",
-                    "text": f"固定相方の勝率差が{best[1]-worst[1]:.0f}ポイントあります。相方ごとに戦い方を変えるか、相性の良い相方との試合を増やしましょう。",
+                    "text": f"固定相方の勝率差が{best[1]-worst[1]:.0f}%あります。相方ごとに戦い方を変えるか、相性の良い相方との試合を増やしましょう。",
                     "details": details,
                 })
 
@@ -979,12 +979,12 @@ def data_advice(all_data, ms_data, tag_partners=None):
                 if diff > 0:
                     advices.append({
                         "category": "season",
-                        "text": f"{season_name}: 後半の勝率が前半より{diff:.0f}ポイント高く、シーズン後半に安定する傾向があります。",
+                        "text": f"{season_name}: 後半の勝率が前半より{diff:.0f}%高く、シーズン後半に安定する傾向があります。",
                     })
                 else:
                     advices.append({
                         "category": "season",
-                        "text": f"{season_name}: 前半の勝率が後半より{-diff:.0f}ポイント高いです。後半は対戦環境が厳しくなっている可能性があります。",
+                        "text": f"{season_name}: 前半の勝率が後半より{-diff:.0f}%高いです。後半は対戦環境が厳しくなっている可能性があります。",
                     })
 
     # カテゴリ順序
