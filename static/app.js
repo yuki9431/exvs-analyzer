@@ -643,11 +643,10 @@ function DeathsImpactSubSection({ deaths }) {
 function TimeOfDaySection({ time }) {
   if (!time || !time.hours || !time.hours.length) return null;
   var rows = time.hours.map(function (h) {
-    var mark = h.mark === 'good' ? '◎' : h.mark === 'bad' ? '△' : '';
-    return [h.hour + '時', h.matches, colorPct(h.win_rate), colorDE(h.dmg_efficiency, 3), mark];
+    return [h.hour + '時', h.matches, colorPct(h.win_rate), colorDE(h.dmg_efficiency, 3)];
   });
   return html`<${Section} title="時間帯別の勝率">
-    <${Table} headers=${['時間帯', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
+    <${Table} headers=${['時間帯', '試合', '勝率', '与被ダメ比']} rows=${rows} />
     <${Tips} tips=${time.tips} />
   <//>`;
 }
@@ -677,11 +676,10 @@ function DayOfWeekSection({ dow }) {
 function DailyTrendSection({ daily }) {
   if (!daily || !daily.days || !daily.days.length) return null;
   var rows = daily.days.map(function (d) {
-    var mark = d.mark === 'good' ? '◎' : d.mark === 'bad' ? '△' : '';
-    return [d.date + ' (' + d.dow_name + ')', d.matches, colorPct(d.win_rate), colorDE(d.dmg_efficiency, 3), mark];
+    return [d.date + ' (' + d.dow_name + ')', d.matches, colorPct(d.win_rate), colorDE(d.dmg_efficiency, 3)];
   });
   return html`<${Section} title="日別勝率">
-    <${Table} headers=${['日付', '試合', '勝率', '与被ダメ比', '']} rows=${rows} />
+    <${Table} headers=${['日付', '試合', '勝率', '与被ダメ比']} rows=${rows} />
     <${Tips} tips=${daily.tips} />
   <//>`;
 }
