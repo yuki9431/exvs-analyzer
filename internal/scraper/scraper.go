@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -90,6 +91,10 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 		return nil, nil, err
 	}
 
+	// 403検出時に全処理を即座に打ち切るためのcontext
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	// Phase 2+3: 日別ページ収集→詳細ページ取得をパイプラインで並行実行
 	// Phase 2で試合エントリが見つかり次第、Phase 3の詳細取得を開始する
 	entryCh := make(chan matchEntry, 50)
@@ -97,10 +102,10 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 
 	go func() {
 		defer close(entryCh)
-		streamErr = streamMatchEntries(m.HTTPClient.Jar, dailyLinks, since, entryCh)
+		streamErr = streamMatchEntries(ctx, cancel, m.HTTPClient.Jar, dailyLinks, since, entryCh)
 	}()
 
-	scores, detailErr := fetchDetailPagesStreaming(m.HTTPClient.Jar, entryCh, notify)
+	scores, detailErr := fetchDetailPagesStreaming(ctx, cancel, m.HTTPClient.Jar, entryCh, notify)
 
 	// Phase 2のエラーを優先的に返す（403はより深刻なため）
 	if streamErr != nil {
@@ -159,26 +164,41 @@ func collectDailyLinks(jar http.CookieJar, since time.Time) ([]dailyLink, error)
 }
 
 // streamMatchEntries は複数の日別ページから試合エントリを並列で収集し、チャネルにストリーミングする
-// HTTPエラーが1件でもあればエラーを返す。403の場合はErrAccessDeniedを返す
-func streamMatchEntries(jar http.CookieJar, links []dailyLink, since time.Time, out chan<- matchEntry) error {
+// HTTPエラーが1件でもあればエラーを返す。403の場合はErrAccessDeniedを返し即座にキャンセルする
+func streamMatchEntries(ctx context.Context, cancel context.CancelFunc, jar http.CookieJar, links []dailyLink, since time.Time, out chan<- matchEntry) error {
 	if len(links) == 0 {
 		return nil
 	}
 
 	sem := make(chan struct{}, maxParallelism)
 	var (
-		wg          sync.WaitGroup
-		mu          sync.Mutex
-		totalPages  int
-		errorCount  int
-		has403      bool
+		wg         sync.WaitGroup
+		mu         sync.Mutex
+		totalPages int
+		errorCount int
+		has403     bool
 	)
 
 	for _, dl := range links {
+		// キャンセル済みなら新規goroutineを起動しない
+		select {
+		case <-ctx.Done():
+			break
+		default:
+		}
+		if ctx.Err() != nil {
+			break
+		}
+
 		wg.Add(1)
 		go func(dl dailyLink) {
 			defer wg.Done()
-			sem <- struct{}{}
+
+			select {
+			case <-ctx.Done():
+				return
+			case sem <- struct{}{}:
+			}
 			defer func() { <-sem }()
 
 			entries, err := collectMatchEntries(jar, dl, since)
@@ -188,12 +208,17 @@ func streamMatchEntries(jar http.CookieJar, links []dailyLink, since time.Time, 
 				errorCount++
 				if errors.Is(err, ErrAccessDenied) {
 					has403 = true
+					cancel()
 				}
 			}
 			mu.Unlock()
 
 			for _, e := range entries {
-				out <- e
+				select {
+				case <-ctx.Done():
+					return
+				case out <- e:
+				}
 			}
 			time.Sleep(requestDelay)
 		}(dl)
@@ -281,12 +306,25 @@ func collectMatchEntries(jar http.CookieJar, dl dailyLink, since time.Time) ([]m
 }
 
 // fetchDetailPagesStreaming はチャネルから試合エントリを受信しつつ詳細ページを並列取得する
-// HTTPエラーが1件でもあればエラーを返す。403の場合はErrAccessDeniedを返す
-func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, notify func(int, int)) (model.DatedScores, error) {
-	// まず全エントリを収集してtotalを確定させる
+// HTTPエラーが1件でもあればエラーを返す。403の場合はErrAccessDeniedを返し即座にキャンセルする
+func fetchDetailPagesStreaming(ctx context.Context, cancel context.CancelFunc, jar http.CookieJar, entryCh <-chan matchEntry, notify func(int, int)) (model.DatedScores, error) {
+	// まず全エントリを収集してtotalを確定させる（キャンセル時はチャネルが閉じるまで待つ）
 	var entries []matchEntry
 	for entry := range entryCh {
-		entries = append(entries, entry)
+		select {
+		case <-ctx.Done():
+			// チャネルに残ったエントリを捨てて終了を待つ
+			for range entryCh {
+			}
+			return nil, ErrAccessDenied
+		default:
+			entries = append(entries, entry)
+		}
+	}
+
+	// streamMatchEntries側で403が発生していた場合
+	if ctx.Err() != nil {
+		return nil, ErrAccessDenied
 	}
 
 	total := len(entries)
@@ -306,13 +344,36 @@ func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, no
 	sem := make(chan struct{}, maxParallelism)
 
 	for _, entry := range entries {
-		sem <- struct{}{}
+		// キャンセル済みなら新規リクエストを発行しない
+		select {
+		case <-ctx.Done():
+			break
+		default:
+		}
+		if ctx.Err() != nil {
+			break
+		}
+
+		select {
+		case <-ctx.Done():
+			break
+		case sem <- struct{}{}:
+		}
+		if ctx.Err() != nil {
+			break
+		}
+
 		wg.Add(1)
 		go func(e matchEntry) {
 			defer wg.Done()
 			defer func() { <-sem }()
 
-			parsed, err := fetchSingleDetail(jar, e)
+			// キャンセル済みならスキップ
+			if ctx.Err() != nil {
+				return
+			}
+
+			parsed, err := fetchSingleDetail(ctx, jar, e)
 			mu.Lock()
 			scores = append(scores, parsed...)
 			processed++
@@ -320,6 +381,7 @@ func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, no
 				errorCount++
 				if errors.Is(err, ErrAccessDenied) {
 					has403 = true
+					cancel()
 				}
 			}
 			current := processed
@@ -333,7 +395,7 @@ func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, no
 	wg.Wait()
 
 	if has403 {
-		return scores, ErrAccessDenied
+		return nil, ErrAccessDenied
 	}
 	if errorCount > 0 {
 		return scores, fmt.Errorf("詳細ページ取得で%w: %d/%d件がエラー", ErrHTTPRequestFailed, errorCount, total)
@@ -343,10 +405,18 @@ func fetchDetailPagesStreaming(jar http.CookieJar, entryCh <-chan matchEntry, no
 
 // fetchSingleDetail は単一の試合詳細ページをnet/http+goqueryで取得しスコアを返す
 // HTTPエラーが発生した場合はエラーを返す（403の場合はErrAccessDenied）
-func fetchSingleDetail(jar http.CookieJar, e matchEntry) (model.DatedScores, error) {
-	client := &http.Client{Timeout: 30 * time.Second, Jar: jar}
-	resp, err := client.Get(e.detailURL)
+func fetchSingleDetail(ctx context.Context, jar http.CookieJar, e matchEntry) (model.DatedScores, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, e.detailURL, nil)
 	if err != nil {
+		return nil, fmt.Errorf("リクエスト作成失敗: url=%s: %w", e.detailURL, err)
+	}
+
+	client := &http.Client{Timeout: 30 * time.Second, Jar: jar}
+	resp, err := client.Do(req)
+	if err != nil {
+		if ctx.Err() != nil {
+			return nil, ctx.Err()
+		}
 		log.Printf("[ERROR] fetchSingleDetail: リクエスト失敗 url=%s err=%v", e.detailURL, err)
 		return nil, fmt.Errorf("リクエスト失敗: url=%s: %w", e.detailURL, err)
 	}
