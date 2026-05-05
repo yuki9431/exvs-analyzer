@@ -428,17 +428,27 @@ function PeriodSelector({ periods, selected, onSelect, userKey, onCustomReport }
 
 // --- Report sections ---
 
+function formatMsAdvice(text) {
+  var m = text.match(/^(.+?)([:：] | の)/);
+  if (m) {
+    return html`<strong class="ms-name">${m[1]}</strong>${text.slice(m[1].length)}`;
+  }
+  return text;
+}
+
 function SummarySection({ summary }) {
   if (!summary || !summary.categories || !summary.categories.length) return null;
   return html`<${Section} title="総合アドバイス" open>
     ${summary.categories.map(function (cat) {
+      var isMsCat = cat.key === 'ms';
       return html`<div>
         <strong>${esc(cat.title)}</strong>
         <ul>${cat.items.map(function (item) {
           var text = typeof item === 'string' ? item : item.text;
           var details = typeof item === 'object' && item.details ? item.details : null;
+          var display = isMsCat ? formatMsAdvice(text) : text;
           return html`<li>
-            ${text}
+            ${display}
             ${details && html`<ul class="advice-details">${details.map(function (d) { return html`<li>${d}</li>`; })}</ul>`}
           </li>`;
         })}</ul>
