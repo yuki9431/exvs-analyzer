@@ -17,6 +17,16 @@ function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+// **太字** をパースして html`<strong>太字</strong>` に変換
+function boldText(s) {
+  if (s == null) return '';
+  var parts = String(s).split(/\*\*(.+?)\*\*/g);
+  if (parts.length === 1) return s;
+  return parts.map(function (part, i) {
+    return i % 2 === 1 ? html`<strong class="tip-bold">${part}</strong>` : part;
+  });
+}
+
 function pct(n) { return n != null ? n.toFixed(1) + '%' : '-'; }
 function num(n, d) { return n != null ? n.toFixed(d != null ? d : 0) : '-'; }
 
@@ -122,8 +132,8 @@ function Tips({ tips }) {
   return html`<blockquote><strong>💡アドバイス:</strong><br />${tips.map(function (t, i) {
     var text = typeof t === 'string' ? t : t.text;
     var details = typeof t === 'object' && t.details ? t.details : null;
-    return html`${i > 0 && html`<br />`}${text}
-      ${details && html`<ul class="advice-details">${details.map(function (d) { return html`<li>${d}</li>`; })}</ul>`}`;
+    return html`${i > 0 && html`<br />`}${boldText(text)}
+      ${details && html`<ul class="advice-details">${details.map(function (d) { return html`<li>${boldText(d)}</li>`; })}</ul>`}`;
   })}</blockquote>`;
 }
 
@@ -446,10 +456,10 @@ function SummarySection({ summary }) {
         <ul>${cat.items.map(function (item) {
           var text = typeof item === 'string' ? item : item.text;
           var details = typeof item === 'object' && item.details ? item.details : null;
-          var display = isMsCat ? formatMsAdvice(text) : text;
+          var display = isMsCat ? formatMsAdvice(text) : boldText(text);
           return html`<li>
             ${display}
-            ${details && html`<ul class="advice-details">${details.map(function (d) { return html`<li>${d}</li>`; })}</ul>`}
+            ${details && html`<ul class="advice-details">${details.map(function (d) { return html`<li>${boldText(d)}</li>`; })}</ul>`}
           </li>`;
         })}</ul>
       </div>`;
