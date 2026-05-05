@@ -34,6 +34,15 @@ const (
 // ErrAccessDenied はサーバーからアクセス拒否(403)された場合のエラー
 var ErrAccessDenied = errors.New("サーバーからアクセスが拒否されました")
 
+// ErrUnauthorized はサーバーから認証拒否(401)された場合のエラー
+var ErrUnauthorized = errors.New("認証が無効です")
+
+// ErrServerError はサーバー内部エラー(5xx)の場合のエラー
+var ErrServerError = errors.New("サーバーでエラーが発生しています")
+
+// ErrNotFound はページが見つからない(404)場合のエラー
+var ErrNotFound = errors.New("ページが見つかりません")
+
 // ErrHTTPRequestFailed はHTTPリクエストが失敗した場合のエラー
 var ErrHTTPRequestFailed = errors.New("データ取得中にHTTPエラーが発生しました")
 
@@ -423,12 +432,19 @@ func fetchSingleDetail(ctx context.Context, jar http.CookieJar, e matchEntry) (m
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= 400 {
-		if resp.StatusCode == http.StatusForbidden {
-			log.Printf("[ERROR] fetchSingleDetail: 403 Forbidden url=%s", e.detailURL)
-			return nil, ErrAccessDenied
-		}
 		log.Printf("[ERROR] fetchSingleDetail: HTTP %d url=%s", resp.StatusCode, e.detailURL)
-		return nil, fmt.Errorf("HTTPエラー %d: url=%s", resp.StatusCode, e.detailURL)
+		switch {
+		case resp.StatusCode == http.StatusUnauthorized:
+			return nil, ErrUnauthorized
+		case resp.StatusCode == http.StatusForbidden:
+			return nil, ErrAccessDenied
+		case resp.StatusCode == http.StatusNotFound:
+			return nil, ErrNotFound
+		case resp.StatusCode >= 500:
+			return nil, fmt.Errorf("%w: HTTP %d", ErrServerError, resp.StatusCode)
+		default:
+			return nil, fmt.Errorf("HTTPエラー %d: url=%s", resp.StatusCode, e.detailURL)
+		}
 	}
 
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
