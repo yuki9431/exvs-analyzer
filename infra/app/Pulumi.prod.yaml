@@ -1,13 +1,15 @@
 config:
   gcp:project:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+    secure: v1:ZNRhblgzjExwl3oi:jCZSB3rnlQbA4BQScwj+0FLexKyrfkNErex5lkvAkYk=
   gcp:region: asia-northeast1
+  exvs-app:serviceName: exvs-analyzer
   exvs-app:cpu: "2"
   exvs-app:memory: "1Gi"
   exvs-app:maxInstances: "3"
   exvs-app:domain: www.exvs-analyzer.com
   exvs-app:gcsBucket:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+    secure: v1:/zqLjVBPrsfEzVcl:NiJy0Q5GyfXBNnaUDXoVF49BCgQK/tIF2No0PMCrMOy2ousY2A==
   exvs-app:image:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
-  exvs-app:sharedStack: exvs-shared/shared
+    secure: v1:3do38TsGcRhTETh3:QdzNh399lXQsDwcNq/1Iat5VDonxiXzj7JQkNcN99QRQmRpdb+d4n9kcIqQYYlX9Hs0smQNpShazmcydLsavlAk2zgRtWoQXWp3Nqr3X7tAK5J+E6d0tVIvJTlqo+oInTLzCTPg=
+  exvs-app:sharedStack: organization/exvs-shared/shared
+encryptionsalt: v1:ToX9TGUsy/w=:v1:i/etZsivSPrFlstj:Ext0d7LnzlUd5QqVkA9H3ECUQuMZzQ==

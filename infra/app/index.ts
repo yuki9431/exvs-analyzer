@@ -2,6 +2,7 @@ import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
 
 const config = new pulumi.Config();
+const serviceName = config.require("serviceName");
 const cpu = config.require("cpu");
 const memory = config.require("memory");
 const maxInstances = config.requireNumber("maxInstances");
@@ -16,8 +17,9 @@ const dnsZoneName = shared.getOutput("dnsZoneName") as pulumi.Output<string>;
 
 // Cloud Run サービス
 export const service = new gcp.cloudrunv2.Service(
-  "exvs-analyzer",
+  serviceName,
   {
+    name: serviceName,
     location: gcp.config.region!,
     ingress: "INGRESS_TRAFFIC_ALL",
     launchStage: "GA",

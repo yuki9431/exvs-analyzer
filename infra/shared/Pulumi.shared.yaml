@@ -1,21 +1,22 @@
 config:
   gcp:project:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+    secure: v1:5mlc0YqYBrP6+JnY:9wJLfHMP7NFoVGpxCyE1Wf3w+86SnUR+MsLuUEb3riA=
   gcp:region: asia-northeast1
   exvs-shared:artifactRegistryRepo:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+    secure: v1:VbIvYzqs1EqP7mCq:io649d9teYZX/UhwbKWuf0KnPDhpCAUhgeljnRF0o6Pe1jZMsAWL
   exvs-shared:gcsBucket:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+    secure: v1:FDni+wlqiUoc5S06:jWGmpPtpG1hSG40torNMBIivfq2iHNP/vlBCENX+i8GcYnBPUA==
   exvs-shared:billingAccount:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+    secure: v1:5/TgN98t8hdG1qav:hLSkhcVrBNxj6Q69yM1rd9P3LCuqLr4alWp13Lti2fFBts9b
   exvs-shared:budgetAmount:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+    secure: v1:qrKhhc7um2Ek9eFw:y/87HFSHHTHoRGfeHV75GubkNwo=
   exvs-shared:pulumiStateBucket:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+    secure: v1:Du/axuJkvq/wtqd/:EIsWkGiOhurIvwVomvsdiXa+lqgmP8yIoJV0fC96pll4wwVh8nYxTfihJ5Rt
   exvs-shared:githubRepo: yuki9431/exvs-analyzer
   exvs-shared:computeSa:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+    secure: v1:LbTz4LuCxUSGA8es:fhlSyWN8rwdbNbJ8pjHD7AWCpFlf/7euPR9VzUST3AI234w1DhU9NroG7KZJ8UeaxIWMNfmKBmtTcjx7BralkAY3
   exvs-shared:ownerEmail:
-    secure: v1:PLACEHOLDER:needs-pulumi-config-set
+    secure: v1:uzvrdYQSitlnOdvZ:POlAg8alvfoFJgKnN+a7HExEL7eh9EmGo8cLBijhCXUeV2uB
   exvs-shared:domainVerificationTxt: google-site-verification=TAXKxm2PncupGRZkk0mBxIxslp_7aZj-w9dxPAi-ObE
   exvs-shared:domain: exvs-analyzer.com
+encryptionsalt: v1:LhK5YSaq0ug=:v1:dh0WNpFPQMm4olnx:5RwQ7+f6ti1RGXxRrpTPTfDUnpYN7A==

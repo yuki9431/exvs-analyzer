@@ -1,0 +1,15 @@
+encryptionsalt: v1:evUdMCCS5y8=:v1:/OISA4XjAeNSfiWM:dpR57gY0VOZJwLVX4naIh01vl/GXDg==
+config:
+  gcp:project:
+    secure: v1:GFZ/rFuC+i0R/bSv:NNxS64NTcMbplD9tvMzrMcd5mprAYX+Q5EByqXsk5dE=
+  gcp:region: asia-northeast1
+  exvs-app:cpu: "1"
+  exvs-app:memory: 512Mi
+  exvs-app:maxInstances: "1"
+  exvs-app:domain: stg.exvs-analyzer.com
+  exvs-app:image:
+    secure: v1:59lbcGCsd1jxOVWy:dohsevPrmGHdafE8JF0gwchwWgGdgSEciMAhLmBT7gDjLHNoyXYCaLlBOq2Q+E2BL5UCcTSK5a5po5G1ga6Ze96mB35pbbo6Q2X1MnGEg/9Vo16Hk2Fp8zdsIkGN8Nm57vnejxs=
+  exvs-app:gcsBucket:
+    secure: v1:ZpepUFqv5KJMeSu1:0iAEyxxqllexQbeTezIhRPKvwR+2/sW5VY9iqpRWtWDeidp+gw==
+  exvs-app:sharedStack: organization/exvs-shared/shared
+  exvs-app:serviceName: stg-exvs-analyzer
