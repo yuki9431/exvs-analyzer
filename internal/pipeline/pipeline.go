@@ -101,8 +101,11 @@ func (j *Job) Snapshot() JobSnapshot {
 	}
 }
 
+// On403Func は403検出時に呼び出されるコールバック型
+type On403Func func(userHash string)
+
 // Run はスクレイピング→分析を実行し、レポートをジョブに保存する
-func Run(j *Job, username, password string) {
+func Run(j *Job, username, password string, on403 ...On403Func) {
 	jobsMu.Lock()
 	j.UserKey = storage.UserKey(username)
 	jobsMu.Unlock()
@@ -166,7 +169,10 @@ func Run(j *Job, username, password string) {
 		if errors.Is(err, scraper.ErrLoginFailed) {
 			setError(j, "ログインに失敗しました。メールアドレスとパスワードを確認してください。", err.Error())
 		} else if errors.Is(err, scraper.ErrAccessDenied) {
-			setError(j, "アクセスが集中しているため、サーバーから拒否されました。しばらく時間をおいてから再度お試しください。", err.Error())
+			setError(j, "戦績詳細ページへのアクセスが拒否されました。ブラウザからプレイヤーズサイト(https://web.vsmobile.jp)にログインし、戦績詳細が閲覧できるか確認してください。", err.Error())
+			if len(on403) > 0 && on403[0] != nil {
+				on403[0](storage.UserKey(username))
+			}
 		} else {
 			setError(j, "データの取得に失敗しました", err.Error())
 		}
