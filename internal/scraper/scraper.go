@@ -538,7 +538,7 @@ func parseDetailPage(s *goquery.Selection, date, hour string, wins []string, sho
 	titleBadges := attrsFromSelection(s, "#panel1 img.title-plv-badge", "src")
 	profileLinks := attrsFromSelection(s, "#panel1 li.item > a.right-arrow", "href")
 	gradeImages := attrsFromSelection(s, "#panel1 img.class-img", "data-original")
-	rankingImages := attrsFromSelection(s, "#panel3 img.ranking-img", "src")
+	scoreRankings := parseScoreRankings(s)
 
 	// 試合経過タブ(panel2)からのタイムラインデータ
 	timeline := parseMatchTimeline(s)
@@ -601,10 +601,9 @@ func parseDetailPage(s *goquery.Selection, date, hour string, wins []string, sho
 		if gradeIdx+1 < len(gradeImages) {
 			teamGrade = stripQueryParam(gradeImages[gradeIdx+1])
 		}
-		// スコア順位バッジ (4位はテキスト表示のため画像がない場合あり)
-		rankingImage := ""
-		if i < len(rankingImages) {
-			rankingImage = rankingImages[i]
+		scoreRanking := 0
+		if i < len(scoreRankings) {
+			scoreRanking = scoreRankings[i]
 		}
 
 		result := model.DatedScore{
@@ -629,7 +628,7 @@ func parseDetailPage(s *goquery.Selection, date, hour string, wins []string, sho
 				ProfileLink:    profileLink,
 				ShuffleGrade:   shuffleGrade,
 				TeamGrade:      teamGrade,
-				RankingImage:   rankingImage,
+				ScoreRanking:   scoreRanking,
 				ShopName:       shopName,
 			},
 		}
@@ -675,6 +674,29 @@ func parseTeamNames(s *goquery.Selection) []string {
 		names = append(names, strings.TrimSpace(el.Text()))
 	})
 	return names
+}
+
+// parseScoreRankings はスコアタブからrank-bandクラスを読み取り、各プレイヤーの試合内順位を返す
+func parseScoreRankings(s *goquery.Selection) []int {
+	var rankings []int
+	s.Find("#panel3 li.item").Each(func(_ int, el *goquery.Selection) {
+		classes, _ := el.Attr("class")
+		rank := 0
+		for _, c := range strings.Fields(classes) {
+			switch c {
+			case "rank-band1":
+				rank = 1
+			case "rank-band2":
+				rank = 2
+			case "rank-band3":
+				rank = 3
+			case "rank-band4":
+				rank = 4
+			}
+		}
+		rankings = append(rankings, rank)
+	})
+	return rankings
 }
 
 // vis.js DataSetパーサー用の正規表現

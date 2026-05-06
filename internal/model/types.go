@@ -29,7 +29,7 @@ type PlayerScore struct {
 	ProfileLink    string // プロフィールページURL
 	ShuffleGrade   string // シャッフル階級画像URL
 	TeamGrade      string // チーム(固定)階級画像URL
-	RankingImage   string // スコア順位バッジ画像URL
+	ScoreRanking   int    // 試合内スコア順位(1-4)
 	ShopName       string // プレイ店舗名
 }
 

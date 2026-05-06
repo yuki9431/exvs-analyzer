@@ -129,7 +129,7 @@ func exportAllScoresCSV(ds model.DatedScores, w io.Writer) error {
 	csvw := csv.NewWriter(w)
 	defer csvw.Flush()
 
-	header := []string{"試合日時", "プレイヤーNo.", "地域", "プレイヤー名", "勝利判定", "機体名", "機体画像URL", "スコア", "撃墜数", "被撃墜数", "与ダメージ", "被ダメージ", "EXダメージ", "ランク", "チーム名", "称号画像URL", "称号バッジURL", "プロフィールURL", "シャッフルグレード画像URL", "チームグレード画像URL", "順位バッジURL", "店舗名"}
+	header := []string{"試合日時", "プレイヤーNo.", "地域", "プレイヤー名", "勝利判定", "機体名", "機体画像URL", "スコア", "撃墜数", "被撃墜数", "与ダメージ", "被ダメージ", "EXダメージ", "ランク", "チーム名", "称号画像URL", "称号バッジURL", "プロフィールURL", "シャッフルグレード画像URL", "チームグレード画像URL", "スコア順位", "店舗名"}
 	if err := csvw.Write(header); err != nil {
 		return err
 	}
@@ -166,9 +166,14 @@ func scoreToRow(d model.DatedScore) []string {
 		d.PlayerScore.ProfileLink,
 		d.PlayerScore.ShuffleGrade,
 		d.PlayerScore.TeamGrade,
-		d.PlayerScore.RankingImage,
+		strconv.Itoa(d.PlayerScore.ScoreRanking),
 		d.PlayerScore.ShopName,
 	}
+}
+
+func atoiOrZero(s string) int {
+	v, _ := strconv.Atoi(s)
+	return v
 }
 
 // ReadAllScoresCSV は既存CSVから全レコードを読み込む。
@@ -235,7 +240,7 @@ func ReadAllScoresCSV(path string) (model.DatedScores, error) {
 				ProfileLink:    col(17),
 				ShuffleGrade:   col(18),
 				TeamGrade:      col(19),
-				RankingImage:   col(20),
+				ScoreRanking:   atoiOrZero(col(20)),
 				ShopName:       col(21),
 			},
 		})
