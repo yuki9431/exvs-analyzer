@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yuki9431/exvs-analyzer/internal/model"
 	"github.com/yuki9431/exvs-analyzer/internal/mslist"
 	"github.com/yuki9431/exvs-analyzer/internal/scraper"
 	"github.com/yuki9431/exvs-analyzer/internal/storage"
@@ -149,7 +150,7 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		}
 
 		// 前回データで即座に分析（速報レポート、キャッシュ済みタッグ情報付き）
-		prelimReport := runAnalysis(csvPath, tmpDir, cachedTagPartnersPath)
+		prelimReport := runAnalysis(csvPath, tmpDir, cachedTagPartnersPath, "")
 		if prelimReport != "" {
 			jobsMu.Lock()
 			j.PreliminaryReport = prelimReport
@@ -224,7 +225,7 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		// タッグ情報がある場合は再分析、なければ速報レポートをそのまま使う
 		finalReport := j.PreliminaryReport
 		if tagPartnersPath != "" {
-			report := runAnalysis(csvPath, tmpDir, tagPartnersPath)
+			report := runAnalysis(csvPath, tmpDir, tagPartnersPath, "")
 			if report != "" {
 				finalReport = report
 			}
@@ -260,6 +261,9 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		log.Printf("[WARN] Failed to upload CSV to Cloud Storage: %v", err)
 	}
 
+	// タイムラインデータの保存
+	timelinePath := saveTimelines(datedScores, username, tmpDir)
+
 	// タッグ相方名を取得（403途中保存時はセッションが無効なのでキャッシュを使用）
 	var tagPartnersPath string
 	if is403WithPartialData {
@@ -288,7 +292,7 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 
 	// Python分析実行
 	updateStatus(j, StatusAnalyzing)
-	report := runAnalysis(csvPath, tmpDir, tagPartnersPath)
+	report := runAnalysis(csvPath, tmpDir, tagPartnersPath, timelinePath)
 	if report == "" {
 		setError(j, "分析処理に失敗しました", "analysis returned empty report")
 		return
@@ -359,11 +363,70 @@ func saveTagPartners(partners []scraper.TagPartner, path string) error {
 	return os.WriteFile(path, b, 0644)
 }
 
+// saveTimelines はDatedScoresからタイムラインデータを抽出し、JSONファイルに保存・GCSにアップロードする
+func saveTimelines(scores model.DatedScores, username, tmpDir string) string {
+	type timelineEntry struct {
+		Datetime string              `json:"datetime"`
+		Timeline *model.MatchTimeline `json:"timeline"`
+	}
+
+	// 既存タイムラインをGCSからダウンロード
+	timelinePath := filepath.Join(tmpDir, "timelines.json")
+	var existing []timelineEntry
+	if found, err := storage.DownloadTimeline(username, timelinePath); err != nil {
+		log.Printf("[WARN] Failed to download existing timelines: %v", err)
+	} else if found {
+		data, err := os.ReadFile(timelinePath)
+		if err == nil {
+			json.Unmarshal(data, &existing)
+		}
+	}
+
+	// 新しいタイムラインを追加
+	var added int
+	for _, s := range scores {
+		if s.MatchTimeline != nil {
+			existing = append(existing, timelineEntry{
+				Datetime: s.Datetime.Format("2006-01-02 15:04"),
+				Timeline: s.MatchTimeline,
+			})
+			added++
+		}
+	}
+
+	if added == 0 {
+		if len(existing) > 0 {
+			return timelinePath
+		}
+		return ""
+	}
+
+	b, err := json.Marshal(existing)
+	if err != nil {
+		log.Printf("[WARN] Failed to marshal timelines: %v", err)
+		return ""
+	}
+	if err := os.WriteFile(timelinePath, b, 0644); err != nil {
+		log.Printf("[WARN] Failed to save timelines: %v", err)
+		return ""
+	}
+
+	if err := storage.UploadTimeline(username, timelinePath); err != nil {
+		log.Printf("[WARN] Failed to upload timelines to GCS: %v", err)
+	}
+
+	log.Printf("[INFO] Saved %d new timelines (%d total)", added, len(existing))
+	return timelinePath
+}
+
 // runAnalysis はPython分析を実行してJSON形式のレポートを返す。失敗時は空文字を返す。
-func runAnalysis(csvPath, tmpDir, tagPartnersPath string) string {
+func runAnalysis(csvPath, tmpDir, tagPartnersPath, timelinePath string) string {
 	args := []string{"scripts/analyze.py", csvPath}
 	if tagPartnersPath != "" {
 		args = append(args, "--tag-partners", tagPartnersPath)
+	}
+	if timelinePath != "" {
+		args = append(args, "--timeline", timelinePath)
 	}
 	cmd := exec.Command("python3", args...)
 	cmd.Dir = "/app"

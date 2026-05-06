@@ -148,3 +148,29 @@ func UploadTagPartners(username, localPath string) error {
 	log.Printf("[INFO] Uploaded tag partners to GCS")
 	return nil
 }
+
+// TimelineObjectPath はユーザーのタイムラインJSONオブジェクトパスを返す
+func TimelineObjectPath(username string) string {
+	return fmt.Sprintf("users/%s/timelines.json", UserKey(username))
+}
+
+// DownloadTimeline はCloud Storageからタイムラインデータをダウンロードする
+func DownloadTimeline(username, localPath string) (bool, error) {
+	found, err := downloadObject(TimelineObjectPath(username), localPath)
+	if err != nil {
+		return false, err
+	}
+	if found {
+		log.Printf("[INFO] Downloaded existing timelines from GCS")
+	}
+	return found, nil
+}
+
+// UploadTimeline はローカルのタイムラインJSONファイルをCloud Storageにアップロードする
+func UploadTimeline(username, localPath string) error {
+	if err := uploadObject(TimelineObjectPath(username), localPath, "application/json"); err != nil {
+		return err
+	}
+	log.Printf("[INFO] Uploaded timelines to GCS")
+	return nil
+}

@@ -51,7 +51,7 @@ func exportAllScoresCSV(ds model.DatedScores, w io.Writer) error {
 	csvw := csv.NewWriter(w)
 	defer csvw.Flush()
 
-	header := []string{"試合日時", "プレイヤーNo.", "地域", "プレイヤー名", "勝利判定", "機体名", "機体画像URL", "スコア", "撃墜数", "被撃墜数", "与ダメージ", "被ダメージ", "EXダメージ"}
+	header := []string{"試合日時", "プレイヤーNo.", "地域", "プレイヤー名", "勝利判定", "機体名", "機体画像URL", "スコア", "撃墜数", "被撃墜数", "与ダメージ", "被ダメージ", "EXダメージ", "ランク", "チーム名", "称号画像URL", "称号バッジURL", "プロフィールURL", "シャッフルグレード画像URL", "チームグレード画像URL", "順位バッジURL", "店舗名"}
 	if err := csvw.Write(header); err != nil {
 		return err
 	}
@@ -81,6 +81,15 @@ func scoreToRow(d model.DatedScore) []string {
 		strconv.Itoa(d.PlayerScore.Give_damage),
 		strconv.Itoa(d.PlayerScore.Receive_damage),
 		strconv.Itoa(d.PlayerScore.Ex_damage),
+		d.PlayerScore.Mastery,
+		d.PlayerScore.TeamName,
+		d.PlayerScore.TitleImage,
+		d.PlayerScore.TitleBadge,
+		d.PlayerScore.ProfileLink,
+		d.PlayerScore.ShuffleGrade,
+		d.PlayerScore.TeamGrade,
+		d.PlayerScore.RankingImage,
+		d.PlayerScore.ShopName,
 	}
 }
 

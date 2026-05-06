@@ -1,7 +1,7 @@
 // csv_export_test.go — internal/storage パッケージのユニットテスト
 //
 // テスト対象と観点:
-//   - scoreToRow: DatedScore→CSV行（13カラム）の変換が正しいか
+//   - scoreToRow: DatedScore→CSV行（22カラム）の変換が正しいか
 //   - exportAllScoresCSV: ヘッダー+データ行のCSV出力
 //   - GetLatestDatetime: CSV内の最新日時を取得。ファイル未存在時はゼロ値を返すか
 //   - SaveAllScoresCSV: 新規作成（ヘッダー付き）と既存ファイルへの追記。空データで変化しないか
@@ -40,6 +40,15 @@ func TestScoreToRow(t *testing.T) {
 			Give_damage:    5000,
 			Receive_damage: 2000,
 			Ex_damage:      1000,
+			Mastery:        "master",
+			TeamName:       "テストチーム",
+			TitleImage:     "https://example.com/title.png",
+			TitleBadge:     "https://example.com/badge.png",
+			ProfileLink:    "https://web.vsmobile.jp/exvs2ib/profile?param=abc123",
+			ShuffleGrade:   "https://example.com/grade1.png",
+			TeamGrade:      "https://example.com/grade2.png",
+			RankingImage:   "https://example.com/ranking.png",
+			ShopName:       "テストゲームセンター",
 		},
 	}
 
@@ -57,8 +66,35 @@ func TestScoreToRow(t *testing.T) {
 	if row[5] != "ガンダム" {
 		t.Errorf("msName: got %q, want %q", row[5], "ガンダム")
 	}
-	if len(row) != 13 {
-		t.Errorf("row length: got %d, want 13", len(row))
+	if row[13] != "master" {
+		t.Errorf("mastery: got %q, want %q", row[13], "master")
+	}
+	if row[14] != "テストチーム" {
+		t.Errorf("teamName: got %q, want %q", row[14], "テストチーム")
+	}
+	if row[15] != "https://example.com/title.png" {
+		t.Errorf("titleImage: got %q, want %q", row[15], "https://example.com/title.png")
+	}
+	if row[16] != "https://example.com/badge.png" {
+		t.Errorf("titleBadge: got %q, want %q", row[16], "https://example.com/badge.png")
+	}
+	if row[17] != "https://web.vsmobile.jp/exvs2ib/profile?param=abc123" {
+		t.Errorf("profileLink: got %q, want %q", row[17], "https://web.vsmobile.jp/exvs2ib/profile?param=abc123")
+	}
+	if row[18] != "https://example.com/grade1.png" {
+		t.Errorf("shuffleGrade: got %q, want %q", row[18], "https://example.com/grade1.png")
+	}
+	if row[19] != "https://example.com/grade2.png" {
+		t.Errorf("teamGrade: got %q, want %q", row[19], "https://example.com/grade2.png")
+	}
+	if row[20] != "https://example.com/ranking.png" {
+		t.Errorf("rankingImage: got %q, want %q", row[20], "https://example.com/ranking.png")
+	}
+	if row[21] != "テストゲームセンター" {
+		t.Errorf("shopName: got %q, want %q", row[21], "テストゲームセンター")
+	}
+	if len(row) != 22 {
+		t.Errorf("row length: got %d, want 22", len(row))
 	}
 }
 

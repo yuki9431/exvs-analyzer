@@ -54,8 +54,9 @@ type TagPartner struct {
 
 // dailyLink はrankpageから収集した日別ページ情報
 type dailyLink struct {
-	date string
-	url  string
+	date     string
+	url      string
+	shopName string // プレイ店舗名
 }
 
 // matchEntry は日別ページから収集した試合情報
@@ -64,6 +65,15 @@ type matchEntry struct {
 	hour      string
 	wins      []string
 	detailURL string
+	shopName  string // プレイ店舗名（dailyLinkから引き継ぎ）
+}
+
+// stripQueryParam はURLからクエリパラメータを除去する
+func stripQueryParam(rawURL string) string {
+	if idx := strings.Index(rawURL, "?"); idx >= 0 {
+		return rawURL[:idx]
+	}
+	return rawURL
 }
 
 func parseNumber(s string) int {
@@ -166,7 +176,8 @@ func collectDailyLinks(jar http.CookieJar, since time.Time) ([]dailyLink, error)
 		}
 
 		link := e.Request.AbsoluteURL(e.ChildAttr("a", "href"))
-		links = append(links, dailyLink{date: date, url: link})
+		shopName := strings.TrimSpace(e.ChildText("span.ds-ib.tl-l.col-stand.fz-ss"))
+		links = append(links, dailyLink{date: date, url: link, shopName: shopName})
 	})
 
 	c.Visit(mobileRankpage)
@@ -298,6 +309,7 @@ func collectMatchEntries(jar http.CookieJar, dl dailyLink, since time.Time) ([]m
 			hour:      hour,
 			wins:      wins,
 			detailURL: link,
+			shopName:  dl.shopName,
 		})
 	})
 
@@ -462,15 +474,16 @@ func fetchSingleDetail(ctx context.Context, jar http.CookieJar, e matchEntry) (m
 
 	var scores model.DatedScores
 	doc.Find("div.panel_area").Each(func(_ int, s *goquery.Selection) {
-		scores = parseDetailPage(s, e.date, e.hour, e.wins)
+		scores = parseDetailPage(s, e.date, e.hour, e.wins, e.shopName)
 	})
 	return scores, nil
 }
 
 // parseDetailPage は試合詳細ページからスコアを抽出する
-func parseDetailPage(s *goquery.Selection, date, hour string, wins []string) model.DatedScores {
+func parseDetailPage(s *goquery.Selection, date, hour string, wins []string, shopName string) model.DatedScores {
 	var scores model.DatedScores
 
+	// スコアタブ(panel3)からの既存データ
 	selectorLeftValue := "div.w45.pr-ss > dl > dd"
 	selectorRightValue := "div.w55 > dl > dd"
 	selectorCity := "div.w80.ta-r > p.col-stand"
@@ -482,6 +495,18 @@ func parseDetailPage(s *goquery.Selection, date, hour string, wins []string) mod
 	msImages := attrsFromSelection(s, selectorMSImage, "data-original")
 	leftValue := textsFromSelection(s, selectorLeftValue)
 	rightValue := textsFromSelection(s, selectorRightValue)
+
+	// メンバータブ(panel1)からの追加データ
+	masteries := parseMasteries(s)
+	teamNames := parseTeamNames(s)
+	titleImages := attrsFromSelection(s, "#panel1 img.title-plv-img", "src")
+	titleBadges := attrsFromSelection(s, "#panel1 img.title-plv-badge", "src")
+	profileLinks := attrsFromSelection(s, "#panel1 li.item > a.right-arrow", "href")
+	gradeImages := attrsFromSelection(s, "#panel1 img.class-img", "data-original")
+	rankingImages := attrsFromSelection(s, "#panel3 img.ranking-img", "src")
+
+	// 試合経過タブ(panel2)からのタイムラインデータ
+	timeline := parseMatchTimeline(s)
 
 	layout := "2006/01/02 15:04"
 	t := date + " " + hour
@@ -507,6 +532,46 @@ func parseDetailPage(s *goquery.Selection, date, hour string, wins []string) mod
 		receiveDamage := parseNumber(rightValue[1+offR])
 		exDamage := parseNumber(rightValue[2+offR])
 
+		mastery := ""
+		if i < len(masteries) {
+			mastery = masteries[i]
+		}
+
+		// チーム名: player 1,2 → team1, player 3,4 → team2
+		teamName := ""
+		teamIdx := i / 2
+		if teamIdx < len(teamNames) {
+			teamName = teamNames[teamIdx]
+		}
+
+		titleImage := ""
+		if i < len(titleImages) {
+			titleImage = titleImages[i]
+		}
+		titleBadge := ""
+		if i < len(titleBadges) {
+			titleBadge = titleBadges[i]
+		}
+		profileLink := ""
+		if i < len(profileLinks) {
+			profileLink = profileLinks[i]
+		}
+		// クラス画像は各プレイヤーに2枚ずつ (シャッフル階級・固定階級)
+		shuffleGrade := ""
+		teamGrade := ""
+		gradeIdx := i * 2
+		if gradeIdx < len(gradeImages) {
+			shuffleGrade = stripQueryParam(gradeImages[gradeIdx])
+		}
+		if gradeIdx+1 < len(gradeImages) {
+			teamGrade = stripQueryParam(gradeImages[gradeIdx+1])
+		}
+		// スコア順位バッジ (4位はテキスト表示のため画像がない場合あり)
+		rankingImage := ""
+		if i < len(rankingImages) {
+			rankingImage = rankingImages[i]
+		}
+
 		result := model.DatedScore{
 			PlayerNo: i + 1,
 			Datetime: datetime,
@@ -522,13 +587,162 @@ func parseDetailPage(s *goquery.Selection, date, hour string, wins []string) mod
 				Give_damage:    giveDamage,
 				Receive_damage: receiveDamage,
 				Ex_damage:      exDamage,
+				Mastery:        mastery,
+				TeamName:       teamName,
+				TitleImage:     titleImage,
+				TitleBadge:     titleBadge,
+				ProfileLink:    profileLink,
+				ShuffleGrade:    shuffleGrade,
+				TeamGrade:    teamGrade,
+				RankingImage:   rankingImage,
+				ShopName:       shopName,
 			},
+		}
+
+		// タイムラインはPlayerNo==1のときのみセット（4人で共有データ）
+		if i == 0 && timeline != nil {
+			result.MatchTimeline = timeline
 		}
 
 		scores = append(scores, result)
 	}
 
 	return scores
+}
+
+// parseMasteries はメンバータブからランク情報を抽出する
+// span.masteryのclass属性から"mastery"以外のクラス名を取得する
+func parseMasteries(s *goquery.Selection) []string {
+	var masteries []string
+	s.Find("#panel1 span.mastery").Each(func(_ int, el *goquery.Selection) {
+		classes, exists := el.Attr("class")
+		if !exists {
+			masteries = append(masteries, "")
+			return
+		}
+		rank := ""
+		for _, c := range strings.Fields(classes) {
+			if c != "mastery" {
+				rank = c
+				break
+			}
+		}
+		masteries = append(masteries, rank)
+	})
+	return masteries
+}
+
+// parseTeamNames はメンバータブからチーム名を抽出する
+// panel1のbox内h3にあるtag-nameを取得（2チーム分）
+func parseTeamNames(s *goquery.Selection) []string {
+	var names []string
+	s.Find("#panel1 > div.box > h3 p.tag-name").Each(func(_ int, el *goquery.Selection) {
+		names = append(names, strings.TrimSpace(el.Text()))
+	})
+	return names
+}
+
+// vis.js DataSetパーサー用の正規表現
+var (
+	rePush      = regexp.MustCompile(`dataset\.push\(\{(.+?)\}\)`)
+	reGroup     = regexp.MustCompile(`group:\s*"([^"]+)"`)
+	reClassName = regexp.MustCompile(`className:\s*'([^']+)'`)
+	reType      = regexp.MustCompile(`type:\s*'([^']+)'`)
+	reStartTime = regexp.MustCompile(`var\s+start_time\s*=\s*new\s+Date\(0,\s*0,\s*0,\s*(\d+),\s*(\d+),\s*(\d+)\)`)
+	reEndTime   = regexp.MustCompile(`var\s+end_time\s*=\s*new\s+Date\(0,\s*0,\s*0,\s*(\d+),\s*(\d+),\s*(\d+)\)`)
+	reGameOver  = regexp.MustCompile(`addCustomTime\(new\s+Date\(0,\s*0,\s*0,\s*(\d+),\s*(\d+),\s*(\d+)\),\s*'game-over'\)`)
+)
+
+// datePartsToSec はvis.jsのDate(0,0,0,min,sec,centisec)を秒に変換する
+func datePartsToSec(minStr, secStr, centiStr string) float64 {
+	min, _ := strconv.Atoi(minStr)
+	sec, _ := strconv.Atoi(secStr)
+	centi, _ := strconv.Atoi(centiStr)
+	return float64(min)*60 + float64(sec) + float64(centi)/100.0
+}
+
+// parseMatchTimeline は試合経過タブからvis.jsのタイムラインデータを解析する
+func parseMatchTimeline(s *goquery.Selection) *model.MatchTimeline {
+	// panel2内のscriptタグからJavaScriptコードを取得
+	var scriptText string
+	s.Find("#panel2 script").Each(func(_ int, el *goquery.Selection) {
+		text := el.Text()
+		if strings.Contains(text, "dataset.push") {
+			scriptText = text
+		}
+	})
+
+	if scriptText == "" {
+		return nil
+	}
+
+	var events []model.MatchEvent
+
+	// scriptTextを行ごとに処理し、start_time/end_time変数とdataset.pushを対応付ける
+	lines := strings.Split(scriptText, "\n")
+	var currentStart float64
+	var currentEnd float64
+	var hasEnd bool
+
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+
+		if m := reStartTime.FindStringSubmatch(line); m != nil {
+			currentStart = datePartsToSec(m[1], m[2], m[3])
+			hasEnd = false
+			currentEnd = 0
+			continue
+		}
+
+		if m := reEndTime.FindStringSubmatch(line); m != nil {
+			currentEnd = datePartsToSec(m[1], m[2], m[3])
+			hasEnd = true
+			continue
+		}
+
+		if m := rePush.FindStringSubmatch(line); m != nil {
+			content := m[1]
+
+			groupMatch := reGroup.FindStringSubmatch(content)
+			if groupMatch == nil {
+				continue
+			}
+
+			event := model.MatchEvent{
+				Group:    groupMatch[1],
+				StartSec: currentStart,
+			}
+
+			if hasEnd {
+				event.EndSec = currentEnd
+			}
+
+			if classMatch := reClassName.FindStringSubmatch(content); classMatch != nil {
+				event.ClassName = classMatch[1]
+			}
+
+			if typeMatch := reType.FindStringSubmatch(content); typeMatch != nil && typeMatch[1] == "point" {
+				event.IsPoint = true
+			}
+
+			events = append(events, event)
+		}
+	}
+
+	if len(events) == 0 {
+		return nil
+	}
+
+	timeline := &model.MatchTimeline{
+		Events: events,
+	}
+
+	// ゲーム終了時間を取得
+	if m := reGameOver.FindStringSubmatch(scriptText); m != nil {
+		timeline.GameEndSec = datePartsToSec(m[1], m[2], m[3])
+	}
+
+	return timeline
 }
 
 // textsFromSelection はgoquery.Selectionから指定セレクタの子要素テキストを収集する
