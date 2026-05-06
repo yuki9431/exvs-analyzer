@@ -16,6 +16,8 @@
 │   │   └── types.go             # 型定義のみ（PlayerScore, MSInfo等）
 │   ├── mslist/
 │   │   └── mslist.go            # MSリストの読み書き・マージ
+│   ├── gradelist/
+│   │   └── gradelist.go         # グレードリストの読み込み・未知URL検出
 │   ├── scraper/
 │   │   ├── scraper.go           # スクレイピング処理
 │   │   └── login.go             # バンダイナムコIDログイン
@@ -34,7 +36,8 @@
 │   ├── app.js                   # フロントエンドJS（CSP対応で外部化）
 │   └── htm-preact-standalone.js # htm + Preactライブラリ
 ├── data/
-│   └── ms_list.json             # 機体名・コストマッピング
+│   ├── ms_list.json             # 機体名・コストマッピング
+│   └── grade_list.json          # 階級画像URL→階級名・グレードマッピング
 ├── infra/
 │   ├── index.ts                 # Pulumiエントリポイント
 │   ├── apis.ts                  # Google API有効化
@@ -66,6 +69,7 @@
 | `internal/` | プライベートパッケージ。外部から参照不可 |
 | `internal/model/` | データ型の定義のみ |
 | `internal/mslist/` | MSリストの読み書き・マージ |
+| `internal/gradelist/` | グレードリストの読み込み・未知URL検出 |
 | `internal/scraper/` | スクレイピング・ログイン処理 |
 | `internal/pipeline/` | 分析パイプライン（ジョブ管理・実行） |
 | `internal/server/` | HTTPハンドラ・レート制限 |
