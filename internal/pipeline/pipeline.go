@@ -41,6 +41,7 @@ type Job struct {
 	Report             string    `json:"report,omitempty"`
 	PreliminaryReport  string    `json:"preliminary_report,omitempty"`
 	Error              string    `json:"error,omitempty"`
+	PartialData        bool      `json:"partial_data,omitempty"`
 	UserKey            string    `json:"-"`
 	completedAt        time.Time
 }
@@ -55,6 +56,7 @@ type JobSnapshot struct {
 	Report            string
 	PreliminaryReport string
 	Error             string
+	PartialData       bool
 	UserKey           string
 }
 
@@ -97,6 +99,7 @@ func (j *Job) Snapshot() JobSnapshot {
 		Report:            j.Report,
 		PreliminaryReport: j.PreliminaryReport,
 		Error:             j.Error,
+		PartialData:       j.PartialData,
 		UserKey:           j.UserKey,
 	}
 }
@@ -165,7 +168,9 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		jobsMu.Unlock()
 	}
 	datedScores, jar, err := scraper.Scraping(username, password, since, onProgress)
-	if err != nil {
+	// 403の場合でも途中データがあれば保存・分析を続行する
+	is403WithPartialData := errors.Is(err, scraper.ErrAccessDenied) && len(datedScores) > 0
+	if err != nil && !is403WithPartialData {
 		switch {
 		case errors.Is(err, scraper.ErrLoginFailed):
 			setError(j, "ログインに失敗しました。メールアドレスとパスワードを確認してください。", err.Error())
@@ -184,6 +189,12 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 			setError(j, "データの取得に失敗しました。時間をおいて再度お試しいただき、解決しない場合は開発者までお問い合わせください。", err.Error())
 		}
 		return
+	}
+	if is403WithPartialData {
+		log.Printf("[WARN] Job %s: 403 occurred but %d partial scores available, saving partial data", j.ID, len(datedScores))
+		if len(on403) > 0 && on403[0] != nil {
+			on403[0](storage.UserKey(username))
+		}
 	}
 	if len(datedScores) == 0 && !exists {
 		setError(j, "戦績データが見つかりませんでした", "no scores found")
@@ -249,23 +260,30 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		log.Printf("[WARN] Failed to upload CSV to Cloud Storage: %v", err)
 	}
 
-	// タッグ相方名を取得
+	// タッグ相方名を取得（403途中保存時はセッションが無効なのでキャッシュを使用）
 	var tagPartnersPath string
-	tagPartners := scraper.ScrapeTagPartners(jar)
-	if len(tagPartners) > 0 {
-		tagPartnersPath = filepath.Join(tmpDir, "tag_partners.json")
-		if err := saveTagPartners(tagPartners, tagPartnersPath); err != nil {
-			log.Printf("[WARN] Failed to save tag partners: %v", err)
-			tagPartnersPath = ""
-		} else {
-			log.Printf("[INFO] Found %d tag partners", len(tagPartners))
-			// タッグ相方情報をGCSにアップロード
-			if err := storage.UploadTagPartners(username, tagPartnersPath); err != nil {
-				log.Printf("[WARN] Failed to upload tag partners to GCS: %v", err)
-			}
+	if is403WithPartialData {
+		if cachedTagPartnersPath != "" {
+			tagPartnersPath = cachedTagPartnersPath
+			log.Printf("[INFO] Using cached tag partners (403 partial save)")
 		}
 	} else {
-		log.Printf("[INFO] No tag partners found")
+		tagPartners := scraper.ScrapeTagPartners(jar)
+		if len(tagPartners) > 0 {
+			tagPartnersPath = filepath.Join(tmpDir, "tag_partners.json")
+			if err := saveTagPartners(tagPartners, tagPartnersPath); err != nil {
+				log.Printf("[WARN] Failed to save tag partners: %v", err)
+				tagPartnersPath = ""
+			} else {
+				log.Printf("[INFO] Found %d tag partners", len(tagPartners))
+				// タッグ相方情報をGCSにアップロード
+				if err := storage.UploadTagPartners(username, tagPartnersPath); err != nil {
+					log.Printf("[WARN] Failed to upload tag partners to GCS: %v", err)
+				}
+			}
+		} else {
+			log.Printf("[INFO] No tag partners found")
+		}
 	}
 
 	// Python分析実行
@@ -279,9 +297,14 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 	jobsMu.Lock()
 	j.Status = StatusDone
 	j.Report = report
+	j.PartialData = is403WithPartialData
 	j.completedAt = time.Now()
 	jobsMu.Unlock()
-	log.Printf("[INFO] Job %s completed", j.ID)
+	if is403WithPartialData {
+		log.Printf("[INFO] Job %s completed with partial data (403 during scraping)", j.ID)
+	} else {
+		log.Printf("[INFO] Job %s completed", j.ID)
+	}
 }
 
 // RunCustomPeriod はカスタム日時範囲で再分析を実行してJSON文字列を返す

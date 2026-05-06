@@ -120,7 +120,12 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 	if streamErr != nil {
 		return nil, nil, streamErr
 	}
+	// 403の場合は途中データとエラーを両方返す（呼び出し元で途中保存できるようにする）
 	if detailErr != nil {
+		if errors.Is(detailErr, ErrAccessDenied) && len(scores) > 0 {
+			log.Printf("[INFO] Returning %d partial scores despite 403 error", len(scores))
+			return scores, m.HTTPClient.Jar, detailErr
+		}
 		return nil, nil, detailErr
 	}
 
@@ -325,7 +330,6 @@ func fetchDetailPagesStreaming(ctx context.Context, cancel context.CancelFunc, j
 			// チャネルに残ったエントリを捨てて終了を待つ
 			for range entryCh {
 			}
-			return nil, ErrAccessDenied
 		default:
 			entries = append(entries, entry)
 		}
@@ -404,7 +408,8 @@ func fetchDetailPagesStreaming(ctx context.Context, cancel context.CancelFunc, j
 	wg.Wait()
 
 	if has403 {
-		return nil, ErrAccessDenied
+		log.Printf("[WARN] 403 detected during detail fetch: %d/%d pages completed, returning partial data", processed, total)
+		return scores, ErrAccessDenied
 	}
 	if errorCount > 0 {
 		return nil, fmt.Errorf("詳細ページ取得で%w: %d/%d件がエラー", ErrHTTPRequestFailed, errorCount, total)
