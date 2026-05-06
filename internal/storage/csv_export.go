@@ -13,9 +13,9 @@ import (
 // currentCSVColumnCount は現在のCSVフォーマットのカラム数
 const currentCSVColumnCount = 22
 
-// IsOldCSVFormat は既存CSVが旧フォーマット（カラム数不足）かどうかを判定する。
-// ファイルが存在しない場合やヘッダーが読めない場合はfalseを返す。
-func IsOldCSVFormat(path string) bool {
+// NeedsBackfill は既存CSVにバックフィルが必要かどうかを判定する。
+// ヘッダーが旧フォーマット、または直近30日以内のデータに新フィールドが空のレコードがあればtrue。
+func NeedsBackfill(path string) bool {
 	f, err := os.Open(path)
 	if err != nil {
 		return false
@@ -23,11 +23,34 @@ func IsOldCSVFormat(path string) bool {
 	defer f.Close()
 
 	r := csv.NewReader(f)
-	header, err := r.Read()
-	if err != nil {
+	r.FieldsPerRecord = -1
+	records, err := r.ReadAll()
+	if err != nil || len(records) == 0 {
 		return false
 	}
-	return len(header) < currentCSVColumnCount
+
+	// ヘッダーが旧フォーマットならバックフィル必要
+	if len(records[0]) < currentCSVColumnCount {
+		return true
+	}
+
+	// 直近30日以内のデータで新フィールド（ランク: カラム13）が空のレコードがあるか
+	layout := "2006-01-02 15:04"
+	cutoff := time.Now().AddDate(0, 0, -30)
+	for i, row := range records {
+		if i == 0 {
+			continue
+		}
+		dt, err := time.Parse(layout, row[0])
+		if err != nil {
+			continue
+		}
+		// 直近30日以内で、カラム数不足または新フィールドが空
+		if dt.After(cutoff) && (len(row) < currentCSVColumnCount || row[13] == "") {
+			return true
+		}
+	}
+	return false
 }
 
 // GetLatestDatetime は既存CSVファイルから最新の試合日時を取得する。

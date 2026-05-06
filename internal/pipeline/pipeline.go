@@ -142,7 +142,7 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 	}
 
 	// 旧CSVフォーマット検出: 新フィールド追加後の初回は全件再スクレイプ
-	needsBackfill := exists && storage.IsOldCSVFormat(csvPath)
+	needsBackfill := exists && storage.NeedsBackfill(csvPath)
 	if needsBackfill {
 		log.Printf("[INFO] Old CSV format detected, will re-scrape all available data for backfill")
 	}
