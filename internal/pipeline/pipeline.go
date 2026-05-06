@@ -8,10 +8,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yuki9431/exvs-analyzer/internal/model"
 	"github.com/yuki9431/exvs-analyzer/internal/mslist"
 	"github.com/yuki9431/exvs-analyzer/internal/scraper"
 	"github.com/yuki9431/exvs-analyzer/internal/storage"
@@ -139,17 +141,28 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		cachedTagPartnersPath = ""
 	}
 
+	// 旧CSVフォーマット検出: 新フィールド追加後の初回は全件再スクレイプ
+	needsBackfill := exists && storage.IsOldCSVFormat(csvPath)
+	if needsBackfill {
+		log.Printf("[INFO] Old CSV format detected, will re-scrape all available data for backfill")
+	}
+
 	if exists {
-		since, err = storage.GetLatestDatetime(csvPath)
-		if err != nil {
-			log.Printf("[WARN] Failed to read latest datetime: %v", err)
-		}
-		if !since.IsZero() {
-			log.Printf("[INFO] Fetching scores after %s", since.Format("2006-01-02 15:04"))
+		if needsBackfill {
+			// 旧フォーマット: since=ゼロで全件再スクレイプ（サイト保持期間内のデータに新フィールドを付与）
+			log.Printf("[INFO] Backfill mode: ignoring existing latest datetime")
+		} else {
+			since, err = storage.GetLatestDatetime(csvPath)
+			if err != nil {
+				log.Printf("[WARN] Failed to read latest datetime: %v", err)
+			}
+			if !since.IsZero() {
+				log.Printf("[INFO] Fetching scores after %s", since.Format("2006-01-02 15:04"))
+			}
 		}
 
 		// 前回データで即座に分析（速報レポート、キャッシュ済みタッグ情報付き）
-		prelimReport := runAnalysis(csvPath, tmpDir, cachedTagPartnersPath)
+		prelimReport := runAnalysis(csvPath, tmpDir, cachedTagPartnersPath, "")
 		if prelimReport != "" {
 			jobsMu.Lock()
 			j.PreliminaryReport = prelimReport
@@ -224,7 +237,7 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		// タッグ情報がある場合は再分析、なければ速報レポートをそのまま使う
 		finalReport := j.PreliminaryReport
 		if tagPartnersPath != "" {
-			report := runAnalysis(csvPath, tmpDir, tagPartnersPath)
+			report := runAnalysis(csvPath, tmpDir, tagPartnersPath, "")
 			if report != "" {
 				finalReport = report
 			}
@@ -249,16 +262,28 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 	mslist.FillMsNames(datedScores, msMap)
 	mslist.CheckUnknownMS(datedScores)
 
-	// CSV保存（既存データに追記）
-	if err := storage.SaveAllScoresCSV(datedScores, csvPath); err != nil {
-		setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to save CSV: %v", err))
-		return
+	// CSV保存
+	if needsBackfill {
+		// バックフィル: 旧CSVの古いデータ（再スクレイプでカバーできない期間）を残して新データとマージ
+		if err := mergeAndSaveCSV(datedScores, csvPath); err != nil {
+			setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to save CSV: %v", err))
+			return
+		}
+	} else {
+		// 通常: 既存データに追記
+		if err := storage.SaveAllScoresCSV(datedScores, csvPath); err != nil {
+			setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to save CSV: %v", err))
+			return
+		}
 	}
 
 	// Cloud Storageにアップロード
 	if err := storage.UploadCSV(username, csvPath); err != nil {
 		log.Printf("[WARN] Failed to upload CSV to Cloud Storage: %v", err)
 	}
+
+	// タイムラインデータの保存
+	timelinePath := saveTimelines(datedScores, username, tmpDir)
 
 	// タッグ相方名を取得（403途中保存時はセッションが無効なのでキャッシュを使用）
 	var tagPartnersPath string
@@ -288,7 +313,7 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 
 	// Python分析実行
 	updateStatus(j, StatusAnalyzing)
-	report := runAnalysis(csvPath, tmpDir, tagPartnersPath)
+	report := runAnalysis(csvPath, tmpDir, tagPartnersPath, timelinePath)
 	if report == "" {
 		setError(j, "分析処理に失敗しました", "analysis returned empty report")
 		return
@@ -359,11 +384,111 @@ func saveTagPartners(partners []scraper.TagPartner, path string) error {
 	return os.WriteFile(path, b, 0644)
 }
 
+// mergeAndSaveCSV はバックフィル時に旧CSVと新スクレイプデータをマージして保存する。
+// 新データでカバーされる日時のレコードは新データで置き換え、それ以外は旧データを残す。
+func mergeAndSaveCSV(newScores model.DatedScores, csvPath string) error {
+	oldScores, err := storage.ReadAllScoresCSV(csvPath)
+	if err != nil {
+		return fmt.Errorf("failed to read old CSV: %w", err)
+	}
+
+	// 新データの日時セットを作成（重複判定用）
+	newDatetimes := make(map[string]bool)
+	for _, s := range newScores {
+		key := s.Datetime.Format("2006-01-02 15:04") + ":" + strconv.Itoa(s.PlayerNo)
+		newDatetimes[key] = true
+	}
+
+	// 旧データから、新データでカバーされていないレコードだけ残す
+	var keepOld model.DatedScores
+	for _, s := range oldScores {
+		key := s.Datetime.Format("2006-01-02 15:04") + ":" + strconv.Itoa(s.PlayerNo)
+		if !newDatetimes[key] {
+			keepOld = append(keepOld, s)
+		}
+	}
+
+	// マージ: 旧データ（古い期間）+ 新データ（新フィールド付き）
+	merged := append(keepOld, newScores...)
+
+	// 新規ファイルとして書き直す
+	if err := os.Remove(csvPath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove old CSV: %w", err)
+	}
+	if err := storage.SaveAllScoresCSV(merged, csvPath); err != nil {
+		return fmt.Errorf("failed to save merged CSV: %w", err)
+	}
+
+	log.Printf("[INFO] Backfill merge: %d old records kept, %d new records, %d total", len(keepOld), len(newScores), len(merged))
+	return nil
+}
+
+// saveTimelines はDatedScoresからタイムラインデータを抽出し、JSONファイルに保存・GCSにアップロードする
+func saveTimelines(scores model.DatedScores, username, tmpDir string) string {
+	type timelineEntry struct {
+		Datetime string              `json:"datetime"`
+		Timeline *model.MatchTimeline `json:"timeline"`
+	}
+
+	// 既存タイムラインをGCSからダウンロード
+	timelinePath := filepath.Join(tmpDir, "timelines.json")
+	var existing []timelineEntry
+	if found, err := storage.DownloadTimeline(username, timelinePath); err != nil {
+		log.Printf("[WARN] Failed to download existing timelines: %v", err)
+	} else if found {
+		data, err := os.ReadFile(timelinePath)
+		if err == nil {
+			if err := json.Unmarshal(data, &existing); err != nil {
+				log.Printf("[WARN] Failed to parse existing timelines: %v", err)
+			}
+		}
+	}
+
+	// 新しいタイムラインを追加
+	var added int
+	for _, s := range scores {
+		if s.MatchTimeline != nil {
+			existing = append(existing, timelineEntry{
+				Datetime: s.Datetime.Format("2006-01-02 15:04"),
+				Timeline: s.MatchTimeline,
+			})
+			added++
+		}
+	}
+
+	if added == 0 {
+		if len(existing) > 0 {
+			return timelinePath
+		}
+		return ""
+	}
+
+	b, err := json.Marshal(existing)
+	if err != nil {
+		log.Printf("[WARN] Failed to marshal timelines: %v", err)
+		return ""
+	}
+	if err := os.WriteFile(timelinePath, b, 0644); err != nil {
+		log.Printf("[WARN] Failed to save timelines: %v", err)
+		return ""
+	}
+
+	if err := storage.UploadTimeline(username, timelinePath); err != nil {
+		log.Printf("[WARN] Failed to upload timelines to GCS: %v", err)
+	}
+
+	log.Printf("[INFO] Saved %d new timelines (%d total)", added, len(existing))
+	return timelinePath
+}
+
 // runAnalysis はPython分析を実行してJSON形式のレポートを返す。失敗時は空文字を返す。
-func runAnalysis(csvPath, tmpDir, tagPartnersPath string) string {
+func runAnalysis(csvPath, tmpDir, tagPartnersPath, timelinePath string) string {
 	args := []string{"scripts/analyze.py", csvPath}
 	if tagPartnersPath != "" {
 		args = append(args, "--tag-partners", tagPartnersPath)
+	}
+	if timelinePath != "" {
+		args = append(args, "--timeline", timelinePath)
 	}
 	cmd := exec.Command("python3", args...)
 	cmd.Dir = "/app"
