@@ -330,6 +330,8 @@ func fetchDetailPagesStreaming(ctx context.Context, cancel context.CancelFunc, j
 			// チャネルに残ったエントリを捨てて終了を待つ
 			for range entryCh {
 			}
+			// drain完了後、収集済みエントリで詳細取得に進む
+			break
 		default:
 			entries = append(entries, entry)
 		}

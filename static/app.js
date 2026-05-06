@@ -1263,6 +1263,9 @@ async function analyze() {
   status.style.display = 'block';
   statusText.textContent = STATUS_MESSAGES.pending;
   error.style.display = 'none';
+  error.style.backgroundColor = '';
+  error.style.borderColor = '';
+  error.style.color = '';
   reportEl.style.display = 'none';
   render(null, reportEl);
 
