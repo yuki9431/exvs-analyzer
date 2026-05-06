@@ -47,7 +47,7 @@ func TestScoreToRow(t *testing.T) {
 			ProfileLink:    "https://web.vsmobile.jp/exvs2ib/profile?param=abc123",
 			ShuffleGrade:   "https://example.com/grade1.png",
 			TeamGrade:      "https://example.com/grade2.png",
-			RankingImage:   "https://example.com/ranking.png",
+			ScoreRanking:   1,
 			ShopName:       "テストゲームセンター",
 		},
 	}
@@ -87,8 +87,8 @@ func TestScoreToRow(t *testing.T) {
 	if row[19] != "https://example.com/grade2.png" {
 		t.Errorf("teamGrade: got %q, want %q", row[19], "https://example.com/grade2.png")
 	}
-	if row[20] != "https://example.com/ranking.png" {
-		t.Errorf("rankingImage: got %q, want %q", row[20], "https://example.com/ranking.png")
+	if row[20] != "1" {
+		t.Errorf("scoreRanking: got %q, want %q", row[20], "1")
 	}
 	if row[21] != "テストゲームセンター" {
 		t.Errorf("shopName: got %q, want %q", row[21], "テストゲームセンター")
