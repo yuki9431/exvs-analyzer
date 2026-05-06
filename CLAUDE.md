@@ -71,8 +71,9 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 
 - `cmd/server/main.go` — エントリポイント。`internal/server.StartServer()` に委譲
 - `cmd/update-mslist/main.go` — MSリストをスクレイピングして `data/ms_list.json` を更新するCLI
-- `internal/model/` — 型定義のみ（`PlayerScore`, `DatedScore`, `MSInfo`, `AverageScore`）
+- `internal/model/` — 型定義のみ（`PlayerScore`, `DatedScore`, `MSInfo`, `AverageScore`, `MatchEvent`, `MatchTimeline`）
 - `internal/mslist/` — MSリストの読み書き・マージ（`LoadMSList`, `SaveMSList`, `MergeMSList`, `BuildMSNameMap`, `FillMsNames`, `CheckUnknownMS`）
+- `internal/gradelist/` — グレードリストの読み込み・未知URL検出（`LoadGradeList`, `BuildGradeMap`, `CheckUnknownGrades`）
 - `internal/scraper/` — Collyベースのスクレイパー（`scraper.go`）+ バンダイナムコID認証（`login.go`）
 - `internal/pipeline/` — 分析パイプライン（`Job`型、ジョブストア、`Run`関数）
 - `internal/server/` — HTTPハンドラ（`server.go`）+ IPベースレート制限（`ratelimit.go`）
@@ -83,6 +84,7 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 - `static/htm-preact-standalone.js` — htm + Preact ライブラリ（スタンドアロン版）
 - `static/preview.html` — フロントエンド開発用プレビュー（gitignore対象）
 - `data/ms_list.json` — MS画像URL→名前・コストのマッピング（コスト: 3000/2500/2000/1500）
+- `data/grade_list.json` — 階級画像URL→階級名・グレードのマッピング（Pilot/Valiant/Ace/Extreme、グレード0=∞）
 - `infra/shared/` — Pulumi IaC 共有リソース（`apis.ts`, `artifact-registry.ts`, `storage.ts`, `dns.ts`, `iam.ts`, `budget.ts`）
 - `infra/app/` — Pulumi IaC 環境別リソース（`index.ts` — Cloud Run, ドメインマッピング, CNAME）
 
