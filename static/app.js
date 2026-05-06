@@ -1260,6 +1260,9 @@ async function analyze() {
   status.style.display = 'block';
   statusText.textContent = STATUS_MESSAGES.pending;
   error.style.display = 'none';
+  error.style.backgroundColor = '';
+  error.style.borderColor = '';
+  error.style.color = '';
   reportEl.style.display = 'none';
   render(null, reportEl);
 
@@ -1326,6 +1329,14 @@ async function analyze() {
         }
 
         renderReport(resultData.report, resultData.user_key);
+        if (resultData.partial) {
+          var warning = document.getElementById('error');
+          warning.style.display = 'block';
+          warning.style.backgroundColor = '#4a3800';
+          warning.style.borderColor = '#d4a017';
+          warning.style.color = '#ffd54f';
+          warning.textContent = 'ガンダムモバイルからアクセスが制限されたため、一部のデータのみで分析しています。時間をおいて再度実行すると続きから取得します。';
+        }
         break;
       }
     }

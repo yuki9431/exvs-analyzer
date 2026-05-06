@@ -203,7 +203,7 @@ func handleResult(w http.ResponseWriter, r *http.Request, id string) {
 		return
 	}
 
-	sendRawReport(w, http.StatusOK, snap.Report, "", snap.UserKey, false)
+	sendRawReport(w, http.StatusOK, snap.Report, "", snap.UserKey, false, snap.PartialData)
 }
 
 func handleCustomPeriod(w http.ResponseWriter, r *http.Request, id string) {
@@ -301,17 +301,20 @@ func sendJSON(w http.ResponseWriter, code int, data interface{}) {
 
 // sendRawReport はJSON形式のレポートをレスポンスとして返す。
 // reportJSONはanalyze.pyが生成したJSON文字列。json.RawMessageで二重エンコードを防ぐ。
-func sendRawReport(w http.ResponseWriter, code int, reportJSON, status, userKey string, preliminary bool) {
+func sendRawReport(w http.ResponseWriter, code int, reportJSON, status, userKey string, preliminary bool, partial ...bool) {
 	type reportResponse struct {
 		Report      json.RawMessage `json:"report"`
 		Status      string          `json:"status,omitempty"`
 		Preliminary bool            `json:"preliminary,omitempty"`
+		Partial     bool            `json:"partial,omitempty"`
 		UserKey     string          `json:"user_key,omitempty"`
 	}
+	isPartial := len(partial) > 0 && partial[0]
 	resp := reportResponse{
 		Report:      json.RawMessage(reportJSON),
 		Status:      status,
 		Preliminary: preliminary,
+		Partial:     isPartial,
 		UserKey:     userKey,
 	}
 	w.Header().Set("Content-Type", "application/json")
