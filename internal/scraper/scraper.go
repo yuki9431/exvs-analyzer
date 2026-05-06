@@ -126,15 +126,18 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 
 	scores, detailErr := fetchDetailPagesStreaming(ctx, cancel, m.HTTPClient.Jar, entryCh, notify)
 
-	// Phase 2のエラーを優先的に返す（403はより深刻なため）
-	if streamErr != nil {
-		return nil, nil, streamErr
-	}
-	// 403の場合は途中データとエラーを両方返す（呼び出し元で途中保存できるようにする）
-	if detailErr != nil {
-		if errors.Is(detailErr, ErrAccessDenied) && len(scores) > 0 {
+	// 403の場合は途中データがあればエラーと一緒に返す（呼び出し元で途中保存できるようにする）
+	if streamErr != nil || detailErr != nil {
+		err := streamErr
+		if err == nil {
+			err = detailErr
+		}
+		if errors.Is(err, ErrAccessDenied) && len(scores) > 0 {
 			log.Printf("[INFO] Returning %d partial scores despite 403 error", len(scores))
-			return scores, m.HTTPClient.Jar, detailErr
+			return scores, m.HTTPClient.Jar, err
+		}
+		if streamErr != nil {
+			return nil, nil, streamErr
 		}
 		return nil, nil, detailErr
 	}
