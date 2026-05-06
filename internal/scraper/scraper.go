@@ -593,7 +593,7 @@ func parseDetailPage(s *goquery.Selection, date, hour string, wins []string, sho
 				TitleBadge:     titleBadge,
 				ProfileLink:    profileLink,
 				ShuffleGrade:   shuffleGrade,
-				TeamGrade:     teamGrade,
+				TeamGrade:      teamGrade,
 				RankingImage:   rankingImage,
 				ShopName:       shopName,
 			},
