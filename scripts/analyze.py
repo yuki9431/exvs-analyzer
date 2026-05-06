@@ -1183,6 +1183,7 @@ def main():
     parser.add_argument("--start", help="開始日時 (YYYY-MM-DD HH:MM)")
     parser.add_argument("--end", help="終了日時 (YYYY-MM-DD HH:MM)")
     parser.add_argument("--tag-partners", help="タッグ相方JSONファイルパス", default=None)
+    parser.add_argument("--timeline", help="タイムラインJSONファイルパス（将来の覚醒分析用）", default=None)
     args = parser.parse_args()
 
     matches = load_csv(args.csv_path)

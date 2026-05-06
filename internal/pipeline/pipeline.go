@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -141,16 +142,18 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		cachedTagPartnersPath = ""
 	}
 
-	// 旧CSVフォーマット検出: 新フィールド追加後の初回は全件再スクレイプ
+	// バックフィル判定: 新フィールドが空のレコードがある日付を特定
 	needsBackfill := exists && storage.NeedsBackfill(csvPath)
+	var backfillDates map[string]bool
 	if needsBackfill {
-		log.Printf("[INFO] Old CSV format detected, will re-scrape all available data for backfill")
+		backfillDates = storage.BackfillDates(csvPath)
+		log.Printf("[INFO] Backfill needed: %d dates with missing data", len(backfillDates))
 	}
 
 	if exists {
 		if needsBackfill {
-			// 旧フォーマット: since=ゼロで全件再スクレイプ（サイト保持期間内のデータに新フィールドを付与）
-			log.Printf("[INFO] Backfill mode: ignoring existing latest datetime")
+			// バックフィル: since=ゼロで対象日付のみ再スクレイプ
+			log.Printf("[INFO] Backfill mode: targeting specific dates")
 		} else {
 			since, err = storage.GetLatestDatetime(csvPath)
 			if err != nil {
@@ -180,7 +183,17 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		j.ProgressTotal = total
 		jobsMu.Unlock()
 	}
-	datedScores, jar, err := scraper.Scraping(username, password, since, onProgress)
+
+	var datedScores model.DatedScores
+	var jar http.CookieJar
+	if needsBackfill {
+		datedScores, jar, err = scraper.ScrapingWithOption(username, password, since, scraper.ScrapingOption{
+			OnProgress:    onProgress,
+			BackfillDates: backfillDates,
+		})
+	} else {
+		datedScores, jar, err = scraper.Scraping(username, password, since, onProgress)
+	}
 	// 403の場合でも途中データがあれば保存・分析を続行する
 	is403WithPartialData := errors.Is(err, scraper.ErrAccessDenied) && len(datedScores) > 0
 	if err != nil && !is403WithPartialData {

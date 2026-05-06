@@ -53,6 +53,41 @@ func NeedsBackfill(path string) bool {
 	return false
 }
 
+// BackfillDates は直近30日以内で新フィールドが空のレコードの日付セットを返す。
+// 日付は "2006/01/02" 形式（スクレイパーのdailyLink.dateと同じ形式）。
+func BackfillDates(path string) map[string]bool {
+	dates := make(map[string]bool)
+
+	f, err := os.Open(path)
+	if err != nil {
+		return dates
+	}
+	defer f.Close()
+
+	r := csv.NewReader(f)
+	r.FieldsPerRecord = -1
+	records, err := r.ReadAll()
+	if err != nil {
+		return dates
+	}
+
+	layout := "2006-01-02 15:04"
+	cutoff := time.Now().AddDate(0, 0, -30)
+	for i, row := range records {
+		if i == 0 {
+			continue
+		}
+		dt, err := time.Parse(layout, row[0])
+		if err != nil {
+			continue
+		}
+		if dt.After(cutoff) && (len(row) < currentCSVColumnCount || row[13] == "") {
+			dates[dt.Format("2006/01/02")] = true
+		}
+	}
+	return dates
+}
+
 // GetLatestDatetime は既存CSVファイルから最新の試合日時を取得する。
 // ファイルが存在しない場合はゼロ値のtimeを返す。
 func GetLatestDatetime(path string) (time.Time, error) {
