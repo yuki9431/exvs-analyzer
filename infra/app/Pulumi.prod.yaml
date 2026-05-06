@@ -10,6 +10,6 @@ config:
   exvs-app:gcsBucket:
     secure: v1:/zqLjVBPrsfEzVcl:NiJy0Q5GyfXBNnaUDXoVF49BCgQK/tIF2No0PMCrMOy2ousY2A==
   exvs-app:image:
-    secure: v1:gcQT4KEj+O7OU+ta:1X1eS7oaap4qimgCv0bPUQ581TCMF3NHF/xL4IkFkzqDlwYG0axTG5Ojkbsk3JuMxYeciw9rQQiRqTw52aJoBcBLKNd+/t/v0OQKwEWkH0kT8Y4V3qDZb4pfQLHssc2a6kbQM46FtttH6Ub4/VVMAFmJ1SXRrs5Nyf3CSSdFVChUAX5NqKgPtRzSUsWm4Q==
+    secure: v1:mhPBarrPRKwxwN/V:yInDQJcQxi7rfKXeyF1qfpdNObmXiWQhMXO7ICXmc8y61DcQ3aZBwhjBoqL3fQju1KqR8vEOhYfLoXe6ECPryA+iRVVwMiW96TdQf9He8fGS6dQbJeeNwTr4QkzjuQvGcpc9zwLtlboYHIB9pPczx6q42SzPH4fNzudyuO2QpzUX79zl7aEbCtVc5/P28g==
   exvs-app:sharedStack: organization/exvs-shared/shared
 encryptionsalt: v1:ToX9TGUsy/w=:v1:i/etZsivSPrFlstj:Ext0d7LnzlUd5QqVkA9H3ECUQuMZzQ==
