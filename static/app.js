@@ -803,28 +803,28 @@ function TimeOfDayChart({ hours }) {
     var matches = hours.map(function (h) { return h.matches; });
 
     chartRef.current = new Chart(canvasRef.current, {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: labels,
         datasets: [
           {
             label: '勝率 (%)',
             data: winRates,
-            borderColor: '#4fc3f7',
-            backgroundColor: 'rgba(79, 195, 247, 0.1)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 4,
-            pointHoverRadius: 6,
+            backgroundColor: winRates.map(function (v) { return v >= 50 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(239, 83, 80, 0.7)'; }),
+            borderColor: winRates.map(function (v) { return v >= 50 ? '#4caf50' : '#ef5350'; }),
+            borderWidth: 1,
             yAxisID: 'y',
           },
           {
             label: '試合数',
             data: matches,
-            type: 'bar',
-            backgroundColor: 'rgba(129, 212, 250, 0.3)',
-            borderColor: 'rgba(129, 212, 250, 0.5)',
-            borderWidth: 1,
+            type: 'line',
+            borderColor: '#81d4fa',
+            backgroundColor: 'rgba(129, 212, 250, 0.1)',
+            fill: false,
+            tension: 0.3,
+            pointRadius: 4,
+            pointHoverRadius: 6,
             yAxisID: 'y1',
           },
         ],
@@ -834,7 +834,7 @@ function TimeOfDayChart({ hours }) {
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { labels: { color: '#aaa', font: { size: 12 } } },
+          legend: { labels: { color: '#aaa', font: { size: 12 }, usePointStyle: true, generateLabels: function (chart) { return chart.data.datasets.map(function (ds, i) { var meta = chart.getDatasetMeta(i); var ps; if (ds.type === 'line') { var c = document.createElement('canvas'); c.width = 24; c.height = 12; var cx = c.getContext('2d'); var color = ds.borderColor; cx.strokeStyle = color; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(4, 6); cx.lineTo(20, 6); cx.stroke(); cx.fillStyle = color; cx.beginPath(); cx.arc(4, 6, 3, 0, Math.PI * 2); cx.fill(); cx.beginPath(); cx.arc(20, 6, 3, 0, Math.PI * 2); cx.fill(); ps = c; } else { ps = 'rectRounded'; } return { text: ds.label, fontColor: '#aaa', fillStyle: ds.type === 'line' ? ds.borderColor : (Array.isArray(ds.backgroundColor) ? ds.backgroundColor[0] : ds.backgroundColor), strokeStyle: ds.type === 'line' ? ds.borderColor : (Array.isArray(ds.borderColor) ? ds.borderColor[0] : ds.borderColor), lineWidth: ds.type === 'line' ? 0 : 1, pointStyle: ps, hidden: meta.hidden, datasetIndex: i }; }); } } },
         },
         scales: {
           x: {
@@ -845,13 +845,13 @@ function TimeOfDayChart({ hours }) {
             position: 'left',
             min: 0,
             max: 100,
-            ticks: { color: '#4fc3f7', callback: function (v) { return v + '%'; } },
+            ticks: { color: '#aaa', callback: function (v) { return v + '%'; } },
             grid: { color: 'rgba(255,255,255,0.08)' },
           },
           y1: {
             position: 'right',
             min: 0,
-            ticks: { color: '#81d4fa', stepSize: 1 },
+            ticks: { color: '#aaa', stepSize: 1 },
             grid: { display: false },
           },
         },
@@ -894,28 +894,28 @@ function DayOfWeekChart({ days }) {
     var matches = days.map(function (d) { return d.matches; });
 
     chartRef.current = new Chart(canvasRef.current, {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: labels,
         datasets: [
           {
             label: '勝率 (%)',
             data: winRates,
-            borderColor: '#4fc3f7',
-            backgroundColor: 'rgba(79, 195, 247, 0.1)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 4,
-            pointHoverRadius: 6,
+            backgroundColor: winRates.map(function (v) { return v >= 50 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(239, 83, 80, 0.7)'; }),
+            borderColor: winRates.map(function (v) { return v >= 50 ? '#4caf50' : '#ef5350'; }),
+            borderWidth: 1,
             yAxisID: 'y',
           },
           {
             label: '試合数',
             data: matches,
-            type: 'bar',
-            backgroundColor: 'rgba(129, 212, 250, 0.3)',
-            borderColor: 'rgba(129, 212, 250, 0.5)',
-            borderWidth: 1,
+            type: 'line',
+            borderColor: '#81d4fa',
+            backgroundColor: 'rgba(129, 212, 250, 0.1)',
+            fill: false,
+            tension: 0.3,
+            pointRadius: 4,
+            pointHoverRadius: 6,
             yAxisID: 'y1',
           },
         ],
@@ -925,7 +925,7 @@ function DayOfWeekChart({ days }) {
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { labels: { color: '#aaa', font: { size: 12 } } },
+          legend: { labels: { color: '#aaa', font: { size: 12 }, usePointStyle: true, generateLabels: function (chart) { return chart.data.datasets.map(function (ds, i) { var meta = chart.getDatasetMeta(i); var ps; if (ds.type === 'line') { var c = document.createElement('canvas'); c.width = 24; c.height = 12; var cx = c.getContext('2d'); var color = ds.borderColor; cx.strokeStyle = color; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(4, 6); cx.lineTo(20, 6); cx.stroke(); cx.fillStyle = color; cx.beginPath(); cx.arc(4, 6, 3, 0, Math.PI * 2); cx.fill(); cx.beginPath(); cx.arc(20, 6, 3, 0, Math.PI * 2); cx.fill(); ps = c; } else { ps = 'rectRounded'; } return { text: ds.label, fontColor: '#aaa', fillStyle: ds.type === 'line' ? ds.borderColor : (Array.isArray(ds.backgroundColor) ? ds.backgroundColor[0] : ds.backgroundColor), strokeStyle: ds.type === 'line' ? ds.borderColor : (Array.isArray(ds.borderColor) ? ds.borderColor[0] : ds.borderColor), lineWidth: ds.type === 'line' ? 0 : 1, pointStyle: ps, hidden: meta.hidden, datasetIndex: i }; }); } } },
         },
         scales: {
           x: {
@@ -936,13 +936,13 @@ function DayOfWeekChart({ days }) {
             position: 'left',
             min: 0,
             max: 100,
-            ticks: { color: '#4fc3f7', callback: function (v) { return v + '%'; } },
+            ticks: { color: '#aaa', callback: function (v) { return v + '%'; } },
             grid: { color: 'rgba(255,255,255,0.08)' },
           },
           y1: {
             position: 'right',
             min: 0,
-            ticks: { color: '#81d4fa', stepSize: 1 },
+            ticks: { color: '#aaa', stepSize: 1 },
             grid: { display: false },
           },
         },
@@ -999,28 +999,28 @@ function DailyTrendChart({ days }) {
     var matches = days.map(function (d) { return d.matches; });
 
     chartRef.current = new Chart(canvasRef.current, {
-      type: 'line',
+      type: 'bar',
       data: {
         labels: labels,
         datasets: [
           {
             label: '勝率 (%)',
             data: winRates,
-            borderColor: '#4fc3f7',
-            backgroundColor: 'rgba(79, 195, 247, 0.1)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: days.length > 30 ? 2 : 4,
-            pointHoverRadius: 6,
+            backgroundColor: winRates.map(function (v) { return v >= 50 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(239, 83, 80, 0.7)'; }),
+            borderColor: winRates.map(function (v) { return v >= 50 ? '#4caf50' : '#ef5350'; }),
+            borderWidth: 1,
             yAxisID: 'y',
           },
           {
             label: '試合数',
             data: matches,
-            type: 'bar',
-            backgroundColor: 'rgba(129, 212, 250, 0.3)',
-            borderColor: 'rgba(129, 212, 250, 0.5)',
-            borderWidth: 1,
+            type: 'line',
+            borderColor: '#81d4fa',
+            backgroundColor: 'rgba(129, 212, 250, 0.1)',
+            fill: false,
+            tension: 0.3,
+            pointRadius: days.length > 30 ? 2 : 4,
+            pointHoverRadius: 6,
             yAxisID: 'y1',
           },
         ],
@@ -1030,7 +1030,7 @@ function DailyTrendChart({ days }) {
         maintainAspectRatio: false,
         interaction: { mode: 'index', intersect: false },
         plugins: {
-          legend: { labels: { color: '#aaa', font: { size: 12 } } },
+          legend: { labels: { color: '#aaa', font: { size: 12 }, usePointStyle: true, generateLabels: function (chart) { return chart.data.datasets.map(function (ds, i) { var meta = chart.getDatasetMeta(i); var ps; if (ds.type === 'line') { var c = document.createElement('canvas'); c.width = 24; c.height = 12; var cx = c.getContext('2d'); var color = ds.borderColor; cx.strokeStyle = color; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(4, 6); cx.lineTo(20, 6); cx.stroke(); cx.fillStyle = color; cx.beginPath(); cx.arc(4, 6, 3, 0, Math.PI * 2); cx.fill(); cx.beginPath(); cx.arc(20, 6, 3, 0, Math.PI * 2); cx.fill(); ps = c; } else { ps = 'rectRounded'; } return { text: ds.label, fontColor: '#aaa', fillStyle: ds.type === 'line' ? ds.borderColor : (Array.isArray(ds.backgroundColor) ? ds.backgroundColor[0] : ds.backgroundColor), strokeStyle: ds.type === 'line' ? ds.borderColor : (Array.isArray(ds.borderColor) ? ds.borderColor[0] : ds.borderColor), lineWidth: ds.type === 'line' ? 0 : 1, pointStyle: ps, hidden: meta.hidden, datasetIndex: i }; }); } } },
           tooltip: {
             callbacks: {
               title: function (items) {
@@ -1051,7 +1051,7 @@ function DailyTrendChart({ days }) {
             min: 0,
             max: 100,
             ticks: {
-              color: '#4fc3f7',
+              color: '#aaa',
               callback: function (v) { return v + '%'; },
             },
             grid: { color: 'rgba(255,255,255,0.08)' },
@@ -1059,7 +1059,7 @@ function DailyTrendChart({ days }) {
           y1: {
             position: 'right',
             min: 0,
-            ticks: { color: '#81d4fa', stepSize: 1 },
+            ticks: { color: '#aaa', stepSize: 1 },
             grid: { display: false },
           },
         },
