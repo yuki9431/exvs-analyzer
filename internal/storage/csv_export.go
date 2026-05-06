@@ -10,6 +10,26 @@ import (
 	"github.com/yuki9431/exvs-analyzer/internal/model"
 )
 
+// currentCSVColumnCount は現在のCSVフォーマットのカラム数
+const currentCSVColumnCount = 22
+
+// IsOldCSVFormat は既存CSVが旧フォーマット（カラム数不足）かどうかを判定する。
+// ファイルが存在しない場合やヘッダーが読めない場合はfalseを返す。
+func IsOldCSVFormat(path string) bool {
+	f, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	r := csv.NewReader(f)
+	header, err := r.Read()
+	if err != nil {
+		return false
+	}
+	return len(header) < currentCSVColumnCount
+}
+
 // GetLatestDatetime は既存CSVファイルから最新の試合日時を取得する。
 // ファイルが存在しない場合はゼロ値のtimeを返す。
 func GetLatestDatetime(path string) (time.Time, error) {
@@ -91,6 +111,79 @@ func scoreToRow(d model.DatedScore) []string {
 		d.PlayerScore.RankingImage,
 		d.PlayerScore.ShopName,
 	}
+}
+
+// ReadAllScoresCSV は既存CSVから全レコードを読み込む。
+// 旧フォーマット（カラム数不足）のデータも新フィールドを空値として読み込む。
+func ReadAllScoresCSV(path string) (model.DatedScores, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	r := csv.NewReader(f)
+	r.FieldsPerRecord = -1 // カラム数不一致を許容
+	records, err := r.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	layout := "2006-01-02 15:04"
+	var scores model.DatedScores
+
+	for i, row := range records {
+		if i == 0 || len(row) < 13 {
+			continue
+		}
+		dt, err := time.Parse(layout, row[0])
+		if err != nil {
+			continue
+		}
+		playerNo, _ := strconv.Atoi(row[1])
+		point, _ := strconv.Atoi(row[7])
+		kills, _ := strconv.Atoi(row[8])
+		deaths, _ := strconv.Atoi(row[9])
+		giveDamage, _ := strconv.Atoi(row[10])
+		receiveDamage, _ := strconv.Atoi(row[11])
+		exDamage, _ := strconv.Atoi(row[12])
+
+		col := func(idx int) string {
+			if idx < len(row) {
+				return row[idx]
+			}
+			return ""
+		}
+
+		scores = append(scores, model.DatedScore{
+			PlayerNo: playerNo,
+			Datetime: dt,
+			PlayerScore: model.PlayerScore{
+				City:           row[2],
+				Name:           row[3],
+				Win:            row[4],
+				MsName:         row[5],
+				MsImage:        row[6],
+				Point:          point,
+				Kills:          kills,
+				Deaths:         deaths,
+				Give_damage:    giveDamage,
+				Receive_damage: receiveDamage,
+				Ex_damage:      exDamage,
+				Mastery:        col(13),
+				TeamName:       col(14),
+				TitleImage:     col(15),
+				TitleBadge:     col(16),
+				ProfileLink:    col(17),
+				ShuffleGrade:   col(18),
+				TeamGrade:      col(19),
+				RankingImage:   col(20),
+				ShopName:       col(21),
+			},
+		})
+	}
+
+	return scores, nil
 }
 
 // SaveAllScoresCSV は既存CSVに新しいレコードのみ追記する。

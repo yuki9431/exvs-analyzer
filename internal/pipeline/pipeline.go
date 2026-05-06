@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"sync"
 	"time"
 
@@ -140,13 +141,24 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 		cachedTagPartnersPath = ""
 	}
 
+	// 旧CSVフォーマット検出: 新フィールド追加後の初回は全件再スクレイプ
+	needsBackfill := exists && storage.IsOldCSVFormat(csvPath)
+	if needsBackfill {
+		log.Printf("[INFO] Old CSV format detected, will re-scrape all available data for backfill")
+	}
+
 	if exists {
-		since, err = storage.GetLatestDatetime(csvPath)
-		if err != nil {
-			log.Printf("[WARN] Failed to read latest datetime: %v", err)
-		}
-		if !since.IsZero() {
-			log.Printf("[INFO] Fetching scores after %s", since.Format("2006-01-02 15:04"))
+		if needsBackfill {
+			// 旧フォーマット: since=ゼロで全件再スクレイプ（サイト保持期間内のデータに新フィールドを付与）
+			log.Printf("[INFO] Backfill mode: ignoring existing latest datetime")
+		} else {
+			since, err = storage.GetLatestDatetime(csvPath)
+			if err != nil {
+				log.Printf("[WARN] Failed to read latest datetime: %v", err)
+			}
+			if !since.IsZero() {
+				log.Printf("[INFO] Fetching scores after %s", since.Format("2006-01-02 15:04"))
+			}
 		}
 
 		// 前回データで即座に分析（速報レポート、キャッシュ済みタッグ情報付き）
@@ -250,10 +262,19 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 	mslist.FillMsNames(datedScores, msMap)
 	mslist.CheckUnknownMS(datedScores)
 
-	// CSV保存（既存データに追記）
-	if err := storage.SaveAllScoresCSV(datedScores, csvPath); err != nil {
-		setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to save CSV: %v", err))
-		return
+	// CSV保存
+	if needsBackfill {
+		// バックフィル: 旧CSVの古いデータ（再スクレイプでカバーできない期間）を残して新データとマージ
+		if err := mergeAndSaveCSV(datedScores, csvPath); err != nil {
+			setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to save CSV: %v", err))
+			return
+		}
+	} else {
+		// 通常: 既存データに追記
+		if err := storage.SaveAllScoresCSV(datedScores, csvPath); err != nil {
+			setError(j, "内部エラーが発生しました", fmt.Sprintf("failed to save CSV: %v", err))
+			return
+		}
 	}
 
 	// Cloud Storageにアップロード
@@ -361,6 +382,45 @@ func saveTagPartners(partners []scraper.TagPartner, path string) error {
 		return fmt.Errorf("marshal tag partners: %w", err)
 	}
 	return os.WriteFile(path, b, 0644)
+}
+
+// mergeAndSaveCSV はバックフィル時に旧CSVと新スクレイプデータをマージして保存する。
+// 新データでカバーされる日時のレコードは新データで置き換え、それ以外は旧データを残す。
+func mergeAndSaveCSV(newScores model.DatedScores, csvPath string) error {
+	oldScores, err := storage.ReadAllScoresCSV(csvPath)
+	if err != nil {
+		return fmt.Errorf("failed to read old CSV: %w", err)
+	}
+
+	// 新データの日時セットを作成（重複判定用）
+	newDatetimes := make(map[string]bool)
+	for _, s := range newScores {
+		key := s.Datetime.Format("2006-01-02 15:04") + ":" + strconv.Itoa(s.PlayerNo)
+		newDatetimes[key] = true
+	}
+
+	// 旧データから、新データでカバーされていないレコードだけ残す
+	var keepOld model.DatedScores
+	for _, s := range oldScores {
+		key := s.Datetime.Format("2006-01-02 15:04") + ":" + strconv.Itoa(s.PlayerNo)
+		if !newDatetimes[key] {
+			keepOld = append(keepOld, s)
+		}
+	}
+
+	// マージ: 旧データ（古い期間）+ 新データ（新フィールド付き）
+	merged := append(keepOld, newScores...)
+
+	// 新規ファイルとして書き直す
+	if err := os.Remove(csvPath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("failed to remove old CSV: %w", err)
+	}
+	if err := storage.SaveAllScoresCSV(merged, csvPath); err != nil {
+		return fmt.Errorf("failed to save merged CSV: %w", err)
+	}
+
+	log.Printf("[INFO] Backfill merge: %d old records kept, %d new records, %d total", len(keepOld), len(newScores), len(merged))
+	return nil
 }
 
 // saveTimelines はDatedScoresからタイムラインデータを抽出し、JSONファイルに保存・GCSにアップロードする
