@@ -25,10 +25,10 @@ const (
 	mobileMSUsedRate = "https://web.vsmobile.jp/exvs2ib/ranking/ms_used_rate"
 
 	// maxParallelism はバンナムサーバーへの最大同時リクエスト数
-	maxParallelism = 5
+	maxParallelism = 3
 
 	// requestDelay はリクエスト完了後の待機時間（サーバー負荷軽減用）
-	requestDelay = 100 * time.Millisecond
+	requestDelay = 300 * time.Millisecond
 )
 
 // ErrAccessDenied はサーバーからアクセス拒否(403)された場合のエラー
