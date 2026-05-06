@@ -90,12 +90,32 @@ func parseNumber(s string) int {
 // ProgressFunc はスクレイピングの進捗を通知するコールバック型
 type ProgressFunc func(current, total int)
 
+// ScrapingOption はスクレイピングのオプション
+type ScrapingOption struct {
+	OnProgress     ProgressFunc
+	BackfillDates  map[string]bool // バックフィル対象日付セット（"2006/01/02"形式）。nilなら全日付対象
+}
+
 // Scraping はスクレイピング処理を実行し、DatedScoresとログイン済みCookieJarを返す
 // 日別ページ収集と詳細ページ取得をパイプラインで並行実行し、高速化を図る
 func Scraping(username, password string, since time.Time, onProgress ...ProgressFunc) (model.DatedScores, http.CookieJar, error) {
+	return ScrapingWithOption(username, password, since, ScrapingOption{
+		OnProgress: firstOrNil(onProgress),
+	})
+}
+
+func firstOrNil(fns []ProgressFunc) ProgressFunc {
+	if len(fns) > 0 {
+		return fns[0]
+	}
+	return nil
+}
+
+// ScrapingWithOption はオプション付きでスクレイピング処理を実行する
+func ScrapingWithOption(username, password string, since time.Time, opt ScrapingOption) (model.DatedScores, http.CookieJar, error) {
 	notify := func(current, total int) {
-		if len(onProgress) > 0 && onProgress[0] != nil {
-			onProgress[0](current, total)
+		if opt.OnProgress != nil {
+			opt.OnProgress(current, total)
 		}
 	}
 
@@ -108,6 +128,18 @@ func Scraping(username, password string, since time.Time, onProgress ...Progress
 	dailyLinks, err := collectDailyLinks(m.HTTPClient.Jar, since)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	// バックフィル対象日付が指定されている場合はフィルタリング
+	if opt.BackfillDates != nil {
+		var filtered []dailyLink
+		for _, dl := range dailyLinks {
+			if opt.BackfillDates[dl.date] {
+				filtered = append(filtered, dl)
+			}
+		}
+		log.Printf("[INFO] Backfill: filtered %d/%d daily links to target dates", len(filtered), len(dailyLinks))
+		dailyLinks = filtered
 	}
 
 	// 403検出時に全処理を即座に打ち切るためのcontext
