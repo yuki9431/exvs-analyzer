@@ -378,7 +378,9 @@ func saveTimelines(scores model.DatedScores, username, tmpDir string) string {
 	} else if found {
 		data, err := os.ReadFile(timelinePath)
 		if err == nil {
-			json.Unmarshal(data, &existing)
+			if err := json.Unmarshal(data, &existing); err != nil {
+				log.Printf("[WARN] Failed to parse existing timelines: %v", err)
+			}
 		}
 	}
 

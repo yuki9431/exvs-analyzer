@@ -51,8 +51,8 @@ type MatchTimeline struct {
 // DatedScore は日付付きスコア
 type DatedScore struct {
 	PlayerNo      int
-	Datetime       time.Time
-	PlayerScore    PlayerScore
+	Datetime      time.Time
+	PlayerScore   PlayerScore
 	MatchTimeline *MatchTimeline // 試合経過(PlayerNo==1のときのみセット、4人で共有)
 }
 
