@@ -810,9 +810,8 @@ function TimeOfDayChart({ hours }) {
           {
             label: '勝率 (%)',
             data: winRates,
-            backgroundColor: winRates.map(function (v) { return v >= 50 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(239, 83, 80, 0.7)'; }),
-            borderColor: winRates.map(function (v) { return v >= 50 ? '#4caf50' : '#ef5350'; }),
-            borderWidth: 1,
+            backgroundColor: winRates.map(function (v) { return v >= 60 ? 'rgba(76, 175, 80, 0.7)' : v < 50 ? 'rgba(239, 83, 80, 0.7)' : 'rgba(129, 212, 250, 0.3)'; }),
+            borderWidth: 0,
             yAxisID: 'y',
           },
           {
@@ -901,9 +900,8 @@ function DayOfWeekChart({ days }) {
           {
             label: '勝率 (%)',
             data: winRates,
-            backgroundColor: winRates.map(function (v) { return v >= 50 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(239, 83, 80, 0.7)'; }),
-            borderColor: winRates.map(function (v) { return v >= 50 ? '#4caf50' : '#ef5350'; }),
-            borderWidth: 1,
+            backgroundColor: winRates.map(function (v) { return v >= 60 ? 'rgba(76, 175, 80, 0.7)' : v < 50 ? 'rgba(239, 83, 80, 0.7)' : 'rgba(129, 212, 250, 0.3)'; }),
+            borderWidth: 0,
             yAxisID: 'y',
           },
           {
@@ -1006,9 +1004,8 @@ function DailyTrendChart({ days }) {
           {
             label: '勝率 (%)',
             data: winRates,
-            backgroundColor: winRates.map(function (v) { return v >= 50 ? 'rgba(76, 175, 80, 0.7)' : 'rgba(239, 83, 80, 0.7)'; }),
-            borderColor: winRates.map(function (v) { return v >= 50 ? '#4caf50' : '#ef5350'; }),
-            borderWidth: 1,
+            backgroundColor: winRates.map(function (v) { return v >= 60 ? 'rgba(76, 175, 80, 0.7)' : v < 50 ? 'rgba(239, 83, 80, 0.7)' : 'rgba(129, 212, 250, 0.3)'; }),
+            borderWidth: 0,
             yAxisID: 'y',
           },
           {
