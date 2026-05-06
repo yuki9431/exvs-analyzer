@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/yuki9431/exvs-analyzer/internal/gradelist"
 	"github.com/yuki9431/exvs-analyzer/internal/model"
 	"github.com/yuki9431/exvs-analyzer/internal/mslist"
 	"github.com/yuki9431/exvs-analyzer/internal/scraper"
@@ -22,6 +23,9 @@ import (
 
 // DefaultMSListPath はデフォルトのMSリストパス
 const DefaultMSListPath = "data/ms_list.json"
+
+// DefaultGradeListPath はデフォルトのグレードリストパス
+const DefaultGradeListPath = "data/grade_list.json"
 
 // JobStatus はジョブの状態
 type JobStatus string
@@ -274,6 +278,15 @@ func Run(j *Job, username, password string, on403 ...On403Func) {
 	msMap := mslist.BuildMSNameMap(msList)
 	mslist.FillMsNames(datedScores, msMap)
 	mslist.CheckUnknownMS(datedScores)
+
+	// グレードリストから未知のグレード画像URLを検出
+	gradeList, err := gradelist.LoadGradeList(DefaultGradeListPath)
+	if err != nil {
+		log.Printf("[WARN] Grade list not found: %v", err)
+	} else {
+		gradeMap := gradelist.BuildGradeMap(gradeList)
+		gradelist.CheckUnknownGrades(datedScores, gradeMap)
+	}
 
 	// CSV保存
 	if needsBackfill {

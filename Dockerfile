@@ -19,8 +19,9 @@ COPY --from=builder /app/server .
 # Python分析スクリプト
 COPY scripts/analyze.py scripts/
 
-# MSリスト
+# データファイル
 COPY data/ms_list.json data/
+COPY data/grade_list.json data/
 
 # フロントエンド
 COPY static/ static/
