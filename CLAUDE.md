@@ -89,8 +89,9 @@ Go HTTPサーバーによる**非同期ジョブパイプライン**（最大同
 ## GitHub Actions
 
 - CI: `ci.yml`（PRのみ。Docker build, go vet, py_compile。ラベル `skip-ci` でスキップ）
-- Build: `build.yml`（mainマージ時 → イメージビルド&プッシュ → Pulumi yaml の image 更新 → コミット → deploy.yml 呼び出し。ラベル `no-deploy` でスキップ。手動実行で環境選択可）
-- Deploy: `deploy.yml`（`infra/app/Pulumi.*.yaml` 変更トリガー or build.yml からの `workflow_dispatch` → `pulumi up`）
+- Build: `build.yml`（mainマージ時 → イメージビルド&プッシュ → **stgのみ**Pulumi yaml の image 更新 → コミット → deploy.yml 呼び出し。ラベル `no-deploy` でスキップ。手動実行可）
+- Deploy to Prod: `deploy-prod.yml`（**手動実行のみ**。stgのイメージをprodに適用 → コミット → deploy.yml 呼び出し）
+- Deploy: `deploy.yml`（`infra/app/Pulumi.*.yaml` 変更トリガー or build.yml/deploy-prod.yml からの `workflow_dispatch` → `pulumi up`）
 - Infra CI: `infra-ci.yml`（infra/配下の変更時にshared + app(prod/staging)のPulumi preview）
 - MSリスト更新: `update-mslist.yml`（毎日03:00-06:00 JST、ランダムスリープ。変更時にPR自動作成）
 - **サードパーティアクションを追加・変更する際は、GitHubリポジトリのリリースページで最新メジャーバージョンを確認すること。** 古いバージョンを指定するとNode.js非推奨警告やエラーが発生する（過去に複数回発生）。

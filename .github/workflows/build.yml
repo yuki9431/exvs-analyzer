@@ -6,16 +6,8 @@ on:
     paths-ignore:
       - "infra/app/Pulumi.*.yaml"
       - ".github/workflows/deploy.yml"
+      - ".github/workflows/deploy-prod.yml"
   workflow_dispatch:
-    inputs:
-      environment:
-        description: "Target environment to update image"
-        required: true
-        default: "stg"
-        type: choice
-        options:
-          - stg
-          - prod
 
 jobs:
   check-deploy-label:
@@ -87,20 +79,12 @@ jobs:
           gcloud builds submit --tag "$IMAGE"
           echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
 
-      - name: Determine target environment
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "DEPLOY_ENV=${{ inputs.environment }}" >> "$GITHUB_ENV"
-          else
-            echo "DEPLOY_ENV=stg" >> "$GITHUB_ENV"
-          fi
-
       - name: Update Pulumi config with new image
         working-directory: infra/app
         run: |
           npm install -g @pulumi/pulumi 2>/dev/null || true
           pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
-          pulumi stack select "$DEPLOY_ENV"
+          pulumi stack select stg
           pulumi config set exvs-app:image "$IMAGE" --secret
         env:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
@@ -109,12 +93,13 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add infra/app/Pulumi.*.yaml
+          git add infra/app/Pulumi.stg.yaml
           if git diff --cached --quiet; then
             echo "No changes to commit"
             echo "CHANGED=false" >> "$GITHUB_ENV"
           else
-            git commit -m "ci: update $DEPLOY_ENV image to ${{ github.sha }}"
+            git commit -m "ci: update stg image to ${{ github.sha }}"
+            git pull --rebase
             git push
             echo "CHANGED=true" >> "$GITHUB_ENV"
           fi
@@ -123,6 +108,6 @@ jobs:
         if: env.CHANGED == 'true'
         run: |
           gh workflow run deploy.yml \
-            -f environment="$DEPLOY_ENV"
+            -f environment="stg"
         env:
           GH_TOKEN: ${{ github.token }}

@@ -1,0 +1,68 @@
+name: Deploy to Prod
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      actions: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        working-directory: infra/app
+        run: npm ci
+
+      - id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: Get stg image and set to prod
+        working-directory: infra/app
+        run: |
+          npm install -g @pulumi/pulumi 2>/dev/null || true
+          pulumi login gs://${{ secrets.PULUMI_STATE_BUCKET }}
+
+          pulumi stack select stg
+          IMAGE=$(pulumi config get exvs-app:image)
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+
+          pulumi stack select prod
+          pulumi config set exvs-app:image "$IMAGE" --secret
+        env:
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
+      - name: Commit updated Pulumi config
+        run: |
+          IMAGE_TAG=$(echo "$IMAGE" | awk -F: '{print $NF}')
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add infra/app/Pulumi.prod.yaml
+          if git diff --cached --quiet; then
+            echo "No changes to commit (prod already has the same image)"
+            echo "CHANGED=false" >> "$GITHUB_ENV"
+          else
+            git commit -m "ci: update prod image to $IMAGE_TAG"
+            git pull --rebase
+            git push
+            echo "CHANGED=true" >> "$GITHUB_ENV"
+          fi
+
+      - name: Trigger deploy workflow
+        if: env.CHANGED == 'true'
+        run: |
+          gh workflow run deploy.yml \
+            -f environment="prod"
+        env:
+          GH_TOKEN: ${{ github.token }}
